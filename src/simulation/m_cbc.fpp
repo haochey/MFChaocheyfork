@@ -1136,12 +1136,12 @@ contains
                                         fd_coef_${XYZ}$(rr-r + 1, 3, cbc_loc) + &
                                         dpres_dtrv2     
                             end do
-                        elseif (k > 0 .and. k < is2%end .and. weno_order < 5 &
+                        elseif (r > 0 .and. r < is2%end .and. weno_order < 5 &
                             .and. m*n*p>0) then
                             !$acc loop seq                   
                             do rr = r - 1, r + 1
                                 dpres_dtrv1 = q_prim_rs${XYZ}$_vf(0, k, rr, E_idx)* &
-                                        fd_coef_${XYZ}$(rr-r + 1, 2, cbc_loc) + &
+                                        fd_coef_${XYZ}$(rr-r + 1, 3, cbc_loc) + &
                                         dpres_dtrv2      
                             end do    
                         end if
@@ -1259,73 +1259,85 @@ contains
                                             2d0*q_prim_vf(E_idx)%sf(0, 0, r) + &
                                             2d0*q_prim_vf(E_idx)%sf(0, 2, r) - &
                                                 q_prim_vf(E_idx)%sf(0, 3, r))/ &
-                                            (y_cc(3)-y_cc(-1))
+                                                (6d0*dy(0))
+                                            !(y_cc(3)-y_cc(-1))
                             elseif (cbc_dir == 1 .and. cbc_loc == -1 .and. k ==(is2%end-1)) then
                                 dpres_dtrv1 = ( q_prim_vf(E_idx)%sf(0, n-3, r) - &
                                             2d0*q_prim_vf(E_idx)%sf(0, n-2, r) + &
                                             2d0*q_prim_vf(E_idx)%sf(0, n, r) - &
                                                 q_prim_vf(E_idx)%sf(0, n+1, r))/ &
-                                            (y_cc(n+1)-y_cc(n-3))
+                                                (6d0*dy(0))
+                                            !(y_cc(n+1)-y_cc(n-3))
                             elseif (cbc_dir == 1 .and. cbc_loc == 1 .and. k ==1) then
                                 dpres_dtrv1 = ( q_prim_vf(E_idx)%sf(m, -1, r) - &
                                             2d0*q_prim_vf(E_idx)%sf(m, 0, r) + &
                                             2d0*q_prim_vf(E_idx)%sf(m, 2, r) - &
                                                 q_prim_vf(E_idx)%sf(m, 3, r))/ &
-                                            (y_cc(3)-y_cc(-1))  
+                                                (6d0*dy(0))
+                                            !(y_cc(3)-y_cc(-1))  
                             elseif (cbc_dir == 1 .and. cbc_loc == 1 .and. k ==(is2%end-1)) then
                                 dpres_dtrv1 = ( q_prim_vf(E_idx)%sf(m, n-3, r) - &
                                             2d0*q_prim_vf(E_idx)%sf(m, n-2, r) + &
                                             2d0*q_prim_vf(E_idx)%sf(m, n, r) - &
                                                 q_prim_vf(E_idx)%sf(m, n+1, r))/ &
-                                            (y_cc(n+1)-y_cc(n-3))
+                                                (6d0*dy(0))
+                                            !(y_cc(n+1)-y_cc(n-3))
                             elseif (cbc_dir == 2 .and. cbc_loc == -1 .and. k ==1) then
                                 dpres_dtrv1 = ( q_prim_vf(E_idx)%sf(-1, 0, r) - &
                                             2d0*q_prim_vf(E_idx)%sf(0, 0, r) + &
                                             2d0*q_prim_vf(E_idx)%sf(2, 0, r) - &
                                                 q_prim_vf(E_idx)%sf(3, 0, r))/ &
-                                            (x_cc(3)-x_cc(-1))
+                                                (6d0*dx(0))
+                                            !(x_cc(3)-x_cc(-1))
                             elseif (cbc_dir == 2 .and. cbc_loc == -1 .and. k ==(is2%end-1)) then
                                 dpres_dtrv1 = ( q_prim_vf(E_idx)%sf(m-3, 0, r) - &
                                             2d0*q_prim_vf(E_idx)%sf(m-2, 0, r) + &
                                             2d0*q_prim_vf(E_idx)%sf(m, 0, r) - &
                                                 q_prim_vf(E_idx)%sf(m+1, 0, r))/ &
-                                            (x_cc(m+1)-x_cc(m-3))
+                                                (6d0*dx(0))
+                                            !(x_cc(m+1)-x_cc(m-3))
                             elseif (cbc_dir == 2 .and. cbc_loc == 1 .and. k ==1) then
                                 dpres_dtrv1 = ( q_prim_vf(E_idx)%sf(-1, n, r) - &
                                             2d0*q_prim_vf(E_idx)%sf(0, n, r) + &
                                             2d0*q_prim_vf(E_idx)%sf(2, n, r) - &
                                                 q_prim_vf(E_idx)%sf(3, n, r))/ &
-                                            (x_cc(3)-x_cc(-1))
+                                                (6d0*dx(0))
+                                            !(x_cc(3)-x_cc(-1))
                             elseif (cbc_dir == 2 .and. cbc_loc == 1 .and. k ==(is2%end-1)) then
                                 dpres_dtrv1 = ( q_prim_vf(E_idx)%sf(m-3, n, r) - &
                                             2d0*q_prim_vf(E_idx)%sf(m-2, n, r) + &
                                             2d0*q_prim_vf(E_idx)%sf(m, n, r) - &
                                                 q_prim_vf(E_idx)%sf(m+1, n, r))/ &
-                                            (x_cc(m+1)-x_cc(m-3))
+                                                (6d0*dx(0))
+                                            !(x_cc(m+1)-x_cc(m-3))
                             elseif (cbc_dir == 3 .and. cbc_loc == -1 .and. k ==1) then
                                 dpres_dtrv1 = ( q_prim_vf(E_idx)%sf(r, -1, 0) - &
                                             2d0*q_prim_vf(E_idx)%sf(r, 0, 0) + &
                                             2d0*q_prim_vf(E_idx)%sf(r, 2, 0) - &
                                                 q_prim_vf(E_idx)%sf(r, 3, 0))/ &
-                                            (y_cc(3)-x_cc(-1))
+                                                (6d0*dy(0))
+                                            !(y_cc(3)-x_cc(-1))
                             elseif (cbc_dir == 3 .and. cbc_loc == -1 .and. k ==(is2%end-1)) then
                                 dpres_dtrv1 = ( q_prim_vf(E_idx)%sf(r, n-3, 0) - &
                                             2d0*q_prim_vf(E_idx)%sf(r, n-2, 0) + &
                                             2d0*q_prim_vf(E_idx)%sf(r, n, 0) - &
                                                 q_prim_vf(E_idx)%sf(r, n+1, 0))/ &
-                                            (y_cc(n+1)-y_cc(n-3))
+                                                (6d0*dy(0))
+                                            !(y_cc(n+1)-y_cc(n-3))
                             elseif (cbc_dir == 3 .and. cbc_loc == 1 .and. k ==1) then
                                 dpres_dtrv1 = ( q_prim_vf(E_idx)%sf(r, -1, p) - &
                                             2d0*q_prim_vf(E_idx)%sf(r, 0, p) + &
                                             2d0*q_prim_vf(E_idx)%sf(r, 2, p) - &
                                                 q_prim_vf(E_idx)%sf(r, 3, p))/ &
-                                            (y_cc(3)-y_cc(-1))
+                                                (6d0*dy(0))
+                                            !(y_cc(3)-y_cc(-1))
                             elseif (cbc_dir == 3 .and. cbc_loc == 1 .and. k ==(is2%end-1)) then
                                 dpres_dtrv1 = ( q_prim_vf(E_idx)%sf(r, n-3, p) - &
                                             2d0*q_prim_vf(E_idx)%sf(r, n-2, p) + &
                                             2d0*q_prim_vf(E_idx)%sf(r, n, p) - &
                                                 q_prim_vf(E_idx)%sf(r, n+1, p))/ &
-                                            (y_cc(n+1)-y_cc(n-3))
+                                                (6d0*dy(0))
+                                            !(y_cc(n+1)-y_cc(n-3))
                             end if
                         end if
 
@@ -1336,73 +1348,85 @@ contains
                                             2d0*q_prim_vf(E_idx)%sf(0, k, 0) + &
                                             2d0*q_prim_vf(E_idx)%sf(0, k, 2) - &
                                                 q_prim_vf(E_idx)%sf(0, k, 3))/ &
-                                            (z_cc(3)-z_cc(-1))
+                                                (6d0*dz(0))
+                                            !(z_cc(3)-z_cc(-1))
                             elseif (cbc_dir == 1 .and. cbc_loc == -1 .and. r ==is3%end-1) then
                                 dpres_dtrv2 = ( q_prim_vf(E_idx)%sf(0, k, p-3) - &
                                             2d0*q_prim_vf(E_idx)%sf(0, k, p-2) + &
                                             2d0*q_prim_vf(E_idx)%sf(0, k, p) - &
                                                 q_prim_vf(E_idx)%sf(0, k, p+1))/ &
-                                            (z_cc(p+1)-z_cc(p-3))
+                                                (6d0*dz(0))
+                                            !(z_cc(p+1)-z_cc(p-3))
                             elseif (cbc_dir == 1 .and. cbc_loc == 1 .and. r ==1) then
                                 dpres_dtrv2 = ( q_prim_vf(E_idx)%sf(m, k, -1) - &
                                             2d0*q_prim_vf(E_idx)%sf(m, k, 0) + &
                                             2d0*q_prim_vf(E_idx)%sf(m, k, 2) - &
                                                 q_prim_vf(E_idx)%sf(m, k, 3))/ &
-                                            (z_cc(3)-z_cc(-1)) 
+                                                (6d0*dz(0))
+                                            !(z_cc(3)-z_cc(-1)) 
                             elseif (cbc_dir == 1 .and. cbc_loc == 1 .and. r ==is3%end-1) then
                                 dpres_dtrv2 = ( q_prim_vf(E_idx)%sf(m, k, p-3) - &
                                             2d0*q_prim_vf(E_idx)%sf(m, k, p-2) + &
                                             2d0*q_prim_vf(E_idx)%sf(m, k, p) - &
                                                 q_prim_vf(E_idx)%sf(m, k, p+1))/ &
-                                            (z_cc(p+1)-z_cc(p-3))
+                                                (6d0*dz(0))
+                                            !(z_cc(p+1)-z_cc(p-3))
                             elseif (cbc_dir == 2 .and. cbc_loc == -1 .and. r ==1) then
                                 dpres_dtrv2 = ( q_prim_vf(E_idx)%sf(k, 0, -1) - &
                                             2d0*q_prim_vf(E_idx)%sf(k, 0, 0) + &
                                             2d0*q_prim_vf(E_idx)%sf(k, 0, 2) - &
                                                 q_prim_vf(E_idx)%sf(k, 0, 3))/ &
-                                            (z_cc(3)-z_cc(-1))
+                                                (6d0*dz(0))
+                                            !(z_cc(3)-z_cc(-1))
                             elseif (cbc_dir == 2 .and. cbc_loc == -1 .and. r ==is3%end-1) then
                                 dpres_dtrv2 = ( q_prim_vf(E_idx)%sf(k, 0, p-3) - &
                                             2d0*q_prim_vf(E_idx)%sf(k, 0, p-2) + &
                                             2d0*q_prim_vf(E_idx)%sf(k, 0, p) - &
                                                 q_prim_vf(E_idx)%sf(k, 0, p+1))/ &
-                                            (z_cc(n+1)-z_cc(n-3))
+                                                (6d0*dz(0))
+                                            !(z_cc(n+1)-z_cc(n-3))
                             elseif (cbc_dir == 2 .and. cbc_loc == 1 .and. r ==1) then
                                 dpres_dtrv2 = ( q_prim_vf(E_idx)%sf(k, n, -1) - &
                                             2d0*q_prim_vf(E_idx)%sf(k, n, 0) + &
                                             2d0*q_prim_vf(E_idx)%sf(k, n, 2) - &
                                                 q_prim_vf(E_idx)%sf(k, n, 3))/ &
-                                            (z_cc(3)-z_cc(-1))
+                                                (6d0*dz(0))
+                                            !(z_cc(3)-z_cc(-1))
                             elseif (cbc_dir == 2 .and. cbc_loc == 1 .and. r ==is3%end-1) then
                                 dpres_dtrv2 = ( q_prim_vf(E_idx)%sf(k, n, p-3) - &
                                             2d0*q_prim_vf(E_idx)%sf(k, n, p-2) + &
                                             2d0*q_prim_vf(E_idx)%sf(k, n, p) - &
                                                 q_prim_vf(E_idx)%sf(k, n, p+1))/ &
-                                            (z_cc(n+1)-z_cc(n-3))
+                                                (6d0*dz(0))
+                                            !(z_cc(n+1)-z_cc(n-3))
                             elseif (cbc_dir == 3 .and. cbc_loc == -1 .and. r ==1) then
                                 dpres_dtrv2 = ( q_prim_vf(E_idx)%sf(-1, k, 0) - &
                                             2d0*q_prim_vf(E_idx)%sf(0, k, 0) + &
                                             2d0*q_prim_vf(E_idx)%sf(2, k, 0) - &
                                                 q_prim_vf(E_idx)%sf(3, k, 0))/ &
-                                            (x_cc(3)-x_cc(-1))
+                                                (6d0*dx(0))
+                                            !(x_cc(3)-x_cc(-1))
                             elseif (cbc_dir == 3 .and. cbc_loc == -1 .and. r ==is3%end-1) then
                                 dpres_dtrv2 = ( q_prim_vf(E_idx)%sf(m-3, k, 0) - &
                                             2d0*q_prim_vf(E_idx)%sf(m-2, k, 0) + &
                                             2d0*q_prim_vf(E_idx)%sf(m, k, 0) - &
                                                 q_prim_vf(E_idx)%sf(m+1, k, 0))/ &
-                                            (x_cc(n+1)-x_cc(n-3))
+                                                (6d0*dx(0))
+                                            !(x_cc(n+1)-x_cc(n-3))
                             elseif (cbc_dir == 3 .and. cbc_loc == 1 .and. r ==1) then
                                 dpres_dtrv2 = ( q_prim_vf(E_idx)%sf(-1, k, p) - &
                                             2d0*q_prim_vf(E_idx)%sf(0, k, p) + &
                                             2d0*q_prim_vf(E_idx)%sf(2, k, p) - &
                                                 q_prim_vf(E_idx)%sf(3, k, p))/ &
-                                            (x_cc(3)-x_cc(-1))
+                                                (6d0*dx(0))
+                                            !(x_cc(3)-x_cc(-1))
                             elseif (cbc_dir == 3 .and. cbc_loc == 1 .and. r ==is3%end-1) then
                                 dpres_dtrv2 = ( q_prim_vf(E_idx)%sf(m-3, k, p) - &
                                             2d0*q_prim_vf(E_idx)%sf(m-2, k, p) + &
                                             2d0*q_prim_vf(E_idx)%sf(m, k, p) - &
                                                 q_prim_vf(E_idx)%sf(m-1, k, p))/ &
-                                            (x_cc(n+1)-x_cc(n-3))
+                                                (6d0*dx(0))
+                                            !(x_cc(n+1)-x_cc(n-3))
                             end if 
                         end if 
                         
@@ -1413,73 +1437,85 @@ contains
                                             2d0*q_prim_vf(E_idx)%sf(0, -1, r) + &
                                             2d0*q_prim_vf(E_idx)%sf(0, 1, r) - &
                                                 q_prim_vf(E_idx)%sf(0, 2, r))/ &
-                                            (y_cc(3)-y_cc(-1))
+                                                (6d0*dy(0))
+                                            !(y_cc(3)-y_cc(-1))
                             elseif (cbc_dir == 1 .and. cbc_loc == -1 .and. k ==is2%end) then
                                 dpres_dtrv1 = ( q_prim_vf(E_idx)%sf(0, n-2, r) - &
                                             2d0*q_prim_vf(E_idx)%sf(0, n-1, r) + &
                                             2d0*q_prim_vf(E_idx)%sf(0, n+1, r) - &
                                                 q_prim_vf(E_idx)%sf(0, n+2, r))/ &
-                                            (y_cc(n+1)-y_cc(n-3))
+                                                (6d0*dy(0))
+                                            !(y_cc(n+1)-y_cc(n-3))
                             elseif (cbc_dir == 1 .and. cbc_loc == 1 .and. k ==0) then
                                 dpres_dtrv1 = ( q_prim_vf(E_idx)%sf(m, -2, r) - &
                                             2d0*q_prim_vf(E_idx)%sf(m, -1, r) + &
                                             2d0*q_prim_vf(E_idx)%sf(m, 1, r) - &
                                                 q_prim_vf(E_idx)%sf(m, 2, r))/ &
-                                            (y_cc(3)-y_cc(-1))  
+                                                (6d0*dy(0))
+                                            !(y_cc(3)-y_cc(-1))  
                             elseif (cbc_dir == 1 .and. cbc_loc == 1 .and. k ==is2%end) then
                                 dpres_dtrv1 = ( q_prim_vf(E_idx)%sf(m, n-2, r) - &
                                             2d0*q_prim_vf(E_idx)%sf(m, n-1, r) + &
                                             2d0*q_prim_vf(E_idx)%sf(m, n+1, r) - &
                                                 q_prim_vf(E_idx)%sf(m, n+2, r))/ &
-                                            (y_cc(n+1)-y_cc(n-3))
+                                                (6d0*dy(0))
+                                            !(y_cc(n+1)-y_cc(n-3))
                             elseif (cbc_dir == 2 .and. cbc_loc == -1 .and. k ==0) then
                                 dpres_dtrv1 = ( q_prim_vf(E_idx)%sf(-2, 0, r) - &
                                             2d0*q_prim_vf(E_idx)%sf(-1, 0, r) + &
                                             2d0*q_prim_vf(E_idx)%sf(1, 0, r) - &
                                                 q_prim_vf(E_idx)%sf(2, 0, r))/ &
-                                            (x_cc(3)-x_cc(-1))
+                                                (6d0*dx(0))
+                                            !(x_cc(3)-x_cc(-1))
                             elseif (cbc_dir == 2 .and. cbc_loc == -1 .and. k ==is2%end) then
                                 dpres_dtrv1 = ( q_prim_vf(E_idx)%sf(m-2, 0, r) - &
                                             2d0*q_prim_vf(E_idx)%sf(m-1, 0, r) + &
                                             2d0*q_prim_vf(E_idx)%sf(m+1, 0, r) - &
                                                 q_prim_vf(E_idx)%sf(m+2, 0, r))/ &
-                                            (x_cc(m+1)-x_cc(m-3))
+                                                (6d0*dx(0))
+                                            !(x_cc(m+1)-x_cc(m-3))
                             elseif (cbc_dir == 2 .and. cbc_loc == 1 .and. k ==0) then
                                 dpres_dtrv1 = ( q_prim_vf(E_idx)%sf(-2, n, r) - &
                                             2d0*q_prim_vf(E_idx)%sf(-1, n, r) + &
                                             2d0*q_prim_vf(E_idx)%sf(1, n, r) - &
                                                 q_prim_vf(E_idx)%sf(2, n, r))/ &
-                                            (x_cc(3)-x_cc(-1))
+                                                (6d0*dx(0))
+                                            !(x_cc(3)-x_cc(-1))
                             elseif (cbc_dir == 2 .and. cbc_loc == 1 .and. k ==is2%end) then
                                 dpres_dtrv1 = ( q_prim_vf(E_idx)%sf(m-2, n, r) - &
                                             2d0*q_prim_vf(E_idx)%sf(m-1, n, r) + &
                                             2d0*q_prim_vf(E_idx)%sf(m+1, n, r) - &
                                                 q_prim_vf(E_idx)%sf(m+2, n, r))/ &
-                                            (x_cc(m+1)-x_cc(m-3))
+                                                (6d0*dx(0))
+                                            !(x_cc(m+1)-x_cc(m-3))
                             elseif (cbc_dir == 3 .and. cbc_loc == -1 .and. k ==0) then
                                 dpres_dtrv1 = ( q_prim_vf(E_idx)%sf(r, -2, 0) - &
                                             2d0*q_prim_vf(E_idx)%sf(r, -1, 0) + &
                                             2d0*q_prim_vf(E_idx)%sf(r, 1, 0) - &
                                                 q_prim_vf(E_idx)%sf(r, 2, 0))/ &
-                                            (y_cc(3)-x_cc(-1))
+                                                (6d0*dy(0))
+                                            !(y_cc(3)-x_cc(-1))
                             elseif (cbc_dir == 3 .and. cbc_loc == -1 .and. k ==is2%end) then
                                 dpres_dtrv1 = ( q_prim_vf(E_idx)%sf(r, n-2, 0) - &
                                             2d0*q_prim_vf(E_idx)%sf(r, n-1, 0) + &
                                             2d0*q_prim_vf(E_idx)%sf(r, n+1, 0) - &
                                                 q_prim_vf(E_idx)%sf(r, n+2, 0))/ &
-                                            (y_cc(n+1)-y_cc(n-3))
+                                                (6d0*dy(0))
+                                            !(y_cc(n+1)-y_cc(n-3))
                             elseif (cbc_dir == 3 .and. cbc_loc == 1 .and. k ==0) then
                                 dpres_dtrv1 = ( q_prim_vf(E_idx)%sf(r, -2, p) - &
                                             2d0*q_prim_vf(E_idx)%sf(r, -1, p) + &
                                             2d0*q_prim_vf(E_idx)%sf(r, 1, p) - &
                                                 q_prim_vf(E_idx)%sf(r, 2, p))/ &
-                                            (y_cc(3)-y_cc(-1))
+                                                (6d0*dy(0))
+                                            !(y_cc(3)-y_cc(-1))
                             elseif (cbc_dir == 3 .and. cbc_loc == 1 .and. k ==is2%end) then
                                 dpres_dtrv1 = ( q_prim_vf(E_idx)%sf(r, n-2, p) - &
                                             2d0*q_prim_vf(E_idx)%sf(r, n-1, p) + &
                                             2d0*q_prim_vf(E_idx)%sf(r, n+1, p) - &
                                                 q_prim_vf(E_idx)%sf(r, n+2, p))/ &
-                                            (y_cc(n+1)-y_cc(n-3))
+                                                (6d0*dy(0))
+                                            !(y_cc(n+1)-y_cc(n-3))
                             end if
                         end if
 
@@ -1490,73 +1526,85 @@ contains
                                             2d0*q_prim_vf(E_idx)%sf(0, k, -1) + &
                                             2d0*q_prim_vf(E_idx)%sf(0, k, 1) - &
                                                 q_prim_vf(E_idx)%sf(0, k, 2))/ &
-                                            (z_cc(3)-z_cc(-1))
+                                                (6d0*dz(0))
+                                            !(z_cc(3)-z_cc(-1))
                             elseif (cbc_dir == 1 .and. cbc_loc == -1 .and. r ==is3%end) then
                                 dpres_dtrv2 = ( q_prim_vf(E_idx)%sf(0, k, p-2) - &
                                             2d0*q_prim_vf(E_idx)%sf(0, k, p-1) + &
                                             2d0*q_prim_vf(E_idx)%sf(0, k, p+1) - &
                                                 q_prim_vf(E_idx)%sf(0, k, p+2))/ &
-                                            (z_cc(p+1)-z_cc(p-3))
+                                                (6d0*dz(0))
+                                            !(z_cc(p+1)-z_cc(p-3))
                             elseif (cbc_dir == 1 .and. cbc_loc == 1 .and. r ==0) then
                                 dpres_dtrv2 = ( q_prim_vf(E_idx)%sf(m, k, -2) - &
                                             2d0*q_prim_vf(E_idx)%sf(m, k, -1) + &
                                             2d0*q_prim_vf(E_idx)%sf(m, k, 1) - &
                                                 q_prim_vf(E_idx)%sf(m, k, 2))/ &
-                                            (z_cc(3)-z_cc(-1)) 
+                                                (6d0*dz(0))
+                                            !(z_cc(3)-z_cc(-1)) 
                             elseif (cbc_dir == 1 .and. cbc_loc == 1 .and. r ==is3%end) then
                                 dpres_dtrv2 = ( q_prim_vf(E_idx)%sf(m, k, p-2) - &
                                             2d0*q_prim_vf(E_idx)%sf(m, k, p-1) + &
                                             2d0*q_prim_vf(E_idx)%sf(m, k, p+1) - &
                                                 q_prim_vf(E_idx)%sf(m, k, p+2))/ &
-                                            (z_cc(p+1)-z_cc(p-3))
+                                                (6d0*dz(0))
+                                            !(z_cc(p+1)-z_cc(p-3))
                             elseif (cbc_dir == 2 .and. cbc_loc == -1 .and. r ==0) then
                                 dpres_dtrv2 = ( q_prim_vf(E_idx)%sf(k, 0, -2) - &
                                             2d0*q_prim_vf(E_idx)%sf(k, 0, -1) + &
                                             2d0*q_prim_vf(E_idx)%sf(k, 0, 1) - &
                                                 q_prim_vf(E_idx)%sf(k, 0, 2))/ &
-                                            (z_cc(3)-z_cc(-1))
+                                                (6d0*dz(0))
+                                            !(z_cc(3)-z_cc(-1))
                             elseif (cbc_dir == 2 .and. cbc_loc == -1 .and. r ==is3%end) then
                                 dpres_dtrv2 = ( q_prim_vf(E_idx)%sf(k, 0, p-2) - &
                                             2d0*q_prim_vf(E_idx)%sf(k, 0, p-1) + &
                                             2d0*q_prim_vf(E_idx)%sf(k, 0, p+1) - &
                                                 q_prim_vf(E_idx)%sf(k, 0, p+2))/ &
-                                            (z_cc(n+1)-z_cc(n-3))
+                                                (6d0*dz(0))
+                                            !(z_cc(n+1)-z_cc(n-3))
                             elseif (cbc_dir == 2 .and. cbc_loc == 1 .and. r ==0) then
                                 dpres_dtrv2 = ( q_prim_vf(E_idx)%sf(k, n, -2) - &
                                             2d0*q_prim_vf(E_idx)%sf(k, n, -1) + &
                                             2d0*q_prim_vf(E_idx)%sf(k, n, 1) - &
                                                 q_prim_vf(E_idx)%sf(k, n, 2))/ &
-                                            (z_cc(3)-z_cc(-1))
+                                                (6d0*dz(0))
+                                            !(z_cc(3)-z_cc(-1))
                             elseif (cbc_dir == 2 .and. cbc_loc == 1 .and. r ==is3%end) then
                                 dpres_dtrv2 = ( q_prim_vf(E_idx)%sf(k, n, p-2) - &
                                             2d0*q_prim_vf(E_idx)%sf(k, n, p-1) + &
                                             2d0*q_prim_vf(E_idx)%sf(k, n, p+1) - &
                                                 q_prim_vf(E_idx)%sf(k, n, p+2))/ &
-                                            (z_cc(n+1)-z_cc(n-3))
+                                                (6d0*dz(0))
+                                            !(z_cc(n+1)-z_cc(n-3))
                             elseif (cbc_dir == 3 .and. cbc_loc == -1 .and. r ==0) then
                                 dpres_dtrv2 = ( q_prim_vf(E_idx)%sf(-2, k, 0) - &
                                             2d0*q_prim_vf(E_idx)%sf(-1, k, 0) + &
                                             2d0*q_prim_vf(E_idx)%sf(1, k, 0) - &
                                                 q_prim_vf(E_idx)%sf(2, k, 0))/ &
-                                            (x_cc(3)-x_cc(-1))
+                                                (6d0*dx(0))
+                                            !(x_cc(3)-x_cc(-1))
                             elseif (cbc_dir == 3 .and. cbc_loc == -1 .and. r ==is3%end) then
                                 dpres_dtrv2 = ( q_prim_vf(E_idx)%sf(m-2, k, 0) - &
                                             2d0*q_prim_vf(E_idx)%sf(m-1, k, 0) + &
                                             2d0*q_prim_vf(E_idx)%sf(m+1, k, 0) - &
                                                 q_prim_vf(E_idx)%sf(m+2, k, 0))/ &
-                                            (x_cc(n+1)-x_cc(n-3))
+                                                (6d0*dx(0))
+                                            !(x_cc(n+1)-x_cc(n-3))
                             elseif (cbc_dir == 3 .and. cbc_loc == 1 .and. r ==0) then
                                 dpres_dtrv2 = ( q_prim_vf(E_idx)%sf(-2, k, p) - &
                                             2d0*q_prim_vf(E_idx)%sf(-1, k, p) + &
                                             2d0*q_prim_vf(E_idx)%sf(1, k, p) - &
                                                 q_prim_vf(E_idx)%sf(2, k, p))/ &
-                                            (x_cc(3)-x_cc(-1))
+                                                (6d0*dx(0))
+                                            !(x_cc(3)-x_cc(-1))
                             elseif (cbc_dir == 3 .and. cbc_loc == 1 .and. r ==is3%end) then
                                 dpres_dtrv2 = ( q_prim_vf(E_idx)%sf(m-2, k, p) - &
                                             2d0*q_prim_vf(E_idx)%sf(m-1, k, p) + &
                                             2d0*q_prim_vf(E_idx)%sf(m+1, k, p) - &
                                                 q_prim_vf(E_idx)%sf(m-2, k, p))/ &
-                                            (x_cc(n+1)-x_cc(n-3))
+                                                (6d0*dx(0))
+                                            !(x_cc(n+1)-x_cc(n-3))
                             end if 
                         end if    
 
