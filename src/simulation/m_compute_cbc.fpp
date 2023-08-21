@@ -279,9 +279,9 @@ contains
                     L(i) = 0d0
                 end do
 
-                L(momxb+1) = -(dpres_dtrv1/rho)
+                L(3) = -(dpres_dtrv1/rho)
         
-                L(E_idx) = -(dpres_dtrv2/rho)
+                L(4) = -(dpres_dtrv2/rho)
         
                 L(advxe) = L(1)
         
