@@ -1035,7 +1035,8 @@ contains
 
                     ! Spatial Derivatives on the Trv-direction
                     if ((cbc_loc == -1 .and. bc${XYZ}$b == -13) .or. (cbc_loc == 1 .and. bc${XYZ}$e == -13)) then
-                    ! =0 means proc boundary; =1 means domain boundary
+                        ! Determines if the boundary is processor boundary or the domain boundary
+                        ! =0 means proc boundary; =1 means domain boundary
                         proc_trv1_bcb = 0
                         proc_trv1_bce = 0
                         proc_trv2_bcb = 0
@@ -1116,7 +1117,7 @@ contains
                                         fd_coef_${XYZ}$(kk-k + 1, 2, cbc_loc) + &
                                         dpres_dtrv1      
                             end do
-                        ! elseif (k > 0 .and. k < is2%end .and. weno_order < 5 &
+                        ! elseif (k > 0 .and. k < is2%end .and. weno_order == 5 &
                         !     .and. m*n>0) then
                         !     ! Trv1 3rd order accuracy  
                         !     !$acc loop seq                   
@@ -1614,6 +1615,19 @@ contains
                         dpres_dtrv2 = 0d0
                     end if   
 
+                    if ((bcxb == bcxe) .and. (bcyb == bcye) .and. &
+                        (bczb == bcze) .and. (bcxe == bcyb) .and. (bcye == bczb)) then 
+                        if ((k == 0 .and. proc_trv1_bcb == 1) &
+                           .or. (k == is2%end .and. proc_trv1_bce == 1)) then
+                            dpres_dtrv1 = 0d0
+                        end if    
+
+                        if ((r == 0 .and. proc_trv2_bcb == 1) &
+                           .or. (r == is3%end .and. proc_trv2_bce == 1)) then
+                            dpres_dtrv2 = 0d0
+                        end if 
+                    end if    
+                            
                     if (m*n == 0d0) then
                         dpres_dtrv1 = 0d0
                         dpres_dtrv2 = 0d0
