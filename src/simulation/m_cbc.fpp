@@ -1109,7 +1109,7 @@ contains
                         dpres_dtrv1 = 0d0
                         dpres_dtrv2 = 0d0
                         
-                        if (k > 1 .and. k < (is2%end -1) .and. m*n>0) then
+                        if (k > 0 .and. k < is2%end .and. m*n>0) then
                             ! Trv1 2nd order accuracy
                             !$acc loop seq                   
                             do kk = k - 1, k + 1
@@ -1128,7 +1128,7 @@ contains
                         !     end do
                         end if
                         
-                        if (r > 1 .and. r < (is3%end - 1) .and. m*n*p>0) then
+                        if (r > 0 .and. r < is3%end .and. m*n*p>0) then
                             ! Trv2 2nd order accuracy
                             !$acc loop seq
                             do rr = r - 1, r + 1
@@ -1608,32 +1608,27 @@ contains
                         !                         (6d0*dx(0))
                         !                     !(x_cc(n+1)-x_cc(n-3))
                         !     end if 
-                        ! end if    
-
-                    else
-                        dpres_dtrv1 = 0d0   
-                        dpres_dtrv2 = 0d0
-                    end if   
-
-                    if ((bcxb == bcxe) .and. (bcyb == bcye) .and. &
-                        (bczb == bcze) .and. (bcxe == bcyb) .and. (bcye == bczb)) then 
-                        if ((k == 0 .and. proc_trv1_bcb == 1) &
-                           .or. (k == is2%end .and. proc_trv1_bce == 1)) then
-                            dpres_dtrv1 = 0d0
-                        end if    
-
-                        if ((r == 0 .and. proc_trv2_bcb == 1) &
-                           .or. (r == is3%end .and. proc_trv2_bce == 1)) then
-                            dpres_dtrv2 = 0d0
-                        end if 
+                        ! end if
+                        ! if ((bcxb == bcxe) .and. (bcyb == bcye) .and. &
+                        ! (bczb == bcze) .and. (bcxe == bcyb) .and. & 
+                        ! (bcye == bczb) .and. m*n*p>0 ) then 
+                        !     if ((k == 0 .and. proc_trv1_bcb == 1) &
+                        !     .or. (k == is2%end .and. proc_trv1_bce == 1)) then
+                        !         dpres_dtrv1 = 0d0
+                        !     end if  
+                        !     if ((r == 0 .and. proc_trv2_bcb == 1) &
+                        !     .or. (r == is3%end .and. proc_trv2_bce == 1)) then
+                        !         dpres_dtrv2 = 0d0
+                        !     end if
+                        ! end if     
                     end if    
                             
-                    if (m*n == 0d0) then
-                        dpres_dtrv1 = 0d0
-                        dpres_dtrv2 = 0d0
-                    elseif (m*n*p == 0d0) then
-                        dpres_dtrv2 = 0d0
-                    end if            
+                    ! if (m*n == 0d0) then
+                    !     dpres_dtrv1 = 0d0
+                    !     dpres_dtrv2 = 0d0
+                    ! elseif (m*n*p == 0d0) then
+                    !     dpres_dtrv2 = 0d0
+                    ! end if            
 
                     ! First-Order Temporal Derivatives of Primitive Variables ====
                     lambda(1) = vel(dir_idx(1)) - c
