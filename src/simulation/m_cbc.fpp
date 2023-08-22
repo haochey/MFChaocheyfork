@@ -1034,6 +1034,9 @@ contains
                     ! ============================================================
 
                     ! Spatial Derivatives on the Trv-direction
+                    dpres_dtrv1 = 0d0
+                    dpres_dtrv2 = 0d0
+                    
                     if ((cbc_loc == -1 .and. bc${XYZ}$b == -13) .or. (cbc_loc == 1 .and. bc${XYZ}$e == -13)) then
                         ! Determines if the boundary is processor boundary or the domain boundary
                         ! =0 means proc boundary; =1 means domain boundary
@@ -1042,72 +1045,69 @@ contains
                         proc_trv2_bcb = 0
                         proc_trv2_bce = 0
 
-                        if (cbc_dir == 1) then
+                        if (cbc_dir == 1 .and. m*n > 0) then
                             if (MINVAL(y_cb) <= y_domain%beg .AND. MAXVAL(y_cb) >= y_domain%end) then
-                            proc_trv1_bcb = 1
-                            proc_trv1_bce = 1
+                                proc_trv1_bcb = 1
+                                proc_trv1_bce = 1
                             elseif (MINVAL(y_cb) <= y_domain%beg) then
-                            proc_trv1_bcb = 1
+                                    proc_trv1_bcb = 1
                             elseif (MAXVAL(y_cb) >= y_domain%end) then
-                            proc_trv1_bce = 1
+                                    proc_trv1_bce = 1
                             end if
 
                             if (n*m*p > 0)then
                                 if (MINVAL(z_cb) <= z_domain%beg .AND. MAXVAL(z_cb) >= z_domain%end) then
-                                proc_trv2_bcb = 1
-                                proc_trv2_bce = 1
+                                    proc_trv2_bcb = 1
+                                    proc_trv2_bce = 1
                                 elseif (MINVAL(z_cb) <= z_domain%beg) then
-                                proc_trv2_bcb = 1
+                                    proc_trv2_bcb = 1
                                 elseif (MAXVAL(z_cb) >= z_domain%end) then
-                                proc_trv2_bce = 1
+                                    proc_trv2_bce = 1
                                 end if
                             end if
 
-                        elseif (cbc_dir == 2) then
+                        elseif (cbc_dir == 2 .and. m*n > 0) then
                             if (MINVAL(x_cb) <= x_domain%beg .AND. MAXVAL(x_cb) >= x_domain%end) then
-                            proc_trv1_bcb = 1
-                            proc_trv1_bce = 1
+                                proc_trv1_bcb = 1
+                                proc_trv1_bce = 1
                             elseif (MINVAL(x_cb) <= x_domain%beg) then
-                            proc_trv1_bcb = 1
+                                proc_trv1_bcb = 1
                             elseif (MAXVAL(x_cb) >= x_domain%end) then
-                            proc_trv1_bce = 1
+                                proc_trv1_bce = 1
                             end if
 
                             if (n*m*p > 0)then
                                 if (MINVAL(z_cb) <= z_domain%beg .AND. MAXVAL(z_cb) >= z_domain%end) then
-                                proc_trv2_bcb = 1
-                                proc_trv2_bce = 1
+                                    proc_trv2_bcb = 1
+                                    proc_trv2_bce = 1
                                 elseif (MINVAL(z_cb) <= z_domain%beg) then
-                                proc_trv2_bcb = 1
+                                    proc_trv2_bcb = 1
                                 elseif (MAXVAL(z_cb) >= z_domain%end) then
-                                proc_trv2_bce = 1
+                                    proc_trv2_bce = 1
                                 end if
                             end if
 
-                        elseif (cbc_dir == 3) then
+                        elseif (cbc_dir == 3 .and. m*n > 0) then
                             if (MINVAL(y_cb) <= y_domain%beg .AND. MAXVAL(y_cb) >= y_domain%end) then
-                            proc_trv1_bcb = 1
-                            proc_trv1_bce = 1
+                                proc_trv1_bcb = 1
+                                proc_trv1_bce = 1
                             elseif (MINVAL(y_cb) <= y_domain%beg) then
-                            proc_trv1_bcb = 1
+                                proc_trv1_bcb = 1
                             elseif (MAXVAL(y_cb) >= y_domain%end) then
-                            proc_trv1_bce = 1
+                                proc_trv1_bce = 1
                             end if
 
                             if (n*m*p > 0) then
                                 if (MINVAL(x_cb) <= x_domain%beg .AND. MAXVAL(x_cb) >= x_domain%end) then
-                                proc_trv2_bcb = 1
-                                proc_trv2_bce = 1
+                                    proc_trv2_bcb = 1
+                                    proc_trv2_bce = 1
                                 elseif (MINVAL(x_cb) <= x_domain%beg) then
-                                proc_trv2_bcb = 1
+                                    proc_trv2_bcb = 1
                                 elseif (MAXVAL(x_cb) >= x_domain%end) then
-                                proc_trv2_bce = 1
+                                    proc_trv2_bce = 1
                                 end if
                             end if
                         end if
-                    
-                        dpres_dtrv1 = 0d0
-                        dpres_dtrv2 = 0d0
                         
                         if (k > 0 .and. k < is2%end .and. m*n>0) then
                             ! Trv1 2nd order accuracy
