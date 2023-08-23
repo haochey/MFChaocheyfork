@@ -1253,7 +1253,7 @@ contains
                             end if    
                         end if
                         
-                        !! 3rd Order Accuracy
+                        !! 3rd Order Accuracy in case needed
                         ! Trv1 Around the corner/proc interface
                         ! if (m*n > 0 .and. weno_order ==5 ) then
                         !     if (cbc_dir == 1 .and. cbc_loc == -1 .and. k ==1) then
@@ -1630,6 +1630,7 @@ contains
                     !     dpres_dtrv2 = 0d0
                     ! end if            
 
+                    !Print*, E_idx
                     ! First-Order Temporal Derivatives of Primitive Variables ====
                     lambda(1) = vel(dir_idx(1)) - c
                     lambda(2) = vel(dir_idx(1))

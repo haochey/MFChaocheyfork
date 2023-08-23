@@ -277,9 +277,9 @@ contains
                 
                 L(2) = 0d0
 
-                L(3) = -(dpres_dtrv1/rho)
+                L(momxb+1) = -(dpres_dtrv1/rho)
         
-                L(4) = -(dpres_dtrv2/rho)
+                L(momxb+2) = -(dpres_dtrv2/rho)
         
                 L(advxe) = L(1)
         
