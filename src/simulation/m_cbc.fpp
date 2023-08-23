@@ -1201,7 +1201,9 @@ contains
                         end if
 
                         ! Trv2 Around the corner/proc interface
-                        if (m*n*p >0) then
+                        if (m*n*p >0 .and. proc_trv2_bcb == 0 &
+                            .and. proc_trv2_bce == 0) then
+                        ! if (m*n*p >0) then        
                             if (cbc_dir == 1 .and. cbc_loc == -1 .and. r ==0) then
                                 dpres_dtrv2 = (q_prim_vf(E_idx)%sf(0, k, 1) - &
                                             q_prim_vf(E_idx)%sf(0, k, -1))/ &
@@ -1253,7 +1255,14 @@ contains
                             end if    
                         end if
                         
-                        !! 3rd Order Accuracy in case needed
+                        ! if (proc_trv1_bcb == 1 .and. proc_trv1_bcb == 1 .and. &
+                        !     proc_trv2_bcb == 1 .and. proc_trv2_bcb == 1 .and. &
+                        !     k == 0 .and. r == 0) then
+                        !     dpres_dtrv1 = 0d0
+                        !     dpres_dtrv2 = 0d0
+                        ! end if                
+
+                        !! 3rd Order Accuracy in case
                         ! Trv1 Around the corner/proc interface
                         ! if (m*n > 0 .and. weno_order ==5 ) then
                         !     if (cbc_dir == 1 .and. cbc_loc == -1 .and. k ==1) then
@@ -1608,29 +1617,9 @@ contains
                         !                         (6d0*dx(0))
                         !                     !(x_cc(n+1)-x_cc(n-3))
                         !     end if 
-                        ! end if
-                        ! if ((bcxb == bcxe) .and. (bcyb == bcye) .and. &
-                        ! (bczb == bcze) .and. (bcxe == bcyb) .and. & 
-                        ! (bcye == bczb) .and. m*n*p>0 ) then 
-                        !     if ((k == 0 .and. proc_trv1_bcb == 1) &
-                        !     .or. (k == is2%end .and. proc_trv1_bce == 1)) then
-                        !         dpres_dtrv1 = 0d0
-                        !     end if  
-                        !     if ((r == 0 .and. proc_trv2_bcb == 1) &
-                        !     .or. (r == is3%end .and. proc_trv2_bce == 1)) then
-                        !         dpres_dtrv2 = 0d0
-                        !     end if
-                        ! end if     
-                    end if    
-                            
-                    ! if (m*n == 0d0) then
-                    !     dpres_dtrv1 = 0d0
-                    !     dpres_dtrv2 = 0d0
-                    ! elseif (m*n*p == 0d0) then
-                    !     dpres_dtrv2 = 0d0
-                    ! end if            
+                        ! end if  
+                    end if           
 
-                    !Print*, E_idx
                     ! First-Order Temporal Derivatives of Primitive Variables ====
                     lambda(1) = vel(dir_idx(1)) - c
                     lambda(2) = vel(dir_idx(1))
