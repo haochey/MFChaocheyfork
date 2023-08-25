@@ -275,7 +275,9 @@ contains
     
                 L(1) = lambda(1)*(dpres_ds - rho*c*dvel_ds(dir_idx(1)))
                 
-                L(2) = 0d0
+                do i= 2, momxb
+                    L(i) = 0d0
+                end do    
 
                 L(momxb+1) = -(dpres_dtrv1/rho)
         

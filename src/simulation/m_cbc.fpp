@@ -1119,7 +1119,7 @@ contains
                             end do
                         ! elseif (k > 0 .and. k < is2%end .and. weno_order == 5 &
                         !     .and. m*n>0) then
-                        !     ! Trv1 3rd order accuracy  
+                        !     !! Trv1 The 3rd order accuracy scheme  
                         !     !$acc loop seq                   
                         !     do kk = k - 2, k + 2
                         !         dpres_dtrv1 = q_prim_rs${XYZ}$_vf(0, kk, r, E_idx)* &
@@ -1138,7 +1138,7 @@ contains
                             end do
                         ! elseif (r > 0 .and. r < is2%end .and. weno_order == 5 &
                         !     .and. m*n*p>0) then
-                        !     ! Trv2 3rd order accuracy   
+                        !     !! Trv2 The 3rd order accuracy scheme  
                         !     !$acc loop seq                   
                         !     do rr = r - 2, r + 2
                         !         dpres_dtrv1 = q_prim_rs${XYZ}$_vf(0, k, rr, E_idx)* &
@@ -1148,119 +1148,112 @@ contains
                         end if
                         
                         !Trv1 Around the corner/proc interface
-                        if (m*n > 0) then
+                        if (m*n > 0 .and. proc_trv1_bcb == 0 &
+                        .and. proc_trv1_bce == 0) then
                             if (cbc_dir == 1 .and. cbc_loc == -1 .and. k ==0) then
                                 dpres_dtrv1 = (q_prim_vf(E_idx)%sf(0, 1, r) - &
                                             q_prim_vf(E_idx)%sf(0, -1, r))/ &
                                             (y_cc(1)-y_cc(-1))
                             elseif (cbc_dir == 1 .and. cbc_loc == -1 .and. k ==is2%end) then
-                                dpres_dtrv1 = (q_prim_vf(E_idx)%sf(0, k-1, r) - &
-                                            q_prim_vf(E_idx)%sf(0, k+1, r))/ &
+                                dpres_dtrv1 = (q_prim_vf(E_idx)%sf(0, k+1, r) - &
+                                            q_prim_vf(E_idx)%sf(0, k-1, r))/ &
                                             (y_cc(n+1)-y_cc(n-1))
                             elseif (cbc_dir == 1 .and. cbc_loc == 1 .and. k ==0) then
                                 dpres_dtrv1 = (q_prim_vf(E_idx)%sf(m, 1, r) - &
                                             q_prim_vf(E_idx)%sf(m, -1, r))/ &
                                             (y_cc(1)-y_cc(-1))   
                             elseif (cbc_dir == 1 .and. cbc_loc == 1 .and. k ==is2%end) then
-                                dpres_dtrv1 = (q_prim_vf(E_idx)%sf(m, k-1, r) - &
-                                            q_prim_vf(E_idx)%sf(m, k+1, r))/ &
+                                dpres_dtrv1 = (q_prim_vf(E_idx)%sf(m, k+1, r) - &
+                                            q_prim_vf(E_idx)%sf(m, k-1, r))/ &
                                             (y_cc(n+1)-y_cc(n-1))
                             elseif (cbc_dir == 2 .and. cbc_loc == -1 .and. k ==0) then
                                 dpres_dtrv1 = (q_prim_vf(E_idx)%sf(1, 0, r) - &
                                             q_prim_vf(E_idx)%sf(-1, 0, r))/ &
                                             (x_cc(1)-x_cc(-1))
                             elseif (cbc_dir == 2 .and. cbc_loc == -1 .and. k ==is2%end) then
-                                dpres_dtrv1 = (q_prim_vf(E_idx)%sf(k-1, 0, r) - &
-                                            q_prim_vf(E_idx)%sf(k+1, 0, r))/ &
+                                dpres_dtrv1 = (q_prim_vf(E_idx)%sf(k+1, 0, r) - &
+                                            q_prim_vf(E_idx)%sf(k-1, 0, r))/ &
                                             (x_cc(m+1)-x_cc(m-1))
                             elseif (cbc_dir == 2 .and. cbc_loc == 1 .and. k ==0) then
                                 dpres_dtrv1 = (q_prim_vf(E_idx)%sf(1, n, r) - &
                                             q_prim_vf(E_idx)%sf(-1, n, r))/ &
                                             (x_cc(1)-x_cc(-1))   
                             elseif (cbc_dir == 2 .and. cbc_loc == 1 .and. k ==is2%end) then
-                                dpres_dtrv1 = (q_prim_vf(E_idx)%sf(k-1, n, r) - &
-                                            q_prim_vf(E_idx)%sf(k+1, n, r))/ &
+                                dpres_dtrv1 = (q_prim_vf(E_idx)%sf(k+1, n, r) - &
+                                            q_prim_vf(E_idx)%sf(k-1, n, r))/ &
                                             (x_cc(m+1)-x_cc(m-1))
                             elseif (cbc_dir == 3 .and. cbc_loc == -1 .and. k ==0) then
                                 dpres_dtrv1 = (q_prim_vf(E_idx)%sf(r, 1, 0) - &
                                             q_prim_vf(E_idx)%sf(r, -1, 0))/ &
                                             (y_cc(1)-y_cc(-1))
                             elseif (cbc_dir == 3 .and. cbc_loc == -1 .and. k ==is2%end) then
-                                dpres_dtrv1 = (q_prim_vf(E_idx)%sf(r, k-1, 0) - &
-                                            q_prim_vf(E_idx)%sf(r, k+1, 0))/ &
+                                dpres_dtrv1 = (q_prim_vf(E_idx)%sf(r, k+1, 0) - &
+                                            q_prim_vf(E_idx)%sf(r, k-1, 0))/ &
                                             (y_cc(n+1)-y_cc(n-1))
                             elseif (cbc_dir == 3 .and. cbc_loc == 1 .and. k ==0) then
                                 dpres_dtrv1 = (q_prim_vf(E_idx)%sf(r, 1, p) - &
                                             q_prim_vf(E_idx)%sf(r, -1, p))/ &
                                             (y_cc(1)-y_cc(-1))   
                             elseif (cbc_dir == 3 .and. cbc_loc == 1 .and. k ==is2%end) then
-                                dpres_dtrv1 = (q_prim_vf(E_idx)%sf(r, k-1, p) - &
-                                            q_prim_vf(E_idx)%sf(r, k+1, p))/ &
+                                dpres_dtrv1 = (q_prim_vf(E_idx)%sf(r, k+1, p) - &
+                                            q_prim_vf(E_idx)%sf(r, k-1, p))/ &
                                             (y_cc(n+1)-y_cc(n-1)) 
                             end if
                         end if
 
                         ! Trv2 Around the corner/proc interface
                         if (m*n*p >0 .and. proc_trv2_bcb == 0 &
-                            .and. proc_trv2_bce == 0) then
-                        ! if (m*n*p >0) then        
+                            .and. proc_trv2_bce == 0) then      
                             if (cbc_dir == 1 .and. cbc_loc == -1 .and. r ==0) then
                                 dpres_dtrv2 = (q_prim_vf(E_idx)%sf(0, k, 1) - &
                                             q_prim_vf(E_idx)%sf(0, k, -1))/ &
                                             (z_cc(1)-z_cc(-1))
                             elseif (cbc_dir == 1 .and. cbc_loc == -1 .and. r ==is3%end) then
-                                dpres_dtrv2 = (q_prim_vf(E_idx)%sf(0, k, r-1) - &
-                                            q_prim_vf(E_idx)%sf(0, k, r+1))/ &
+                                dpres_dtrv2 = (q_prim_vf(E_idx)%sf(0, k, r+1) - &
+                                            q_prim_vf(E_idx)%sf(0, k, r-1))/ &
                                             (z_cc(p+1)-z_cc(p-1))
                             elseif (cbc_dir == 1 .and. cbc_loc == 1 .and. r ==0) then
                                 dpres_dtrv2 = (q_prim_vf(E_idx)%sf(m, k, 1) - &
                                             q_prim_vf(E_idx)%sf(m, k, -1))/ &
                                             (z_cc(1)-z_cc(-1))   
                             elseif (cbc_dir == 1 .and. cbc_loc == 1 .and. r ==is3%end) then
-                                dpres_dtrv2 = (q_prim_vf(E_idx)%sf(m, k, r-1) - &
-                                            q_prim_vf(E_idx)%sf(m, k, r+1))/ &
+                                dpres_dtrv2 = (q_prim_vf(E_idx)%sf(m, k, r+1) - &
+                                            q_prim_vf(E_idx)%sf(m, k, r-1))/ &
                                             (z_cc(p+1)-z_cc(p-1))
                             elseif (cbc_dir == 2 .and. cbc_loc == -1 .and. r ==0) then
                                 dpres_dtrv2 = (q_prim_vf(E_idx)%sf(k, 0, 1) - &
                                             q_prim_vf(E_idx)%sf(k, 0, -1))/ &
                                             (z_cc(1)-z_cc(-1))
                             elseif (cbc_dir == 2 .and. cbc_loc == -1 .and. r ==is3%end) then
-                                dpres_dtrv2 = (q_prim_vf(E_idx)%sf(k, 0, r-1) - &
-                                            q_prim_vf(E_idx)%sf(k, 0, r+1))/ &
+                                dpres_dtrv2 = (q_prim_vf(E_idx)%sf(k, 0, r+1) - &
+                                            q_prim_vf(E_idx)%sf(k, 0, r-1))/ &
                                             (z_cc(p+1)-z_cc(p-1))
                             elseif (cbc_dir == 2 .and. cbc_loc == 1 .and. r ==0) then
                                 dpres_dtrv2 = (q_prim_vf(E_idx)%sf(k, n, 1) - &
                                             q_prim_vf(E_idx)%sf(k, n, -1))/ &
                                             (z_cc(1)-z_cc(-1))   
                             elseif (cbc_dir == 2 .and. cbc_loc == 1 .and. r ==is3%end) then
-                                dpres_dtrv2 = (q_prim_vf(E_idx)%sf(k, n, r-1) - &
-                                            q_prim_vf(E_idx)%sf(k, n, r+1))/ &
+                                dpres_dtrv2 = (q_prim_vf(E_idx)%sf(k, n, r+1) - &
+                                            q_prim_vf(E_idx)%sf(k, n, r-1))/ &
                                             (z_cc(p+1)-z_cc(p-1))
                             elseif (cbc_dir == 3 .and. cbc_loc == -1 .and. r ==0) then
                                 dpres_dtrv2 = (q_prim_vf(E_idx)%sf(1, k, 0) - &
                                             q_prim_vf(E_idx)%sf(-1, k, 0))/ &
                                             (x_cc(1)-x_cc(-1))
                             elseif (cbc_dir == 3 .and. cbc_loc == -1 .and. r ==is3%end) then
-                                dpres_dtrv2 = (q_prim_vf(E_idx)%sf(r-1, k, 0) - &
-                                            q_prim_vf(E_idx)%sf(r+1, k, 0))/ &
+                                dpres_dtrv2 = (q_prim_vf(E_idx)%sf(r+1, k, 0) - &
+                                            q_prim_vf(E_idx)%sf(r-1, k, 0))/ &
                                             (x_cc(m+1)-x_cc(m-1))
                             elseif (cbc_dir == 3 .and. cbc_loc == 1 .and. r ==0) then
                                 dpres_dtrv2 = (q_prim_vf(E_idx)%sf(1, k, p) - &
                                             q_prim_vf(E_idx)%sf(-1, k, p))/ &
                                             (x_cc(1)-x_cc(-1))   
                             elseif (cbc_dir == 3 .and. cbc_loc == 1 .and. r ==is3%end) then
-                                dpres_dtrv2 = (q_prim_vf(E_idx)%sf(r-1, k, p) - &
-                                            q_prim_vf(E_idx)%sf(r+1, k, p))/ &
+                                dpres_dtrv2 = (q_prim_vf(E_idx)%sf(r+1, k, p) - &
+                                            q_prim_vf(E_idx)%sf(r-1, k, p))/ &
                                             (x_cc(m+1)-x_cc(m-1)) 
                             end if    
                         end if
-                        
-                        ! if (proc_trv1_bcb == 1 .and. proc_trv1_bcb == 1 .and. &
-                        !     proc_trv2_bcb == 1 .and. proc_trv2_bcb == 1 .and. &
-                        !     k == 0 .and. r == 0) then
-                        !     dpres_dtrv1 = 0d0
-                        !     dpres_dtrv2 = 0d0
-                        ! end if                
 
                         !! 3rd Order Accuracy in case
                         ! Trv1 Around the corner/proc interface
@@ -1619,7 +1612,7 @@ contains
                         !     end if 
                         ! end if  
                     end if           
-
+                    
                     ! First-Order Temporal Derivatives of Primitive Variables ====
                     lambda(1) = vel(dir_idx(1)) - c
                     lambda(2) = vel(dir_idx(1))
