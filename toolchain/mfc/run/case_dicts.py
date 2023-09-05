@@ -88,7 +88,7 @@ SIMULATION = COMMON + [
 
 for cmp in ["x", "y", "z"]:
     for prepend in ["domain%beg", "domain%end", "a", "b"]:
-        PRE_PROCESS.append(f"{cmp}_{prepend}")
+        SIMULATION.append(f"{cmp}_{prepend}")
 
 for cmp in ["x", "y", "z"]:
     SIMULATION.append(f'bc_{cmp}%beg')

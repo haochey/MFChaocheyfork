@@ -401,10 +401,6 @@ contains
             #:endfor
         #:endfor
 
-        ! x_domain%beg =  dflt_int; x_domain%end =  dflt_int;
-        ! y_domain%beg =  dflt_int; y_domain%end =  dflt_int;
-        ! z_domain%beg =  dflt_int; z_domain%end =  dflt_int;
-
         ! Fluids physical parameters
         do i = 1, num_fluids_max
             fluid_pp(i)%gamma = dflt_real
