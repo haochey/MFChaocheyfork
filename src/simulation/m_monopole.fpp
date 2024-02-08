@@ -19,13 +19,13 @@ module m_monopole
     implicit none
     private; public :: s_initialize_monopole_module, s_monopole_calculations
 
-    integer, allocatable, dimension(:) :: pulse, support, support_width
+    integer, allocatable, dimension(:) :: pulse, support
     !$acc declare create(pulse, support)
 
     real(kind(0d0)), allocatable, dimension(:, :) :: loc_mono
     !$acc declare create(loc_mono)
 
-    real(kind(0d0)), allocatable, dimension(:) :: foc_length, aperture
+    real(kind(0d0)), allocatable, dimension(:) :: foc_length, aperture, support_width
     !$acc declare create(foc_length, aperture)
 
     real(kind(0d0)), allocatable, dimension(:) :: mag, length, npulse, dir, delay
