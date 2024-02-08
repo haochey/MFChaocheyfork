@@ -493,7 +493,7 @@ The source plane is defined in the finite region of the domain: $x\in[-\infty,\i
 There are a few additional spatial support types available for special source types and coordinate systems tabulated in [Monopole supports](#monopole-supports).
 
 - `Mono(i)%support_width` defines how many cell width the monopole support function extended by.
-Large `Mono(i)%support_width` is prefered when `Mono(i)%mag` is large.
+Large `Mono(i)%support_width` is preferred when `Mono(i)%mag` is large.
 
 ### 8. Ensemble-Averaged Bubble Model
 
