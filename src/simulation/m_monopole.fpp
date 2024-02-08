@@ -26,7 +26,7 @@ module m_monopole
     !$acc declare create(loc_mono)
 
     real(kind(0d0)), allocatable, dimension(:) :: foc_length, aperture, support_width
-    !$acc declare create(foc_length, aperture)
+    !$acc declare create(foc_length, aperture, support_width)
 
     real(kind(0d0)), allocatable, dimension(:) :: mag, length, npulse, dir, delay
     !$acc declare create(mag, length, npulse, dir, delay)
