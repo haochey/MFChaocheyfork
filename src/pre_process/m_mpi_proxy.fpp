@@ -86,7 +86,7 @@ contains
 
             call MPI_BCAST(patch_icpp(i)%model%filepath, len(patch_icpp(i)%model%filepath), MPI_CHARACTER, 0, MPI_COMM_WORLD, ierr)
 
-            #:for VAR in [ 'model%translate', 'model%scale', 'model%rotate', &
+            #:for VAR in [ 'model%translate', 'model%scale', 'model%rotate', 'model%threshold',&
                 'normal', 'radii', 'vel', 'tau_e', 'alpha_rho', 'alpha' ]
                 call MPI_BCAST(patch_icpp(i)%${VAR}$, size(patch_icpp(i)%${VAR}$), MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, ierr)
             #:endfor
