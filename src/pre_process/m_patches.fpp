@@ -1950,7 +1950,7 @@ contains
                         if (eta > patch_icpp(patch_id)%model%threshold) then
                             eta = 1d0
                         else
-                            eta = 0d0 
+                            eta = 0d0
                         end if
                     end if
 
