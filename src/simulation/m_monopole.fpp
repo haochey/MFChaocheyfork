@@ -93,7 +93,7 @@ contains
         real(kind(0d0)) :: the_time, sound
         real(kind(0d0)) :: s2, const_sos, s1
         !integer :: w !< Broadband loop variables
-        real(kind(0d0)), dimension(0:99) :: phi_rn, !fre, period, sl, bandwid, ffre !< Broadband loop variables
+        real(kind(0d0)), dimension(100) :: phi_rn !fre, period, sl, bandwid, ffre !< Broadband loop variables
 
         call random_number(phi_rn(:))
         ! !$acc loop seq
@@ -281,10 +281,9 @@ contains
         real(kind(0d0)) :: period, t0, sigt, pa
         real(kind(0d0)) :: offset
         real(kind(0d0)) :: f_g
-        integer :: term_index
+        integer :: term_index, w
         real(kind(0d0)) :: fre, sl, bwid
-        real(kind(0d0)), dimension(0:99) :: phi_rn
-
+        real(kind(0d0)), dimension(100) :: phi_rn
 
         offset = 0d0
         if (delay(nm) /= dflt_real) offset = delay(nm)
