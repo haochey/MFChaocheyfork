@@ -283,6 +283,8 @@ contains
         real(kind(0d0)) :: f_g
         integer :: term_index
         real(kind(0d0)) :: fre, sl, bwid
+        real(kind(0d0)), dimension(0:99) :: phi_rn
+
 
         offset = 0d0
         if (delay(nm) /= dflt_real) offset = delay(nm)
