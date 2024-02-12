@@ -92,6 +92,18 @@ contains
 
         real(kind(0d0)) :: the_time, sound
         real(kind(0d0)) :: s2, const_sos, s1
+        !integer :: w !< Broadband loop variables
+        real(kind(0d0)), dimension(100) :: phi_rn !fre, period, sl, bandwid, ffre !< Broadband loop variables
+
+        call random_number(phi_rn(:))
+        ! !$acc loop seq
+        ! do w = 0, 99
+        !     fre(w) = 500d0 + w*100d0
+        !     period(w) = 1d0/fre
+        !     sl(w) = 1d0 + 0.5d0*w
+        !     bwid(w) = 100d0
+        !     ffre(w) = ((2d0*sl*bwid)**0.5d0)*cos((the_time + offset)*2.d0*pi/period + 2d0*pi*phi_rn(w))
+        ! end do
 
         !$acc parallel loop collapse(3) gang vector default(present)
         do l = 0, p
@@ -169,13 +181,13 @@ contains
                             angle = 0.d0
                             angle_z = 0.d0
 
-                            s2 = f_g(the_time, sound, const_sos, q, term_index)* &
+                            s2 = f_g(the_time, sound, const_sos, q, term_index, phi_rn)* &
                                  f_delta(j, k, l, loc_mono(:, q), length(q), q, angle, angle_z)
                             !s2 = 1d0
 
                             if (support(q) == 5) then
                                 term_index = 1
-                                s1 = f_g(the_time, sound, const_sos, q, term_index)* &
+                                s1 = f_g(the_time, sound, const_sos, q, term_index, phi_rn)* &
                                      f_delta(j, k, l, loc_mono(:, q), length(q), q, angle, angle_z)
                             end if
 
@@ -262,14 +274,16 @@ contains
         !! @param the_time Simulation time
         !! @param sos Sound speed
         !! @param mysos Alternative speed of sound for testing
-    function f_g(the_time, sos, mysos, nm, term_index)
+    function f_g(the_time, sos, mysos, nm, term_index, phi_rn)
         !$acc routine seq
         real(kind(0d0)), intent(IN) :: the_time, sos, mysos
         integer, intent(IN) :: nm
         real(kind(0d0)) :: period, t0, sigt, pa
         real(kind(0d0)) :: offset
         real(kind(0d0)) :: f_g
-        integer :: term_index
+        integer :: term_index, w
+        real(kind(0d0)) :: fre, sl, bwid
+        real(kind(0d0)), dimension(100) :: phi_rn
 
         offset = 0d0
         if (delay(nm) /= dflt_real) offset = delay(nm)
@@ -299,6 +313,16 @@ contains
                 f_g = mag(nm)
             end if
         else
+            ! Broadband wave
+            f_g = 0d0
+            !$acc routine seq
+            do w = 0, 99
+                fre = 500d0 + w*100d0
+                period = 1d0/fre
+                sl = 1d0 + 0.5d0*w
+                bwid = 100d0
+                f_g = ((2d0*sl*bwid)**0.5d0)*cos((the_time + offset)*2.d0*pi/period + 2d0*pi*phi_rn(w)) + f_g
+            end do
         end if
 
     end function f_g

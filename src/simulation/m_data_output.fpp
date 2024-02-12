@@ -171,7 +171,7 @@ contains
 
         do i = 1, num_probes
             ! Generating the relative path to the data file
-            write (file_path, '(A,I0,A)') '/D/probe', i, '_prim.dat'
+            write (file_path, '(A,I0,A)') '/probe', i, '_prim.dat'
             file_path = trim(case_dir)//trim(file_path)
 
             ! Creating the formatted data file and setting up its
