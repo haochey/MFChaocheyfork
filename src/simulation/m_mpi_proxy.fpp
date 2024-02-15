@@ -760,11 +760,13 @@ contains
     end subroutine s_mpi_sendrecv_grid_variables_buffers ! -----------------
 
     subroutine s_mpi_send_random_number(phi_rn)
+
         real(kind(0d0)), dimension(0:99) :: phi_rn
-        #ifdef MFC_MPI
-            call MPI_BCAST(phi_rn, size(phi_rn), MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, ierr)
+
+#ifdef MFC_MPI
+        call MPI_BCAST(phi_rn, size(phi_rn), MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, ierr)
         ! print*, proc_rank, 'rdn', phi_rn(1)
-        #endif
+#endif
 
     end subroutine s_mpi_send_random_number
 
