@@ -13,6 +13,12 @@ Please delete options that are not relevant.
 - [ ] New feature (non-breaking change which adds functionality)
 - [ ] Something else
 
+### Scope
+
+- [ ] This PR comprises a set of related changes with a common goal
+
+If you cannot check the above box, please split your PR into multiple PRs that each have a common goal.
+
 ## How Has This Been Tested?
 
 Please describe the tests that you ran to verify your changes. 
@@ -26,13 +32,14 @@ Please also list any relevant details for your test configuration
 
 * What computers and compilers did you use to test this:
 
-## Checklist:
+## Checklist
 
-- [ ] I have added comments for new code
-- [ ] I added Doxygen docstrings to new code
+- [ ] I have added comments for the new code
+- [ ] I added Doxygen docstrings to the new code
 - [ ] I have made corresponding changes to the documentation (`docs/`)
 - [ ] I have added regression tests to the test suite so that people can verify in the future that the feature is behaving as expected
 - [ ] I have added example cases in `examples/` that demonstrate my new feature performing as expected
+- [ ] I ran `./mfc.sh format` before committing my code
 - [ ] New and existing tests pass locally with my changes, including with GPU capability enabled and disabled
 - [ ] This PR does not introduce any repeated code (it follows the [DRY](https://en.wikipedia.org/wiki/Don%27t_repeat_yourself) principle)
 - [ ] I cannot think of a way to condense this code and reduce any introduced additional line count
