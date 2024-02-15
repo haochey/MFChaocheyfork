@@ -81,7 +81,7 @@ contains
 
         real(kind(0d0)) :: myR, myV, alf, myP, myRho, R2Vav
 
-        integer :: i, j, k, l, q, ii !< generic loop variables
+        integer :: i, j, k, l, q, ii, w !< generic loop variables
         integer :: term_index
 
         real(kind(0d0)), dimension(num_fluids) :: myalpha_rho, myalpha
@@ -93,17 +93,21 @@ contains
         real(kind(0d0)) :: the_time, sound
         real(kind(0d0)) :: s2, const_sos, s1
         !integer :: w !< Broadband loop variables
-        real(kind(0d0)), dimension(100) :: phi_rn !fre, period, sl, bandwid, ffre !< Broadband loop variables
+        real(kind(0d0)), dimension(0:99) :: phi_rn, fre, period, sl, bwid, ffre !< Broadband loop variables
+        real(kind(0d0)) :: fsum
 
         call random_number(phi_rn(:))
-        ! !$acc loop seq
-        ! do w = 0, 99
-        !     fre(w) = 500d0 + w*100d0
-        !     period(w) = 1d0/fre
-        !     sl(w) = 1d0 + 0.5d0*w
-        !     bwid(w) = 100d0
-        !     ffre(w) = ((2d0*sl*bwid)**0.5d0)*cos((the_time + offset)*2.d0*pi/period + 2d0*pi*phi_rn(w))
-        ! end do
+        call s_mpi_send_random_number(phi_rn)
+        !$acc loop seq
+        do w = 0, 99
+            fre(w) = 500d0 + w*100d0
+            period(w) = 1d0/fre(w)
+            sl(w) = 10d0 + 5d0*w
+            bwid(w) = 100d0
+            ffre(w) = ((2d0*sl(w)*bwid(w))**0.5d0)*cos((the_time)*2.d0*pi/period(w) + 2d0*pi*phi_rn(w))
+        end do
+
+        fsum = sum(ffre)
 
         !$acc parallel loop collapse(3) gang vector default(present)
         do l = 0, p
@@ -181,13 +185,13 @@ contains
                             angle = 0.d0
                             angle_z = 0.d0
 
-                            s2 = f_g(the_time, sound, const_sos, q, term_index, phi_rn)* &
+                            s2 = f_g(the_time, sound, const_sos, q, term_index, phi_rn, ffre, fsum)* &
                                  f_delta(j, k, l, loc_mono(:, q), length(q), q, angle, angle_z)
                             !s2 = 1d0
 
                             if (support(q) == 5) then
                                 term_index = 1
-                                s1 = f_g(the_time, sound, const_sos, q, term_index, phi_rn)* &
+                                s1 = f_g(the_time, sound, const_sos, q, term_index, phi_rn, ffre, fsum)* &
                                      f_delta(j, k, l, loc_mono(:, q), length(q), q, angle, angle_z)
                             end if
 
@@ -274,7 +278,7 @@ contains
         !! @param the_time Simulation time
         !! @param sos Sound speed
         !! @param mysos Alternative speed of sound for testing
-    function f_g(the_time, sos, mysos, nm, term_index, phi_rn)
+    function f_g(the_time, sos, mysos, nm, term_index, phi_rn, ffre, fsum)
         !$acc routine seq
         real(kind(0d0)), intent(IN) :: the_time, sos, mysos
         integer, intent(IN) :: nm
@@ -282,8 +286,8 @@ contains
         real(kind(0d0)) :: offset
         real(kind(0d0)) :: f_g
         integer :: term_index, w
-        real(kind(0d0)) :: fre, sl, bwid
-        real(kind(0d0)), dimension(100) :: phi_rn
+        real(kind(0d0)) :: fre, sl, bwid, fsum
+        real(kind(0d0)), dimension(100) :: phi_rn, ffre
 
         offset = 0d0
         if (delay(nm) /= dflt_real) offset = delay(nm)
@@ -314,15 +318,16 @@ contains
             end if
         else
             ! Broadband wave
-            f_g = 0d0
-            !$acc routine seq
-            do w = 0, 99
-                fre = 500d0 + w*100d0
-                period = 1d0/fre
-                sl = 1d0 + 0.5d0*w
-                bwid = 100d0
-                f_g = ((2d0*sl*bwid)**0.5d0)*cos((the_time + offset)*2.d0*pi/period + 2d0*pi*phi_rn(w)) + f_g
-            end do
+            f_g = fsum
+            !!$acc routine seq
+            ! do w = 0, 99
+            !     fre = 500d0 + w*100d0
+            !     period = 1d0/fre
+            !     sl = 10d0 + 5d0*w
+            !     bwid = 100d0
+            !     f_g = ((2d0*sl*bwid)**0.5d0)*cos((the_time + offset)*2.d0*pi/period + 2d0*pi*phi_rn(w)) + f_g
+            ! end do
+
         end if
 
     end function f_g

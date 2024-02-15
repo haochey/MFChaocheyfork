@@ -591,7 +591,6 @@ contains
         integer, intent(IN) :: pbc_loc
 
 #ifdef MFC_MPI
-
         ! MPI Communication in x-direction =================================
         if (mpi_dir == 1) then
 
@@ -760,6 +759,14 @@ contains
 
     end subroutine s_mpi_sendrecv_grid_variables_buffers ! -----------------
 
+    subroutine s_mpi_send_random_number(phi_rn)
+        real(kind(0d0)), dimension(0:99) :: phi_rn
+
+        call MPI_BCAST(phi_rn, size(phi_rn), MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, ierr)
+        ! print*, proc_rank, 'rdn', phi_rn(1)
+
+    end subroutine s_mpi_send_random_number
+
     !>  The goal of this procedure is to populate the buffers of
         !!      the cell-average conservative variables by communicating
         !!      with the neighboring processors.
@@ -776,6 +783,7 @@ contains
 
         integer, intent(IN) :: mpi_dir
         integer, intent(IN) :: pbc_loc
+        real(kind(0d0)), dimension(0:99) :: phi_rn
 
         integer :: i, j, k, l, r, q !< Generic loop iterators
 
