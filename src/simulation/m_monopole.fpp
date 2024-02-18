@@ -319,15 +319,6 @@ contains
         else
             ! Broadband wave
             f_g = fsum
-            !!$acc routine seq
-            ! do w = 0, 99
-            !     fre = 500d0 + w*100d0
-            !     period = 1d0/fre
-            !     sl = 10d0 + 5d0*w
-            !     bwid = 100d0
-            !     f_g = ((2d0*sl*bwid)**0.5d0)*cos((the_time + offset)*2.d0*pi/period + 2d0*pi*phi_rn(w)) + f_g
-            ! end do
-
         end if
 
     end function f_g
