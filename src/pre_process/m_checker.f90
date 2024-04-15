@@ -630,6 +630,11 @@ contains
                 call s_mpi_abort('Unsupported choice for the value of '// &
                                  'num_ibs. Exiting ...')
             end if
+
+            if(num_ibs > num_patches) then
+                call s_mpi_abort('Unsupported choices of the number of ib patches and '// &
+                                'the number of patches. num_ibs should be smaller than num_patches. Exiting ...')
+            end if
         end if
 
         if (num_ibs > 0 .and. .not. ib) then
