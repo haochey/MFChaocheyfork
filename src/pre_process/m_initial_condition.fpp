@@ -181,7 +181,7 @@ contains
             !> @}
 
             !> IB Patches
-                !> @{
+            !> @{
             do i = 1, num_ibs
                 if (proc_rank == 0) then
                     print *, 'Processing 3D ib patch', i
@@ -191,7 +191,7 @@ contains
                 ! Spherical patch
                 if (patch_ib(i)%geometry == 8) then
                     call s_sphere(1, ib_markers%sf, q_prim_vf, .true.)
-                ! Cylindrical patch
+                    ! Cylindrical patch
                 elseif (patch_ib(i)%geometry == 10) then
                     call s_cylinder(1, ib_markers%sf, q_prim_vf, .true.)
 
@@ -267,11 +267,11 @@ contains
                 ! Circular patch
                 if (patch_ib(i)%geometry == 2) then
                     call s_circle(1, ib_markers%sf, q_prim_vf, .true.)
-    
-                ! Rectangular patch
+
+                    ! Rectangular patch
                 elseif (patch_ib(i)%geometry == 3) then
                     call s_rectangle(1, ib_markers%sf, q_prim_vf, .true.)
-    
+
                 elseif (patch_ib(i)%geometry == 4) then
                     call s_airfoil(1, ib_markers%sf, q_prim_vf, .true.)
                 end if
