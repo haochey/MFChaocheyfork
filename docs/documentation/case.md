@@ -178,6 +178,8 @@ Ensure the data for the $k$-th time step is stored in the `restart_data/` direct
 | `model%translate(i)` | Real    | Not Supported         | Model's $i$-th component of (applied) translation.           |
 | `model%spc`          | Integer | Not Supported         | Number of samples per cell when discretizing the model into the grid. |
 | `model%threshold`    | Real    | Not Supported         | Ray fraction inside the model patch above which the fraction is set to one.|
+| `ib`                 | Logical | Not Supported         | Using immersed boundaries                                    |
+| `num_ibs`            | Integer | Not Supported         | Number of immersed boundaries.                               |
 
 *: These parameters should be prepended with `patch_icpp(j)%` where $j$ is the patch index. 
 
@@ -290,6 +292,11 @@ See also `adv_alphan` in table [Simulation Algorithm Parameters](#5-simulation-a
 These parameters should be prepended with `patch_ib(j)%` where $j$ is the patch index. 
 
 #### Parameter Descriptions
+
+- `ib` enables immersed boundaries.
+
+- `num_ibs` defines the total number of immersed boundaries in the domain.
+The number has to be a positive integer. `num_ibs` needs to be less or equal to `num_patches` to ensure correct initialization.
 
 - `geometry` defines the type of geometry of a patch with an integer number.
 Definitions for currently implemented patch types are list in table [Immersed Boundary Patch Type](#immersed-boundary-patch-types)
