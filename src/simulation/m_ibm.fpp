@@ -580,7 +580,7 @@ contains
                                 else
                                     ghost_points(count)%DB(1) = 0
                                 end if
-    
+
                                 if ((y_cc(j) - dy(j)) < y_domain%beg) then
                                     ghost_points(count)%DB(2) = -1
                                 else if ((y_cc(j) + dy(j)) > y_domain%end) then
@@ -612,7 +612,7 @@ contains
                                 else
                                     ghost_points(count)%DB(1) = 0
                                 end if
-    
+
                                 if ((y_cc(j) - dy(j)) < y_domain%beg) then
                                     ghost_points(count)%DB(2) = -1
                                 else if ((y_cc(j) + dy(j)) > y_domain%end) then
