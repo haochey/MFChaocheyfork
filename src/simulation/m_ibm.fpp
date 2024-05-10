@@ -396,9 +396,9 @@ contains
                     ghost_points(q)%ip_grid(dim) = ghost_points(q)%loc(dim)
                 else
                     if (ghost_points(q)%DB(dim) == -1) then
-                        ghost_points(q)%ip_grid(dim) = ghost_points(q)%loc(dim)+1
+                        ghost_points(q)%ip_grid(dim) = ghost_points(q)%loc(dim) + 1
                     else if (ghost_points(q)%DB(dim) == 1) then
-                        ghost_points(q)%ip_grid(dim) = ghost_points(q)%loc(dim)-1
+                        ghost_points(q)%ip_grid(dim) = ghost_points(q)%loc(dim) - 1
                     end if
 
                     if (norm(dim) > 0) then
@@ -556,7 +556,6 @@ contains
                                 ghost_points(count)%DB(2) = 0
                             end if
 
-
                             count_i = count_i + 1
 
                         end if
@@ -669,7 +668,7 @@ contains
                         interp_coeffs(:, :, 1) = eta(:, :, 1)/buf
                     end if
                 end if
-                
+
                 ghost_points(i)%interp_coeffs = interp_coeffs
             end do
 
