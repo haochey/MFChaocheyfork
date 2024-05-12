@@ -417,9 +417,6 @@ contains
                 end if
             end do
 
-            print*, ghost_points(q)%loc(:)
-            print*, ghost_points(q)%ip_grid(:)
-
             ! print *, "GP Loc: ", ghost_points(q)%loc(:)
             ! print *, "Norm: ", norm(:)
             ! print *, "Dist: ", abs(dist)
@@ -534,7 +531,7 @@ contains
                             end if
 
                             count = count + 1
-                            
+
                         else
                             inner_points(count_i)%loc = [i, j, 0]
                             patch_id = ib_markers%sf(i, j, 0)
