@@ -531,7 +531,7 @@ contains
                             end if
 
                             count = count + 1
-                            !  print*, i, j, (y_cc(j) + dy(j)), ghost_points(count)%DB(2)
+                            
                         else
                             inner_points(count_i)%loc = [i, j, 0]
                             patch_id = ib_markers%sf(i, j, 0)
@@ -665,16 +665,6 @@ contains
                 ! Get the interpolation points
                 i1 = gp%ip_grid(1); i2 = i1 + 1
                 j1 = gp%ip_grid(2); j2 = j1 + 1
-
-                ! if (gp%DB(1) == -1) then
-                !     i2 = i1 + 1
-                ! else if (gp%DB(1) == 1) then
-                !     i2 = i1 - 1
-                ! else if (gp%DB(2) == -1) then
-                !     j2 = j1 + 1
-                ! else if (gp%DB(2) == 1) then
-                !     j2 = j1 - 1
-                ! end if
 
                 dist = 0d0
                 buf = 1d0
@@ -835,8 +825,12 @@ contains
             i2 = i1 - 1
         else if (gp%DB(2) == -1) then
             j2 = j1 + 1
-            ! else if (gp%DB(2) == 1) then
-            !     j2 = j1 - 1
+        else if (gp%DB(2) == 1) then
+            j2 = j1 - 1
+        else if (gp%DB(3) == -1) then
+            k2 = k1 + 1
+        else if (gp%DB(3) == 1) then
+            k2 = k1 - 1
         end if
 
         if (p == 0) then
