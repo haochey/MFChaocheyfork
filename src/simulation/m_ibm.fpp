@@ -417,6 +417,9 @@ contains
                 end if
             end do
 
+            print*, ghost_points(q)%loc(:)
+            print*, ghost_points(q)%ip_grid(:)
+
             ! print *, "GP Loc: ", ghost_points(q)%loc(:)
             ! print *, "Norm: ", norm(:)
             ! print *, "Dist: ", abs(dist)
@@ -538,18 +541,15 @@ contains
                             inner_points(count_i)%ib_patch_id = &
                                 patch_id
                             inner_points(count_i)%slip = patch_ib(patch_id)%slip
-
-                            if ((x_cc(i) - dx(i)) < x_domain%beg) then
-                                ghost_points(count)%DB(1) = -1
-                            else if ((x_cc(i) + dx(i)) > x_domain%end) then
+                            if ((x_cc(i) - dx(i)) < x_domain%beg .or. &
+                                (x_cc(i) + dx(i)) > x_domain%end) then
                                 ghost_points(count)%DB(1) = 1
                             else
                                 ghost_points(count)%DB(1) = 0
                             end if
 
-                            if ((y_cc(j) - dy(j)) < y_domain%beg) then
-                                ghost_points(count)%DB(2) = -1
-                            else if ((y_cc(j) + dy(j)) > y_domain%end) then
+                            if ((y_cc(j) - dy(j)) < y_domain%beg .or. &
+                                (y_cc(j) + dy(j)) > y_domain%end) then
                                 ghost_points(count)%DB(2) = 1
                             else
                                 ghost_points(count)%DB(2) = 0
