@@ -816,20 +816,6 @@ contains
         j1 = gp%ip_grid(2); j2 = j1 + 1
         k1 = gp%ip_grid(3); k2 = k1 + 1
 
-        if (gp%DB(1) == -1) then
-            i2 = i1 + 1
-        else if (gp%DB(1) == 1) then
-            i2 = i1 - 1
-        else if (gp%DB(2) == -1) then
-            j2 = j1 + 1
-        else if (gp%DB(2) == 1) then
-            j2 = j1 - 1
-        else if (gp%DB(3) == -1) then
-            k2 = k1 + 1
-        else if (gp%DB(3) == 1) then
-            k2 = k1 - 1
-        end if
-
         if (p == 0) then
             k1 = 0
             k2 = 0
