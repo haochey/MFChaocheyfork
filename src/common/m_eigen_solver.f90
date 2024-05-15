@@ -11,7 +11,7 @@ module m_eigen_solver
     implicit none
 
     private; public :: cg, cbal, corth, comqr2, csroot, cdiv, pythag, &
-                       Findv
+                       Findv, FindQ
 
 contains
 
@@ -944,11 +944,10 @@ contains
 
     subroutine Findv(A, Real_lmd, V)
         real(kind(0d0)), dimension(3, 3) :: A
-        real(kind(0d0)), dimension(3) :: D, V
+        real(kind(0d0)), dimension(1:3) :: D, V
         real(kind(0d0)) :: Real_lmd, Dmax, v_mag
         real(kind(0d0)) :: Dx, Dy, Dz
         real(kind(0d0)) :: rx, ry, rz
-        !real(kind(0d0)) :: a11, a12, a13, a21, a22, a23, a31, a32, a33
 
         Dx = (A(2,3)*A(3,2)) - (A(2,2) - Real_lmd)*(A(3,3) - Real_lmd)
         Dy = (A(1,3)*A(3,1)) - (A(1,1) - Real_lmd)*(A(3,3) - Real_lmd)
@@ -972,9 +971,37 @@ contains
             ry = (-(A(1,1) - Real_lmd)*A(2,3) + A(2,1)*A(1,3))/(-Dz)
         end if
 
-        v_mag = rx**2 + ry**2 + rz**2
+        v_mag = sqrt(rx**2 + ry**2 + rz**2)
         V(1) = rx/v_mag; V(2) = ry/v_mag; V(3) = rz/v_mag
 
     end subroutine
+
+    subroutine FindQ(A, Real_lmd, Q, V_real)
+        real(kind(0d0)), dimension(3, 3) :: Q, A
+        real(kind(0d0)), dimension(1:3) :: V, u3
+        real(kind(0d0)) :: phi, c, Real_lmd
+        real(kind(0d0)), dimension(1:3) :: V_real
+
+        call Findv(A, Real_lmd, V)
+        V_real = V
+
+        u3(1) = 0d0; u3(2) = 0d0; u3(3) = 1d0;
+        c = DOT_PRODUCT(u3, V)
+        phi = acos(c)
+        
+        Q(1,1) = cos(phi) + (1 - cos(phi))*V(1)**2
+        Q(2,1) = V(3)*sin(phi) + (1 - cos(phi))*V(1)*V(2)
+        Q(3,1) = -V(2)*sin(phi) + (1 - cos(phi))*V(1)*V(3)
+
+        Q(1,2) = -V(3)*sin(phi) + (1 - cos(phi))*V(1)*V(2)
+        Q(2,2) = cos(phi) + (1 - cos(phi))*V(2)**2
+        Q(3,2) = V(1)*sin(phi) + (1 - cos(phi))*V(2)*V(3)
+
+        Q(1,3) = V(2)*sin(phi) + (1 - cos(phi))*V(1)*V(3)
+        Q(2,3) = -V(1)*sin(phi) + (1 - cos(phi))*V(3)*V(2)
+        Q(3,3) = cos(phi) + (1 - cos(phi))*V(3)**2
+
+    end subroutine
+
 
 end module m_eigen_solver

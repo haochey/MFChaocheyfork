@@ -501,7 +501,8 @@ contains
         integer :: ierr_q, ip, jp
         real(kind(0d0)), dimension(1:3) :: V_real
         real(kind(0d0)), dimension(1:3) :: eignr, eigni, fv1, fv2, fv3
-        real(kind(0d0)), dimension(1:3, 1:3) :: VGT, zeroimag, eignvr, eignvi
+        real(kind(0d0)), dimension(1:3, 1:3) :: VGT, Q_schur, zeroimag, & 
+                                                eignvr, eignvi, UT
 
         do l = -offset_z%beg, p + offset_z%end
             do k = -offset_y%beg, n + offset_y%end
@@ -530,16 +531,39 @@ contains
                         end do
                     end do
 
+                    do ip = 1,3
+                        do jp = 1,3
+                            zeroimag(ip,jp) = 0d0
+                        end do
+                    end do
+                    VGT = q_jacobian_sf(1:3, 1:3)
+
                     call cg(3, 3, q_jacobian_sf(1:3, 1:3), zeroimag, eignr, eigni, &
                             eignvr, eignvi, fv1, fv2, fv3, ierr_q)
+                
+                    if (abs(eigni(2)) > 0d0 .or. abs(eigni(3)) > 0d0 ) then
+                        call FindQ(VGT, eignr(1), Q_schur, V_real)
 
-                    call Findv(q_jacobian_sf, eignr(1), V_real)
+                        UT = TRANSPOSE(Q_schur)*VGT*Q_schur 
 
-                    if (l == 39 .and. k == 38 .and. j ==36 .and. proc_rank == 3) then
-                        do ip = 1, 3
-                            write(*, '(3F10.5)') (V_real(ip,jp), jp=1,3)
-                        end do
-                        print*,'========================================'
+                        if (l == 39 .and. k == 38 .and. j ==36 .and. proc_rank == 3) then
+                            print*, 'eigen value', eignr(1)
+                            print*,'========================================'
+                            do ip = 1, 3
+                                write(*, '(3F16.8)') (VGT(ip, jp), jp = 1,3)
+                            end do
+                            print*,'========================================'
+                            do ip = 1, 3
+                                write(*, '(3F16.8)') (V_real(ip))
+                            end do
+                            print*,'========================================'
+                            do ip = 1, 3
+                                write(*, '(3F16.8)') (UT(ip, jp), jp = 1,3)
+                            end do
+                            print*,'========================================'
+                         end if
+                    ! else 
+                    !     print*, 'Three REAL Eigenvalues'
                     end if
                 
                     ! Decompose J into asymmetric matrix, S, and a skew-symmetric matrix, O
