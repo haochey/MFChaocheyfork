@@ -950,9 +950,9 @@ contains
         real(kind(0d0)) :: rx, ry, rz
         !real(kind(0d0)) :: a11, a12, a13, a21, a22, a23, a31, a32, a33
 
-        Dx = (A(2,3)*A(3,2)) - (A(2,2) - Real_lmd) (A(3,3) - Real_lmd)
-        Dy = (A(1,3)*A(3,1)) - (A(1,1) - Real_lmd) (A(3,3) - Real_lmd)
-        Dz = (A(1,2)*A(2,1)) - (A(1,1) - Real_lmd) (A(2,2) - Real_lmd)
+        Dx = (A(2,3)*A(3,2)) - (A(2,2) - Real_lmd)*(A(3,3) - Real_lmd)
+        Dy = (A(1,3)*A(3,1)) - (A(1,1) - Real_lmd)*(A(3,3) - Real_lmd)
+        Dz = (A(1,2)*A(2,1)) - (A(1,1) - Real_lmd)*(A(2,2) - Real_lmd)
 
         D(1) = ABS(Dx); D(2) = ABS(Dy); D(3) = ABS(Dz)
 
