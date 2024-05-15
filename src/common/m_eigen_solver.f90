@@ -941,4 +941,34 @@ contains
         return
     end subroutine pythag
 
+    subroutine Findv(A, Real_lmd, V)
+        real(kind(0d0)), dimension(3, 3) :: A
+        real(kind(0d0)), dimension(3) :: D, V
+        real(kind(0d0)) :: Real_lmd, Dmax
+        real(kind(0d0)) :: Dx, Dy, Dz
+        real(kind(0d0)) :: rx, ry, rz
+        real(kind(0d0)) :: a11, a12, a13, a21, a22, a23, a31, a32, a33
+
+        Dx = (a23*a32) - (a22 - Real_lmd) (a33 - Real_lmd)
+        Dy = (a13*a31) - (a11 - Real_lmd) (a33 - Real_lmd)
+        Dz = (a12*a21) - (a11 - Real_lmd) (a22 - Real_lmd)
+
+        D(1) = Dx; D(2) = Dy; D(3) = Dz
+
+        Dmax = maxval(D)
+
+        if (Dmax == D(1)) then
+            rx = 1d0
+            ry =
+        else if (Dmax == D(2)) then
+            ry = 1d0
+
+        else if (Dmax == D(3)) then
+            rz = 1d0
+
+        end if
+
+        V(1) = rx; V(2) = ry; V(3) = rz; 
+    end subroutine
+
 end module m_eigen_solver
