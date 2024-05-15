@@ -498,6 +498,10 @@ contains
 
         real(kind(0d0)) :: trS, trS2, trO2, Q, IIS
         integer :: j, k, l, r, jj, kk !< Generic loop iterators
+        integer :: ierr_q, jjj, kkk, ip, jp
+        real(kind(0d0)), dimension(1:3) :: V_real
+        real(kind(0d0)), dimension(1:3) :: eignr, eigni, fv1, fv2, fv3
+        real(kind(0d0)), dimension(1:3, 1:3) :: VGT, zeroimag, eignvr, eignvi
 
         do l = -offset_z%beg, p + offset_z%end
             do k = -offset_y%beg, n + offset_y%end
@@ -528,8 +532,10 @@ contains
 
                     call cg(3, 3, q_jacobian_sf(1:3, 1:3), zeroimag, eignr, eigni, &
                             eignvr, eignvi, fv1, fv2, fv3, ierr_q)
-                            
-                    call Findv(q_jacobian_sf, eg1, V_real)
+
+                    call Findv(q_jacobian_sf, eignr(1), V_real)
+
+                    
 
                     ! Decompose J into asymmetric matrix, S, and a skew-symmetric matrix, O
                     do jj = 1, 3
