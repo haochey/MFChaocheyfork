@@ -10,7 +10,8 @@ module m_eigen_solver
 
     implicit none
 
-    private; public :: cg, cbal, corth, comqr2, csroot, cdiv, pythag
+    private; public :: cg, cbal, corth, comqr2, csroot, cdiv, pythag, &
+                       Findv
 
 contains
 
@@ -944,31 +945,36 @@ contains
     subroutine Findv(A, Real_lmd, V)
         real(kind(0d0)), dimension(3, 3) :: A
         real(kind(0d0)), dimension(3) :: D, V
-        real(kind(0d0)) :: Real_lmd, Dmax
+        real(kind(0d0)) :: Real_lmd, Dmax, v_mag
         real(kind(0d0)) :: Dx, Dy, Dz
         real(kind(0d0)) :: rx, ry, rz
-        real(kind(0d0)) :: a11, a12, a13, a21, a22, a23, a31, a32, a33
+        !real(kind(0d0)) :: a11, a12, a13, a21, a22, a23, a31, a32, a33
 
-        Dx = (a23*a32) - (a22 - Real_lmd) (a33 - Real_lmd)
-        Dy = (a13*a31) - (a11 - Real_lmd) (a33 - Real_lmd)
-        Dz = (a12*a21) - (a11 - Real_lmd) (a22 - Real_lmd)
+        Dx = (A(2,3)*A(3,2)) - (A(2,2) - Real_lmd) (A(3,3) - Real_lmd)
+        Dy = (A(1,3)*A(3,1)) - (A(1,1) - Real_lmd) (A(3,3) - Real_lmd)
+        Dz = (A(1,2)*A(2,1)) - (A(1,1) - Real_lmd) (A(2,2) - Real_lmd)
 
-        D(1) = Dx; D(2) = Dy; D(3) = Dz
+        D(1) = ABS(Dx); D(2) = ABS(Dy); D(3) = ABS(Dz)
 
         Dmax = maxval(D)
 
         if (Dmax == D(1)) then
             rx = 1d0
-            ry =
+            ry = (-(A(3,3) - Real_lmd)*A(2,1) + A(2,3)*A(3,1))/(-Dx)
+            rz = (-(A(2,2) - Real_lmd)*A(3,1) + A(3,2)*A(2,1))/(-Dx)
         else if (Dmax == D(2)) then
             ry = 1d0
-
+            rx = (-(A(3,3) - Real_lmd)*A(1,2) + A(1,3)*A(3,2))/(-Dy)
+            rz = (-(A(1,1) - Real_lmd)*A(3,2) + A(3,1)*A(1,2))/(-Dy)
         else if (Dmax == D(3)) then
             rz = 1d0
-
+            rx = (-(A(2,2) - Real_lmd)*A(1,3) + A(1,2)*A(2,3))/(-Dz)
+            ry = (-(A(1,1) - Real_lmd)*A(2,3) + A(2,1)*A(1,3))/(-Dz)
         end if
 
-        V(1) = rx; V(2) = ry; V(3) = rz; 
+        v_mag = rx**2 + ry**2 + rz**2
+        V(1) = rx/v_mag; V(2) = ry/v_mag; V(3) = rz/v_mag
+
     end subroutine
 
 end module m_eigen_solver

@@ -20,6 +20,8 @@ module m_derived_variables
     use m_mpi_proxy             !< Message passing interface (MPI) module proxy
 
     use m_variables_conversion
+
+    use m_eigen_solver
     ! ==========================================================================
 
     implicit none
@@ -523,6 +525,9 @@ contains
                                 q_prim_vf(mom_idx%beg + jj - 1)%sf(j, k, r + l)
                         end do
                     end do
+
+                    call cg(nm, nl, ar, ai, wr, wi, zr, zi, fv1, fv2, fv3, ierr)
+                    call Findv(q_jacobian_sf, eg1, V_real)
 
                     ! Decompose J into asymmetric matrix, S, and a skew-symmetric matrix, O
                     do jj = 1, 3
