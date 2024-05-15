@@ -526,7 +526,9 @@ contains
                         end do
                     end do
 
-                    call cg(nm, nl, ar, ai, wr, wi, zr, zi, fv1, fv2, fv3, ierr)
+                    call cg(3, 3, q_jacobian_sf(1:3, 1:3), zeroimag, eignr, eigni, &
+                            eignvr, eignvi, fv1, fv2, fv3, ierr_q)
+                            
                     call Findv(q_jacobian_sf, eg1, V_real)
 
                     ! Decompose J into asymmetric matrix, S, and a skew-symmetric matrix, O
