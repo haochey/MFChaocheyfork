@@ -498,7 +498,7 @@ contains
 
         real(kind(0d0)) :: trS, trS2, trO2, Q, IIS
         integer :: j, k, l, r, jj, kk !< Generic loop iterators
-        integer :: ierr_q, jjj, kkk, ip, jp
+        integer :: ierr_q, ip, jp
         real(kind(0d0)), dimension(1:3) :: V_real
         real(kind(0d0)), dimension(1:3) :: eignr, eigni, fv1, fv2, fv3
         real(kind(0d0)), dimension(1:3, 1:3) :: VGT, zeroimag, eignvr, eignvi
@@ -535,8 +535,13 @@ contains
 
                     call Findv(q_jacobian_sf, eignr(1), V_real)
 
-                    
-
+                    if (l == 39 .and. k == 38 .and. j ==36 .and. proc_rank == 3) then
+                        do ip = 1, 3
+                            write(*, '(3F10.5)') (V_real(ip,jp), jp=1,3)
+                        end do
+                        print*,'========================================'
+                    end if
+                
                     ! Decompose J into asymmetric matrix, S, and a skew-symmetric matrix, O
                     do jj = 1, 3
                         do kk = 1, 3
