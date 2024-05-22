@@ -502,7 +502,9 @@ contains
         real(kind(0d0)), dimension(1:3) :: V_real
         real(kind(0d0)), dimension(1:3) :: eignr, eigni, fv1, fv2, fv3
         real(kind(0d0)), dimension(1:3, 1:3) :: VGT, Q_schur, zeroimag, & 
-                                                eignvr, eignvi, UT
+                                                eignvr, eignvi, UT, An
+        real(kind(0d0)) :: Rortex
+
 
         do l = -offset_z%beg, p + offset_z%end
             do k = -offset_y%beg, n + offset_y%end
@@ -540,30 +542,29 @@ contains
 
                     call cg(3, 3, q_jacobian_sf(1:3, 1:3), zeroimag, eignr, eigni, &
                             eignvr, eignvi, fv1, fv2, fv3, ierr_q)
-                
-                    if (abs(eigni(2)) > 0d0 .or. abs(eigni(3)) > 0d0 ) then
-                        call FindQ(VGT, eignr(1), Q_schur, V_real)
 
-                        UT = TRANSPOSE(Q_schur)*VGT*Q_schur 
+                    Rortex = 0.0d0
+                    if (abs(eigni(2)) > 1d-12 .or. abs(eigni(3)) > 1d-12 ) then
 
-                        if (l == 39 .and. k == 38 .and. j ==36 .and. proc_rank == 3) then
-                            print*, 'eigen value', eignr(1)
-                            print*,'========================================'
-                            do ip = 1, 3
-                                write(*, '(3F16.8)') (VGT(ip, jp), jp = 1,3)
-                            end do
-                            print*,'========================================'
-                            do ip = 1, 3
-                                write(*, '(3F16.8)') (V_real(ip))
-                            end do
-                            print*,'========================================'
-                            do ip = 1, 3
-                                write(*, '(3F16.8)') (UT(ip, jp), jp = 1,3)
-                            end do
-                            print*,'========================================'
-                         end if
-                    ! else 
-                    !     print*, 'Three REAL Eigenvalues'
+                        call QR_schur(VGT, Q_schur, UT, Rortex, An)
+
+                        ! if (l == 39 .and. k == 38 .and. j ==36 .and. proc_rank == 3) then
+                        !     print*, 'eigen value', eignr(1), eigni(2), eigni(3)
+                        !     print*,'========================================'
+                        !     do ip = 1, 3
+                        !         write(*, '(3F16.8)') (VGT(ip, jp), jp = 1,3)
+                        !     end do
+                        !     print*,'========================================'
+                        !     ! do ip = 1, 3
+                        !     !     write(*, '(3F16.8)') (V_real(ip))
+                        !     ! end do
+                        !     ! print*,'========================================'
+                        !     do ip = 1, 3
+                        !         write(*, '(3F16.8)') (UT(ip, jp), jp = 1,3)
+                        !     end do
+                        !     print*,'========================================'
+                        !     print*, 'Rortex', Rortex
+                        !  end if
                     end if
                 
                     ! Decompose J into asymmetric matrix, S, and a skew-symmetric matrix, O
@@ -595,7 +596,7 @@ contains
                     IIS = 0.5*((S(1, 1) + S(2, 2) + S(3, 3))**2 - &
                                (S2(1, 1) + S2(2, 2) + S2(3, 3)))
                     q_sf(j, k, l) = Q + IIS
-
+                    q_sf(j, k, l) = Rortex
                 end do
             end do
         end do
