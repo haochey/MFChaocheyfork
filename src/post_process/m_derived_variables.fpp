@@ -501,10 +501,9 @@ contains
         integer :: ierr_q, ip, jp
         real(kind(0d0)), dimension(1:3) :: V_real
         real(kind(0d0)), dimension(1:3) :: eignr, eigni, fv1, fv2, fv3
-        real(kind(0d0)), dimension(1:3, 1:3) :: VGT, Q_schur, zeroimag, & 
+        real(kind(0d0)), dimension(1:3, 1:3) :: VGT, Q_schur, zeroimag, &
                                                 eignvr, eignvi, UT, An
         real(kind(0d0)) :: Rortex
-
 
         do l = -offset_z%beg, p + offset_z%end
             do k = -offset_y%beg, n + offset_y%end
@@ -533,9 +532,9 @@ contains
                         end do
                     end do
 
-                    do ip = 1,3
-                        do jp = 1,3
-                            zeroimag(ip,jp) = 0d0
+                    do ip = 1, 3
+                        do jp = 1, 3
+                            zeroimag(ip, jp) = 0d0
                         end do
                     end do
                     VGT = q_jacobian_sf(1:3, 1:3)
@@ -544,7 +543,7 @@ contains
                             eignvr, eignvi, fv1, fv2, fv3, ierr_q)
 
                     Rortex = 0.0d0
-                    if (abs(eigni(2)) > 1d-12 .or. abs(eigni(3)) > 1d-12 ) then
+                    if (abs(eigni(2)) > 1d-12 .or. abs(eigni(3)) > 1d-12) then
 
                         call QR_schur(VGT, Q_schur, UT, Rortex, An)
 
@@ -566,7 +565,7 @@ contains
                         !     print*, 'Rortex', Rortex
                         !  end if
                     end if
-                
+
                     ! Decompose J into asymmetric matrix, S, and a skew-symmetric matrix, O
                     do jj = 1, 3
                         do kk = 1, 3

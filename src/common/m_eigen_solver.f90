@@ -11,7 +11,7 @@ module m_eigen_solver
     implicit none
 
     private; public :: cg, cbal, corth, comqr2, csroot, cdiv, pythag, &
-                       Findv, FindQ, QR, QR_schur, reorder
+ Findv, FindQ, QR, QR_schur, reorder
 
 contains
 
@@ -949,26 +949,26 @@ contains
         real(kind(0d0)) :: Dx, Dy, Dz
         real(kind(0d0)) :: rx, ry, rz
 
-        Dx = (A(2,3)*A(3,2)) - (A(2,2) - Real_lmd)*(A(3,3) - Real_lmd)
-        Dy = (A(1,3)*A(3,1)) - (A(1,1) - Real_lmd)*(A(3,3) - Real_lmd)
-        Dz = (A(1,2)*A(2,1)) - (A(1,1) - Real_lmd)*(A(2,2) - Real_lmd)
+        Dx = (A(2, 3)*A(3, 2)) - (A(2, 2) - Real_lmd)*(A(3, 3) - Real_lmd)
+        Dy = (A(1, 3)*A(3, 1)) - (A(1, 1) - Real_lmd)*(A(3, 3) - Real_lmd)
+        Dz = (A(1, 2)*A(2, 1)) - (A(1, 1) - Real_lmd)*(A(2, 2) - Real_lmd)
 
-        D(1) = ABS(Dx); D(2) = ABS(Dy); D(3) = ABS(Dz)
+        D(1) = abs(Dx); D(2) = abs(Dy); D(3) = abs(Dz)
 
         Dmax = maxval(D)
 
         if (Dmax == D(1)) then
             rx = 1d0
-            ry = (-(A(3,3) - Real_lmd)*A(2,1) + A(2,3)*A(3,1))/(-Dx)
-            rz = (-(A(2,2) - Real_lmd)*A(3,1) + A(3,2)*A(2,1))/(-Dx)
+            ry = (-(A(3, 3) - Real_lmd)*A(2, 1) + A(2, 3)*A(3, 1))/(-Dx)
+            rz = (-(A(2, 2) - Real_lmd)*A(3, 1) + A(3, 2)*A(2, 1))/(-Dx)
         else if (Dmax == D(2)) then
             ry = 1d0
-            rx = (-(A(3,3) - Real_lmd)*A(1,2) + A(1,3)*A(3,2))/(-Dy)
-            rz = (-(A(1,1) - Real_lmd)*A(3,2) + A(3,1)*A(1,2))/(-Dy)
+            rx = (-(A(3, 3) - Real_lmd)*A(1, 2) + A(1, 3)*A(3, 2))/(-Dy)
+            rz = (-(A(1, 1) - Real_lmd)*A(3, 2) + A(3, 1)*A(1, 2))/(-Dy)
         else if (Dmax == D(3)) then
             rz = 1d0
-            rx = (-(A(2,2) - Real_lmd)*A(1,3) + A(1,2)*A(2,3))/(-Dz)
-            ry = (-(A(1,1) - Real_lmd)*A(2,3) + A(2,1)*A(1,3))/(-Dz)
+            rx = (-(A(2, 2) - Real_lmd)*A(1, 3) + A(1, 2)*A(2, 3))/(-Dz)
+            ry = (-(A(1, 1) - Real_lmd)*A(2, 3) + A(2, 1)*A(1, 3))/(-Dz)
         end if
 
         v_mag = sqrt(rx**2 + ry**2 + rz**2)
@@ -985,72 +985,72 @@ contains
         call Findv(A, Real_lmd, V)
         V_real = V
 
-        u3(1) = 0d0; u3(2) = 0d0; u3(3) = 1d0;
+        u3(1) = 0d0; u3(2) = 0d0; u3(3) = 1d0; 
         c = V(3)
         phi = acos(c)
-        
-        Q(1,1) = cos(phi) + (1 - cos(phi))*(V(1)**2)
-        Q(2,1) = V(3)*sin(phi) + (1 - cos(phi))*V(2)*V(1)
-        Q(3,1) = -V(2)*sin(phi) + (1 - cos(phi))*V(3)*V(1)
 
-        Q(1,2) = -V(3)*sin(phi) + (1 - cos(phi))*V(1)*V(2)
-        Q(2,2) = cos(phi) + (1 - cos(phi))*(V(2)**2)
-        Q(3,2) = V(1)*sin(phi) + (1 - cos(phi))*V(2)*V(3)
+        Q(1, 1) = cos(phi) + (1 - cos(phi))*(V(1)**2)
+        Q(2, 1) = V(3)*sin(phi) + (1 - cos(phi))*V(2)*V(1)
+        Q(3, 1) = -V(2)*sin(phi) + (1 - cos(phi))*V(3)*V(1)
 
-        Q(1,3) = V(2)*sin(phi) + (1 - cos(phi))*V(1)*V(3)
-        Q(2,3) = -V(1)*sin(phi) + (1 - cos(phi))*V(3)*V(2)
-        Q(3,3) = cos(phi) + (1 - cos(phi))*(V(3)**2)
+        Q(1, 2) = -V(3)*sin(phi) + (1 - cos(phi))*V(1)*V(2)
+        Q(2, 2) = cos(phi) + (1 - cos(phi))*(V(2)**2)
+        Q(3, 2) = V(1)*sin(phi) + (1 - cos(phi))*V(2)*V(3)
 
-        if (Q(1,2) > Q(2,1)) then
+        Q(1, 3) = V(2)*sin(phi) + (1 - cos(phi))*V(1)*V(3)
+        Q(2, 3) = -V(1)*sin(phi) + (1 - cos(phi))*V(3)*V(2)
+        Q(3, 3) = cos(phi) + (1 - cos(phi))*(V(3)**2)
+
+        if (Q(1, 2) > Q(2, 1)) then
             V = -V_real
-            Q(1,1) = cos(phi) + (1 - cos(phi))*(V(1)**2)
-            Q(2,1) = V(3)*sin(phi) + (1 - cos(phi))*V(2)*V(1)
-            Q(3,1) = -V(2)*sin(phi) + (1 - cos(phi))*V(3)*V(1)
+            Q(1, 1) = cos(phi) + (1 - cos(phi))*(V(1)**2)
+            Q(2, 1) = V(3)*sin(phi) + (1 - cos(phi))*V(2)*V(1)
+            Q(3, 1) = -V(2)*sin(phi) + (1 - cos(phi))*V(3)*V(1)
 
-            Q(1,2) = -V(3)*sin(phi) + (1 - cos(phi))*V(1)*V(2)
-            Q(2,2) = cos(phi) + (1 - cos(phi))*(V(2)**2)
-            Q(3,2) = V(1)*sin(phi) + (1 - cos(phi))*V(2)*V(3)
+            Q(1, 2) = -V(3)*sin(phi) + (1 - cos(phi))*V(1)*V(2)
+            Q(2, 2) = cos(phi) + (1 - cos(phi))*(V(2)**2)
+            Q(3, 2) = V(1)*sin(phi) + (1 - cos(phi))*V(2)*V(3)
 
-            Q(1,3) = V(2)*sin(phi) + (1 - cos(phi))*V(1)*V(3)
-            Q(2,3) = -V(1)*sin(phi) + (1 - cos(phi))*V(3)*V(2)
-            Q(3,3) = cos(phi) + (1 - cos(phi))*(V(3)**2)
+            Q(1, 3) = V(2)*sin(phi) + (1 - cos(phi))*V(1)*V(3)
+            Q(2, 3) = -V(1)*sin(phi) + (1 - cos(phi))*V(3)*V(2)
+            Q(3, 3) = cos(phi) + (1 - cos(phi))*(V(3)**2)
         end if
 
     end subroutine
 
     subroutine QR(A, Q, R)
-        real(kind(0d0)), dimension(3, 3) :: A, Q, R 
-        real(kind(0d0)), dimension(1:3) ::  u
+        real(kind(0d0)), dimension(3, 3) :: A, Q, R
+        real(kind(0d0)), dimension(1:3) :: u
         real :: norm_u
-        integer :: i, j, k 
+        integer :: i, j, k
 
         ! Initialize Q
         Q = reshape([0.0, 0.0, 0.0, &
-                    0.0, 0.0, 0.0, &
-                    0.0, 0.0, 0.0], shape(Q))
+                     0.0, 0.0, 0.0, &
+                     0.0, 0.0, 0.0], shape(Q))
 
         ! Initialize R
         R = reshape([0.0, 0.0, 0.0, &
-                    0.0, 0.0, 0.0, &
-                    0.0, 0.0, 0.0], shape(R))
+                     0.0, 0.0, 0.0, &
+                     0.0, 0.0, 0.0], shape(R))
 
         do k = 1, 3
             u = A(:, k)
-            
-            do j = 1, k-1
+
+            do j = 1, k - 1
                 R(j, k) = dot_product(Q(:, j), A(:, k))
-                u = u - R(j, k) * Q(:, j)
+                u = u - R(j, k)*Q(:, j)
             end do
-    
+
             norm_u = sqrt(dot_product(u, u))
-            Q(:, k) = u / norm_u
+            Q(:, k) = u/norm_u
             R(k, k) = norm_u
         end do
 
     end subroutine
 
     subroutine QR_schur(A, Q_s, UT_s, Rortex, An)
-        real(kind(0d0)), dimension(3, 3) :: A, Q_s, UT_s 
+        real(kind(0d0)), dimension(3, 3) :: A, Q_s, UT_s
         real(kind(0d0)), dimension(3, 3) :: An, Ann, Q, R
         real(kind(0d0)) :: diff, alpha, beta, Rortex, alpha_old
         integer :: i, j
@@ -1062,11 +1062,11 @@ contains
         do i = 1, 200
             alpha_old = alpha
             call QR(An, Q, R)
-            An = MATMUL(R, Q)
+            An = matmul(R, Q)
             call reorder(An, Ann)
 
-            alpha = sqrt((Ann(2,2)-Ann(1,1))**2 + (Ann(1,2)+Ann(2,1))**2)/2
-            beta = (Ann(2,1) - Ann(1,2))/2
+            alpha = sqrt((Ann(2, 2) - Ann(1, 1))**2 + (Ann(1, 2) + Ann(2, 1))**2)/2
+            beta = (Ann(2, 1) - Ann(1, 2))/2
 
             if (beta < 0d0) then
                 beta = -beta
@@ -1082,16 +1082,15 @@ contains
     subroutine reorder(An, Ann)
         real(kind(0d0)), dimension(3, 3) :: An, Ann
 
-        Ann(3,3) = An(1,1);
-        Ann(1,1) = An(3,3);
-        Ann(2,2) = An(2,2);
-        Ann(1,2) = An(3,2);
-        Ann(1,3) = An(3,1);
-        Ann(2,3) = An(2,1);
-        Ann(2,1) = An(2,3);
-        Ann(3,1) = An(1,3);
-        Ann(3,2) = An(1,2);
-
+        Ann(3, 3) = An(1, 1); 
+        Ann(1, 1) = An(3, 3); 
+        Ann(2, 2) = An(2, 2); 
+        Ann(1, 2) = An(3, 2); 
+        Ann(1, 3) = An(3, 1); 
+        Ann(2, 3) = An(2, 1); 
+        Ann(2, 1) = An(2, 3); 
+        Ann(3, 1) = An(1, 3); 
+        Ann(3, 2) = An(1, 2); 
     end subroutine
 
 end module m_eigen_solver
