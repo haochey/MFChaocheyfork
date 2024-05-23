@@ -22,6 +22,7 @@ module m_compute_levelset
 
     private; public :: s_compute_cylinder_levelset, s_compute_circle_levelset, &
  s_compute_airfoil_levelset, &
+ s_compute_2D_STL_levelset, &
  s_compute_3D_airfoil_levelset, &
  s_compute_rectangle_levelset, &
  s_compute_sphere_levelset
@@ -39,6 +40,34 @@ module m_compute_levelset
 contains
 
     !>  Initialize IBM module
+    subroutine s_compute_2D_STL_levelset(levelset, levelset_norm, ib_patch_id, ghost_points, num_gps)
+        integer :: num_gps
+        type(ghost_point), dimension(num_gps), intent(INOUT) :: ghost_points
+        real(kind(0d0)), dimension(0:m, 0:n, 0:p, num_ibs), intent(INOUT) :: levelset
+        real(kind(0d0)), dimension(0:m, 0:n, 0:p, num_ibs, 3), intent(INOUT) :: levelset_norm
+        integer, intent(IN) :: ib_patch_id
+        real(kind(0d0)), dimension(0:num_gps) :: distance
+        integer :: i, j, ii, jj, q !< Loop index variables
+        type(ghost_point) :: gp
+
+        do i = 0, m
+            do j = 0, n
+                do q = 0, num_gps
+                    gp = ghost_points(q)
+                    ii = gp%loc(1)
+                    jj = gp%loc(2)
+                    if (gp%IBB > 0) then
+                        distance = (x_cc(i) - x_cc(ii))**2 &
+                                    + (y_cc(j) - y_cc(jj))**2
+                end do
+            end do    
+        end do
+
+
+    end subroutine s_compute_2D_STL_levelset
+
+
+
     subroutine s_compute_circle_levelset(levelset, levelset_norm, ib_patch_id)
 
         real(kind(0d0)), dimension(0:m, 0:n, 0:p, num_ibs), intent(INOUT) :: levelset

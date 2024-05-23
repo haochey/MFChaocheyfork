@@ -277,6 +277,7 @@ module m_derived_types
         integer :: ib_patch_id !< ID of the IB Patch the ghost point is part of
         logical :: slip
         integer, dimension(3) :: DB
+        integer :: IBB
 
     end type ghost_point
 
