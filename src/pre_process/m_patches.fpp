@@ -1925,11 +1925,12 @@ contains
 
     !> The STL patch is a 2/3D geometry that is imported from an STL file.
     !! @param patch_id is the patch identifier
-    subroutine s_model(patch_id, patch_id_fp, q_prim_vf) ! ---------------------
+    subroutine s_model(patch_id, patch_id_fp, q_prim_vf, ib) ! ---------------------
 
         integer, intent(IN) :: patch_id
         integer, intent(INOUT), dimension(0:m, 0:n, 0:p) :: patch_id_fp
         type(scalar_field), dimension(1:sys_size) :: q_prim_vf
+        logical, intent(IN) :: ib   !< True if this patch is an immersed boundary
 
         integer :: i, j, k !< Generic loop iterators
 
@@ -2020,6 +2021,10 @@ contains
                     ! Note: Should probably use *eta* to compute primitive variables
                     ! if defining them analytically.
                     @:analytical()
+
+                    if (ib .and. eta > patch_icpp(patch_id)%model%threshold) then
+                        patch_id_fp(i, j, k) = patch_id
+                    end if
 
                 end do; end do; end do
 
