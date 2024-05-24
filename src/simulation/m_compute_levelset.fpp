@@ -55,7 +55,7 @@ contains
 
         do i = 0, m
             do j = 0, n
-                distance_buffer = 1d08
+                distance_buffer = 1d12
                 ii_buffer = 0
                 jj_buffer = 0
                 distance = 0d0
@@ -66,8 +66,10 @@ contains
                     jj = gp%loc(2)
 
                     if (gp%IBB > 0) then
-                        distance(q) = (x_cc(i) - x_cc(ii))**2 &
-                                      + (y_cc(j) - y_cc(jj))**2
+                        distance(q) = dsqrt((x_cc(i) - x_cc(ii))**2 &
+                                      + (y_cc(j) - y_cc(jj))**2)
+                    else
+                        distance(q) = 1d12
                     end if
 
                     if (distance_buffer > distance(q)) then
@@ -93,7 +95,7 @@ contains
                     levelset_norm(i, j, 0, ib_patch_id, :) = 0
                 else
                     levelset_norm(i, j, 0, ib_patch_id, :) = &
-                        dist_vec(:)/distance_buffer
+                        dist_vec(:)/abs(distance_buffer)
                 end if
 
                 ! print*, i, j, levelset(i, j, 0, ib_patch_id)

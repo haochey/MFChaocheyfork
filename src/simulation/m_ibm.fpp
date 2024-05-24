@@ -356,23 +356,23 @@ contains
                                 i - 1:i + 1, &
                                 j - 1:j + 1, 0)
                 if (any(subsection_2D == 0)) then
-                    ghost_points%IBB = 1
+                    ghost_points(q)%IBB = 1
                 else
-                    ghost_points%IBB = 0
+                    ghost_points(q)%IBB = 0
                 end if
             else
-                do k = 0, p
-                    subsection_3D = ib_markers%sf( &
-                                    i - 1:i + 1, &
-                                    j - 1:j + 1, &
-                                    k - 1:k + 1)
-                    if (any(subsection_3D == 0)) then
-                        ghost_points%IBB = 1
-                    else
-                        ghost_points%IBB = 0
-                    end if
-                end do
+                subsection_3D = ib_markers%sf( &
+                                i - 1:i + 1, &
+                                j - 1:j + 1, &
+                                k - 1:k + 1)
+                if (any(subsection_3D == 0)) then
+                    ghost_points(q)%IBB = 1
+                else
+                    ghost_points(q)%IBB = 0
+                end if
             end if
+
+            print*, i, j, ghost_points(q)%IBB
 
         end do
 
