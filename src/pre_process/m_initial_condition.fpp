@@ -267,7 +267,7 @@ contains
                 if (patch_ib(i)%geometry == 2) then
                     call s_circle(i, ib_markers%sf, q_prim_vf, .true.)
 
-                ! Rectangular patch
+                    ! Rectangular patch
                 elseif (patch_ib(i)%geometry == 3) then
                     call s_rectangle(i, ib_markers%sf, q_prim_vf, .true.)
 

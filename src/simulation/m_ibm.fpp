@@ -375,7 +375,7 @@ contains
             end if
 
         end do
-        
+
     end subroutine s_determine_IB_boundary
 
     !>  Function that computes that bubble wall pressure for Gilmore bubbles

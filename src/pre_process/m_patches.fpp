@@ -2013,11 +2013,9 @@ contains
 
                     if (ib) then
                         eta = f_model_is_inside(model, point, (/dx, dy, dz/), patch_ib(patch_id)%model%spc)
-                    else    
+                    else
                         eta = f_model_is_inside(model, point, (/dx, dy, dz/), patch_icpp(patch_id)%model%spc)
                     end if
-
-
 
                     if (patch_icpp(patch_id)%smoothen) then
                         if (eta > patch_icpp(patch_id)%model%threshold) then

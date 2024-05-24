@@ -67,7 +67,7 @@ contains
 
                     if (gp%IBB > 0) then
                         distance(q) = (x_cc(i) - x_cc(ii))**2 &
-                                    + (y_cc(j) - y_cc(jj))**2
+                                      + (y_cc(j) - y_cc(jj))**2
                     end if
 
                     if (distance_buffer > distance(q)) then
@@ -76,7 +76,7 @@ contains
                         jj_buffer = jj
                     end if
                 end do
-                
+
                 if (ib_markers%sf(i, j, 0) /= 0) then
                     distance_buffer = -distance_buffer
                 else
@@ -93,16 +93,14 @@ contains
                     levelset_norm(i, j, 0, ib_patch_id, :) = 0
                 else
                     levelset_norm(i, j, 0, ib_patch_id, :) = &
-                            dist_vec(:)/distance_buffer
+                        dist_vec(:)/distance_buffer
                 end if
 
                 ! print*, i, j, levelset(i, j, 0, ib_patch_id)
-            end do    
+            end do
         end do
 
     end subroutine s_compute_2D_STL_levelset
-
-
 
     subroutine s_compute_circle_levelset(levelset, levelset_norm, ib_patch_id)
 
