@@ -372,7 +372,7 @@ contains
                 end if
             end if
 
-            print*, i, j, ghost_points(q)%IBB
+            ! print*, i, j, ghost_points(q)%IBB
 
         end do
 
@@ -454,6 +454,11 @@ contains
                         index = index + dir
                     end do
                     ghost_points(q)%ip_grid(dim) = index
+                    if (ghost_points(q)%DB(dim) == -1) then
+                        ghost_points(q)%ip_grid(dim) = ghost_points(q)%loc(dim) + 1
+                    else if (ghost_points(q)%DB(dim) == 1) then
+                        ghost_points(q)%ip_grid(dim) = ghost_points(q)%loc(dim) - 1
+                    end if
                 end if
             end do
 
@@ -553,6 +558,23 @@ contains
                             ghost_points(count)%ib_patch_id = &
                                 patch_id
                             ghost_points(count)%slip = patch_ib(patch_id)%slip
+
+                            if ((x_cc(i) - dx(i)) < x_domain%beg) then
+                                ghost_points(count)%DB(1) = -1
+                            else if ((x_cc(i) + dx(i)) > x_domain%end) then
+                                ghost_points(count)%DB(1) = 1
+                            else
+                                ghost_points(count)%DB(1) = 0
+                            end if
+
+                            if ((y_cc(j) - dy(j)) < y_domain%beg) then
+                                ghost_points(count)%DB(2) = -1
+                            else if ((y_cc(j) + dy(j)) > y_domain%end) then
+                                ghost_points(count)%DB(2) = 1
+                            else
+                                ghost_points(count)%DB(2) = 0
+                            end if
+
                             count = count + 1
                         else
                             inner_points(count_i)%loc = [i, j, 0]
@@ -560,6 +582,21 @@ contains
                             inner_points(count_i)%ib_patch_id = &
                                 patch_id
                             inner_points(count_i)%slip = patch_ib(patch_id)%slip
+
+                            if ((x_cc(i) - dx(i)) < x_domain%beg .or. &
+                                (x_cc(i) + dx(i)) > x_domain%end) then
+                                ghost_points(count)%DB(1) = 1
+                            else
+                                ghost_points(count)%DB(1) = 0
+                            end if
+
+                            if ((y_cc(j) - dy(j)) < y_domain%beg .or. &
+                                (y_cc(j) + dy(j)) > y_domain%end) then
+                                ghost_points(count)%DB(2) = 1
+                            else
+                                ghost_points(count)%DB(2) = 0
+                            end if
+
                             count_i = count_i + 1
                         end if
                     end if
@@ -576,6 +613,31 @@ contains
                                 ghost_points(count)%ib_patch_id = &
                                     ib_markers%sf(i, j, k)
                                 ghost_points(count)%slip = patch_ib(patch_id)%slip
+
+                                if ((x_cc(i) - dx(i)) < x_domain%beg) then
+                                    ghost_points(count)%DB(1) = -1
+                                else if ((x_cc(i) + dx(i)) > x_domain%end) then
+                                    ghost_points(count)%DB(1) = 1
+                                else
+                                    ghost_points(count)%DB(1) = 0
+                                end if
+
+                                if ((y_cc(j) - dy(j)) < y_domain%beg) then
+                                    ghost_points(count)%DB(2) = -1
+                                else if ((y_cc(j) + dy(j)) > y_domain%end) then
+                                    ghost_points(count)%DB(2) = 1
+                                else
+                                    ghost_points(count)%DB(2) = 0
+                                end if
+
+                                if ((z_cc(k) - dz(k)) < z_domain%beg) then
+                                    ghost_points(count)%DB(3) = -1
+                                else if ((z_cc(k) + dz(k)) > z_domain%end) then
+                                    ghost_points(count)%DB(3) = 1
+                                else
+                                    ghost_points(count)%DB(3) = 0
+                                end if
+
                                 count = count + 1
                             else
                                 inner_points(count_i)%loc = [i, j, k]
@@ -583,6 +645,31 @@ contains
                                 inner_points(count_i)%ib_patch_id = &
                                     ib_markers%sf(i, j, k)
                                 inner_points(count_i)%slip = patch_ib(patch_id)%slip
+
+                                if ((x_cc(i) - dx(i)) < x_domain%beg) then
+                                    ghost_points(count)%DB(1) = -1
+                                else if ((x_cc(i) + dx(i)) > x_domain%end) then
+                                    ghost_points(count)%DB(1) = 1
+                                else
+                                    ghost_points(count)%DB(1) = 0
+                                end if
+
+                                if ((y_cc(j) - dy(j)) < y_domain%beg) then
+                                    ghost_points(count)%DB(2) = -1
+                                else if ((y_cc(j) + dy(j)) > y_domain%end) then
+                                    ghost_points(count)%DB(2) = 1
+                                else
+                                    ghost_points(count)%DB(2) = 0
+                                end if
+
+                                if ((z_cc(k) - dz(k)) < z_domain%beg) then
+                                    ghost_points(count)%DB(3) = -1
+                                else if ((z_cc(k) + dz(k)) > z_domain%end) then
+                                    ghost_points(count)%DB(3) = 1
+                                else
+                                    ghost_points(count)%DB(3) = 0
+                                end if
+                                
                                 count_i = count_i + 1
                             end if
                         end if
