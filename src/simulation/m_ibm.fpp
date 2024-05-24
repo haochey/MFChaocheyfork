@@ -882,7 +882,7 @@ contains
             else if (geometry == 4) then
                 call s_compute_airfoil_levelset(levelset, levelset_norm, i)
             else if (geometry == 5) then
-                call s_compute_2D_STL_levelset(levelset, levelset_norm, i, ghost_points, num_gps)
+                call s_compute_2D_STL_levelset(levelset, levelset_norm, i, ghost_points, num_gps, ib_markers)
             else if (geometry == 8) then
                 call s_compute_sphere_levelset(levelset, levelset_norm, i)
             else if (geometry == 10) then

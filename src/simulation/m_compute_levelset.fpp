@@ -40,26 +40,56 @@ module m_compute_levelset
 contains
 
     !>  Initialize IBM module
-    subroutine s_compute_2D_STL_levelset(levelset, levelset_norm, ib_patch_id, ghost_points, num_gps)
-        integer :: num_gps
+    subroutine s_compute_2D_STL_levelset(levelset, levelset_norm, ib_patch_id, ghost_points, num_gps, ib_markers)
+        integer, intent(INOUT) :: num_gps
         type(ghost_point), dimension(num_gps), intent(INOUT) :: ghost_points
         real(kind(0d0)), dimension(0:m, 0:n, 0:p, num_ibs), intent(INOUT) :: levelset
         real(kind(0d0)), dimension(0:m, 0:n, 0:p, num_ibs, 3), intent(INOUT) :: levelset_norm
+        real(kind(0d0)), dimension(3) :: dist_vec
         integer, intent(IN) :: ib_patch_id
         real(kind(0d0)), dimension(0:num_gps) :: distance
-        integer :: i, j, ii, jj, q !< Loop index variables
+        integer :: i, j, ii, jj, q, ii_buffer, jj_buffer !< Loop index variables
         type(ghost_point) :: gp
+        real(kind(0d0)) :: distance_buffer
+        type(integer_field), intent(INOUT) :: ib_markers
 
         do i = 0, m
             do j = 0, n
-                do q = 0, num_gps
+                distance_buffer = 1d08
+                ii_buffer = 0
+                jj_buffer = 0
+                distance = 0d0
+
+                do q = 1, num_gps
                     gp = ghost_points(q)
                     ii = gp%loc(1)
                     jj = gp%loc(2)
+
                     if (gp%IBB > 0) then
-                        distance = (x_cc(i) - x_cc(ii))**2 &
+                        distance(q) = (x_cc(i) - x_cc(ii))**2 &
                                     + (y_cc(j) - y_cc(jj))**2
+                    end if
+
+                    if (distance_buffer > distance(q)) then
+                        distance_buffer = distance(q)
+                        ii_buffer = ii
+                        jj_buffer = jj
+                    end if
                 end do
+                
+                if (ib_markers%sf(i, j, 0) /= 0) then
+                    distance_buffer = -distance_buffer
+                else
+                    distance_buffer = abs(distance_buffer)
+                end if
+
+                dist_vec(1) = x_cc(i) - x_cc(ii_buffer)
+                dist_vec(2) = y_cc(j) - y_cc(jj_buffer)
+                dist_vec(3) = 0
+
+                levelset(i, j, 0, ib_patch_id) = distance_buffer
+                levelset_norm(i, j, 0, ib_patch_id, :) = &
+                        dist_vec(:)/distance_buffer
             end do    
         end do
 

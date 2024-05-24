@@ -52,6 +52,8 @@ contains
                     call s_check_3D_airfoil_ib_patch_geometry(i)
                 else if (patch_ib(i)%geometry == 10) then
                     call s_check_cylinder_ib_patch_geometry(i)
+                else if (patch_ib(i)%geometry == 5) then
+                    call s_check_2D_STL_ib_patch_geometry(i)
                 else
                     call s_mpi_abort('Unsupported choice of the '// &
                                      'geometry of active patch '//trim(iStr)// &
