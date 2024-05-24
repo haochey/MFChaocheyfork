@@ -88,11 +88,17 @@ contains
                 dist_vec(3) = 0
 
                 levelset(i, j, 0, ib_patch_id) = distance_buffer
-                levelset_norm(i, j, 0, ib_patch_id, :) = &
-                        dist_vec(:)/distance_buffer
+
+                if (distance_buffer == 0) then
+                    levelset_norm(i, j, 0, ib_patch_id, :) = 0
+                else
+                    levelset_norm(i, j, 0, ib_patch_id, :) = &
+                            dist_vec(:)/distance_buffer
+                end if
+
+                print*, i, j, levelset(i, j, 0, ib_patch_id)
             end do    
         end do
-
 
     end subroutine s_compute_2D_STL_levelset
 
