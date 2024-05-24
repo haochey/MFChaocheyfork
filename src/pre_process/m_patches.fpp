@@ -1947,15 +1947,25 @@ contains
 
         t_mat4x4 :: transform
 
-        if (proc_rank == 0) then
+        if (.not. ib .and. proc_rank == 0) then
             print *, " * Reading model: "//trim(patch_icpp(patch_id)%model%filepath)
+            model = f_model_read(patch_icpp(patch_id)%model%filepath)
+        else if (ib .and. proc_rank == 0) then
+            print *, " * Reading model: "//trim(patch_ib(patch_id)%model%filepath)
+            model = f_model_read(patch_ib(patch_id)%model%filepath)
         end if
-        model = f_model_read(patch_icpp(patch_id)%model%filepath)
 
         if (proc_rank == 0) then
             print *, " * Transforming model..."
         end if
-        transform = f_create_transform_matrix(patch_icpp(patch_id)%model)
+        ! transform = f_create_transform_matrix(patch_icpp(patch_id)%model)
+
+        if (ib) then
+            transform = f_create_transform_matrix(patch_ib(patch_id)%model)
+        else
+            transform = f_create_transform_matrix(patch_icpp(patch_id)%model)
+        end if
+
         call s_transform_model(model, transform)
 
         bbox = f_create_bbox(model)
@@ -2001,7 +2011,13 @@ contains
                         point = f_convert_cyl_to_cart(point)
                     end if
 
-                    eta = f_model_is_inside(model, point, (/dx, dy, dz/), patch_icpp(patch_id)%model%spc)
+                    if (ib) then
+                        eta = f_model_is_inside(model, point, (/dx, dy, dz/), patch_ib(patch_id)%model%spc)
+                    else    
+                        eta = f_model_is_inside(model, point, (/dx, dy, dz/), patch_icpp(patch_id)%model%spc)
+                    end if
+
+
 
                     if (patch_icpp(patch_id)%smoothen) then
                         if (eta > patch_icpp(patch_id)%model%threshold) then
@@ -2022,7 +2038,7 @@ contains
                     ! if defining them analytically.
                     @:analytical()
 
-                    if (ib .and. eta > patch_icpp(patch_id)%model%threshold) then
+                    if (ib .and. eta > patch_ib(patch_id)%model%threshold) then
                         patch_id_fp(i, j, k) = patch_id
                     end if
 

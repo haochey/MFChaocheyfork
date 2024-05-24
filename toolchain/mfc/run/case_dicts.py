@@ -30,11 +30,11 @@ for ib_id in range(1, 10+1):
 
     for attribute in ["translate", "scale", "rotate"]:
         for j in range(1, 4):
-            PRE_PROCESS.append(f"patch_icpp({ib_id})%model%{attribute}({j})")
+            PRE_PROCESS.append(f"patch_ib({ib_id})%model%{attribute}({j})")
     
-    PRE_PROCESS.append(f"patch_icpp({ib_id})%model%filepath")
-    PRE_PROCESS.append(f"patch_icpp({ib_id})%model%spc")
-    PRE_PROCESS.append(f"patch_icpp({ib_id})%model%threshold")
+    PRE_PROCESS.append(f"patch_ib({ib_id})%model%filepath")
+    PRE_PROCESS.append(f"patch_ib({ib_id})%model%spc")
+    PRE_PROCESS.append(f"patch_ib({ib_id})%model%threshold")
 
 
     # PRE_PROCESS.append(f"patch_ib({ib_id})%model_scale({1})")

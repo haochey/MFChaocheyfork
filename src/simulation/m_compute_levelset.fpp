@@ -96,7 +96,7 @@ contains
                             dist_vec(:)/distance_buffer
                 end if
 
-                print*, i, j, levelset(i, j, 0, ib_patch_id)
+                ! print*, i, j, levelset(i, j, 0, ib_patch_id)
             end do    
         end do
 
