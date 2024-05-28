@@ -110,6 +110,10 @@ contains
         call s_find_ghost_points(ghost_points, inner_points)
         !$acc update device(ghost_points, inner_points)
 
+        if (proc_rank == 0) then
+            call s_mpi_sendrecv_num_gps(num_gps)
+        end if
+
         call s_determine_IB_boundary(ghost_points)
 
         call s_compute_levelset(levelset, levelset_norm, ghost_points)
@@ -964,11 +968,11 @@ contains
             geometry = patch_ib(i)%geometry
             if (geometry == 2) then
                 call s_compute_circle_levelset(levelset, levelset_norm, i)
-            else if (geometry == 3) then
+            else if (geometry == 5) then
                 call s_compute_rectangle_levelset(levelset, levelset_norm, i)
             else if (geometry == 4) then
                 call s_compute_airfoil_levelset(levelset, levelset_norm, i)
-            else if (geometry == 5) then
+            else if (geometry == 3) then
                 call s_compute_2D_STL_levelset(levelset, levelset_norm, i, ghost_points, num_gps, ib_markers)
             else if (geometry == 8) then
                 call s_compute_sphere_levelset(levelset, levelset_norm, i)
