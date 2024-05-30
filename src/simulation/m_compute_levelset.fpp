@@ -49,7 +49,7 @@ contains
         real(kind(0d0)), dimension(3) :: dist_vec, dist_vec_buffer1, dist_vec_buffer2, dist_vec_buffer3
         integer, intent(IN) :: ib_patch_id
         real(kind(0d0)), dimension(0:num_gps) :: distance
-        integer :: i, j, ii, jj, q, ii_buffer, jj_buffer !< Loop index variables
+        integer :: i, j, ii, jj, q, ii_buffer, jj_buffer, a !< Loop index variables
         integer :: ii_buffer_avg1, jj_buffer_avg1, ii_buffer_avg2, jj_buffer_avg2
         type(ghost_point) :: gp
         real(kind(0d0)) :: distance_q, distance_buffer
@@ -110,12 +110,12 @@ contains
                     dist_vec(1) = (dist_vec_buffer1(1) + dist_vec_buffer2(1) + dist_vec_buffer3(1))
                     dist_vec(2) = (dist_vec_buffer1(2) + dist_vec_buffer2(2) + dist_vec_buffer3(2))
                     dist_vec(3) = 0
-                    distance = sqrt(dist_vec(1)**2 + dist_vec(2)**2 + dist_vec(3)**2)
+                    distance = dsqrt(dist_vec(1)**2 + dist_vec(2)**2 + dist_vec(3)**2)
                 else if (ii_buffer_avg1 /= -1000) then
                     dist_vec(1) = (dist_vec_buffer1(1) + dist_vec_buffer2(1))
                     dist_vec(2) = (dist_vec_buffer1(2) + dist_vec_buffer2(2))
                     dist_vec(3) = 0
-                    distance = sqrt(dist_vec(1)**2 + dist_vec(2)**2 + dist_vec(3)**2)
+                    distance = dsqrt(dist_vec(1)**2 + dist_vec(2)**2 + dist_vec(3)**2)
                 else
                     dist_vec(1) = x_cc(i) - x_cc(ii_buffer)
                     dist_vec(2) = y_cc(j) - y_cc(jj_buffer)
@@ -137,10 +137,35 @@ contains
                     levelset_norm(i, j, 0, ib_patch_id, :) = &
                         dist_vec(:)/abs(distance_q)
                 end if
-
-                ! print*, i, j, levelset(i, j, 0, ib_patch_id)
             end do
         end do
+
+        ! do i = 2, m-2
+        !     do j = 0, n
+        !         do a = 1, 3
+        !             levelset_norm(i, j, 0, ib_patch_id, a) = levelset_norm(i-2, j, 0, ib_patch_id, a) &
+        !                                                         + levelset_norm(i-1, j, 0, ib_patch_id, a) &
+        !                                                         + levelset_norm(i, j, 0, ib_patch_id, a) &
+        !                                                         + levelset_norm(i+1, j, 0, ib_patch_id, a) &
+        !                                                         + levelset_norm(i+2, j, 0, ib_patch_id, a)
+        !         end do
+        !     end do
+        ! end do
+
+        ! do j = 2, n-2
+        !     do i = 0, m
+        !         do a = 1, 3
+        !             levelset_norm(i, j, 0, ib_patch_id, a) = levelset_norm(i, j-2, 0, ib_patch_id, a) &
+        !                                                         + levelset_norm(i, j-1, 0, ib_patch_id, a) &
+        !                                                         + levelset_norm(i, j, 0, ib_patch_id, a) &
+        !                                                         + levelset_norm(i, j+1, 0, ib_patch_id, a) &
+        !                                                         + levelset_norm(i, j+2, 0, ib_patch_id, a)
+        !         end do
+        !         distance_buffer = dsqrt(levelset_norm(i, j, 0, ib_patch_id, 1)**2 + levelset_norm(i, j, 0, ib_patch_id, 2)**2)
+        !         levelset_norm(i, j, 0, ib_patch_id, :) = levelset_norm(i, j, 0, ib_patch_id, :)/distance_buffer
+        !     end do
+        ! end do
+
 
     end subroutine s_compute_2D_STL_levelset
 

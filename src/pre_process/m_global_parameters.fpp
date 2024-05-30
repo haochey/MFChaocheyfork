@@ -306,6 +306,7 @@ contains
             patch_icpp(i)%geometry = dflt_int
             patch_icpp(i)%model%scale(:) = 1d0
             patch_icpp(i)%model%translate(:) = 0d0
+            patch_icpp(i)%model%rotate(:) = 0d0
             patch_icpp(i)%model%filepath(:) = ' '
             patch_icpp(i)%model%spc = 10
             patch_icpp(i)%model%threshold = 0.9d0
