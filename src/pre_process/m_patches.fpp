@@ -1947,16 +1947,21 @@ contains
 
         if (.not. ib .and. proc_rank == 0) then
             print *, " * Reading model: "//trim(patch_icpp(patch_id)%model%filepath)
-            model = f_model_read(patch_icpp(patch_id)%model%filepath)
         else if (ib .and. proc_rank == 0) then
             print *, " * Reading model: "//trim(patch_ib(patch_id)%model%filepath)
+        end if
+
+        if (.not. ib) then
+            model = f_model_read(patch_icpp(patch_id)%model%filepath)
+        else
             model = f_model_read(patch_ib(patch_id)%model%filepath)
         end if
+
 
         if (proc_rank == 0) then
             print *, " * Transforming model..."
         end if
-        ! transform = f_create_transform_matrix(patch_icpp(patch_id)%model)
+        transform = f_create_transform_matrix(patch_icpp(patch_id)%model)
 
         if (ib) then
             transform = f_create_transform_matrix(patch_ib(patch_id)%model)
@@ -2010,7 +2015,7 @@ contains
 
                     if (ib) then
                         eta = f_model_is_inside(model, point, (/dx, dy, dz/), patch_ib(patch_id)%model%spc)
-                    else
+                    else if (.not. ib) then
                         eta = f_model_is_inside(model, point, (/dx, dy, dz/), patch_icpp(patch_id)%model%spc)
                     end if
 
