@@ -82,6 +82,7 @@ contains
                         distance_buffer = distance(q)
                         ii_buffer = ii
                         jj_buffer = jj
+
                     else if (abs(distance_buffer - distance(q)) < 1d-13) then
                         if (ii_buffer_avg1 == -1000) then
                             ii_buffer_avg1 = ii
