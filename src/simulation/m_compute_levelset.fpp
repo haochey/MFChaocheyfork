@@ -111,12 +111,12 @@ contains
                     dist_vec(1) = (dist_vec_buffer1(1) + dist_vec_buffer2(1) + dist_vec_buffer3(1))
                     dist_vec(2) = (dist_vec_buffer1(2) + dist_vec_buffer2(2) + dist_vec_buffer3(2))
                     dist_vec(3) = 0
-                    distance = dsqrt(dist_vec(1)**2 + dist_vec(2)**2 + dist_vec(3)**2)
+                    distance_q = dsqrt(dist_vec(1)**2 + dist_vec(2)**2 + dist_vec(3)**2)
                 else if (ii_buffer_avg1 /= -1000) then
                     dist_vec(1) = (dist_vec_buffer1(1) + dist_vec_buffer2(1))
                     dist_vec(2) = (dist_vec_buffer1(2) + dist_vec_buffer2(2))
                     dist_vec(3) = 0
-                    distance = dsqrt(dist_vec(1)**2 + dist_vec(2)**2 + dist_vec(3)**2)
+                    distance_q = dsqrt(dist_vec(1)**2 + dist_vec(2)**2 + dist_vec(3)**2)
                 else
                     dist_vec(1) = x_cc(i) - x_cc(ii_buffer)
                     dist_vec(2) = y_cc(j) - y_cc(jj_buffer)
