@@ -73,7 +73,7 @@ contains
 
                     if (gp%IBB > 0) then
                         distance(q) = dsqrt((x_cc(i) - x_cc(ii))**2 &
-                                    + (y_cc(j) - y_cc(jj))**2)
+                                            + (y_cc(j) - y_cc(jj))**2)
                     else
                         distance(q) = 1d12
                     end if
@@ -87,9 +87,9 @@ contains
                             jj_buffer_avg2 = jj
                         end if
                     else if (distance_buffer > distance(q)) then
-                            distance_buffer = distance(q)
-                            ii_buffer = ii
-                            jj_buffer = jj
+                        distance_buffer = distance(q)
+                        ii_buffer = ii
+                        jj_buffer = jj
                     end if
                 end do
 
@@ -104,7 +104,6 @@ contains
                 dist_vec_buffer3(1) = x_cc(i) - x_cc(ii_buffer_avg2)
                 dist_vec_buffer3(2) = y_cc(j) - y_cc(jj_buffer_avg2)
                 dist_vec_buffer3(3) = 0
-
 
                 if (ii_buffer_avg2 /= -1000) then
                     dist_vec(1) = (dist_vec_buffer1(1) + dist_vec_buffer2(1) + dist_vec_buffer3(1))
@@ -166,7 +165,6 @@ contains
         !     end do
         ! end do
 
-
     end subroutine s_compute_2D_STL_levelset
 
     subroutine s_compute_3D_STL_levelset(levelset, levelset_norm, ib_patch_id, ghost_points, num_gps, ib_markers)
@@ -199,8 +197,8 @@ contains
 
                         if (gp%IBB > 0) then
                             distance(q) = dsqrt((x_cc(i) - x_cc(ii))**2 &
-                                        + (y_cc(j) - y_cc(jj))**2 & 
-                                        + (z_cc(k) - z_cc(kk))**2)
+                                                + (y_cc(j) - y_cc(jj))**2 &
+                                                + (z_cc(k) - z_cc(kk))**2)
                         else
                             distance(q) = 1d12
                         end if

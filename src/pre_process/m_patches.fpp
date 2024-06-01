@@ -2032,7 +2032,7 @@ contains
                         end if
 
                         call s_assign_patch_primitive_variables(patch_id, i, j, k, &
-                                                            eta, q_prim_vf, patch_id_fp)
+                                                                eta, q_prim_vf, patch_id_fp)
                     end if
 
                     if (ib .and. eta > patch_ib(patch_id)%model%threshold) then

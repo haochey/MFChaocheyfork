@@ -196,7 +196,7 @@ contains
 
                 elseif (patch_ib(i)%geometry == 11) then
                     call s_3D_airfoil(i, ib_markers%sf, q_prim_vf, .true.)
-                    
+
                 elseif (patch_ib(i)%geometry == 12) then
                     call s_model(i, ib_markers%sf, q_prim_vf, .true.)
                 end if
@@ -278,7 +278,7 @@ contains
                     call s_airfoil(i, ib_markers%sf, q_prim_vf, .true.)
 
                 elseif (patch_ib(i)%geometry == 5) then
-                        call s_model(i, ib_markers%sf, q_prim_vf, .true.)
+                    call s_model(i, ib_markers%sf, q_prim_vf, .true.)
                 end if
             end do
             !> @}
