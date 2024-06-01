@@ -73,8 +73,9 @@ for ib_id in range(1, 10+1):
     for real_attr, ty in [("geometry", ParamType.INT), ("radius", ParamType.REAL),
                           ("theta", ParamType.REAL), ("slip", ParamType.LOG),
                           ("c", ParamType.REAL), ("p", ParamType.REAL),
-                          ("t", ParamType.REAL), ("m", ParamType.REAL)
+                          ("t", ParamType.REAL), ("m", ParamType.REAL),
                           ("patch_icpp({p_id})%model%filepath", ParamType.STR)]:
+        
         PRE_PROCESS[f"patch_ib({ib_id})%{real_attr}"] = ty
 
     PRE_PROCESS[f"patch_ib({ib_id})%model%spc"] = ParamType.INT
