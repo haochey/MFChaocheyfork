@@ -278,7 +278,8 @@ module m_derived_types
         real(kind(0d0)), dimension(2, 2, 2) :: interp_coeffs !< Interpolation Coefficients of image point
         integer :: ib_patch_id !< ID of the IB Patch the ghost point is part of
         logical :: slip
-        integer, dimension(3) :: DB
+        integer, dimension(3) :: DB !< Checks if the ghost cell is adjacent to domain boundary
+        integer :: IBB !< Checks if the ghost cell is at the boundary of the immersed object
 
     end type ghost_point
 
