@@ -210,6 +210,7 @@ module m_derived_types
         real(kind(0d0)) :: theta
 
         logical :: slip
+        type(ic_model_parameters) :: model !< Model parameters
 
     end type ib_patch_parameters
 
