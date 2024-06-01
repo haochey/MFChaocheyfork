@@ -1990,15 +1990,18 @@ contains
 
     end subroutine s_mpi_sendrecv_ib_buffers ! ---------
 
-    subroutine s_mpi_sendrecv_num_gps(num_gps)
+    subroutine s_mpi_bcast_num_gps(num_gps)
         integer, intent(INOUT) :: num_gps
 
 #ifdef MFC_MPI
 
-        call MPI_BCAST(num_gps, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
+        if (proc_rank == 0) then
+            call MPI_BCAST(num_gps, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
+            ! print*, 'ierr after BCAST', ierr
+        end if
 
 #endif
-    end subroutine s_mpi_sendrecv_num_gps
+    end subroutine s_mpi_bcast_num_gps
 
     !> Module deallocation and/or disassociation procedures
     subroutine s_finalize_mpi_proxy_module() ! -----------------------------
