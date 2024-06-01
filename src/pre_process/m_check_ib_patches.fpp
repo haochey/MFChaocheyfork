@@ -52,6 +52,8 @@ contains
                     call s_check_3D_airfoil_ib_patch_geometry(i)
                 else if (patch_ib(i)%geometry == 10) then
                     call s_check_cylinder_ib_patch_geometry(i)
+                else if (patch_ib(i)%geometry == 5) then
+                    call s_check_2D_STL_ib_patch_geometry(i)
                 else
                     call s_mpi_abort('Unsupported choice of the '// &
                                      'geometry of active patch '//trim(iStr)// &
@@ -93,6 +95,21 @@ contains
         end if
 
     end subroutine s_check_circle_ib_patch_geometry ! -------------------------
+
+    subroutine s_check_2D_STL_ib_patch_geometry(patch_id)
+        integer, intent(IN) :: patch_id
+        call s_int_to_str(patch_id, iStr)
+
+        ! Constraints the general domain parameters
+        if (n == 0 .or. p > 0) then
+
+            call s_mpi_abort('Inconsistency(ies) detected in '// &
+                             'geometric parameters of circle '// &
+                             'patch '//trim(iStr)//'. Exiting ...')
+
+        end if
+
+    end subroutine s_check_2D_STL_ib_patch_geometry
 
     subroutine s_check_airfoil_ib_patch_geometry(patch_id) ! -------------------
 

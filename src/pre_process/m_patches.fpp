@@ -1923,7 +1923,7 @@ contains
 
     !> The STL patch is a 2/3D geometry that is imported from an STL file.
     !! @param patch_id is the patch identifier
-    subroutine s_model(patch_id, patch_id_fp, q_prim_vf) ! ---------------------
+    subroutine s_model(patch_id, patch_id_fp, q_prim_vf, ib) ! ---------------------
 
         integer, intent(IN) :: patch_id
         integer, intent(INOUT), dimension(0:m, 0:n, 0:p) :: patch_id_fp
@@ -1934,6 +1934,7 @@ contains
         type(t_bbox) :: bbox
         type(t_model) :: model
         type(ic_model_parameters) :: params
+        logical, intent(IN) :: ib   !< True if this patch is an immersed boundary
 
         t_vec3 :: point
 
@@ -1944,15 +1945,28 @@ contains
 
         t_mat4x4 :: transform
 
-        if (proc_rank == 0) then
+        if (.not. ib .and. proc_rank == 0) then
             print *, " * Reading model: "//trim(patch_icpp(patch_id)%model%filepath)
+        else if (ib .and. proc_rank == 0) then
+            print *, " * Reading model: "//trim(patch_ib(patch_id)%model%filepath)
         end if
-        model = f_model_read(patch_icpp(patch_id)%model%filepath)
+
+        if (.not. ib) then
+            model = f_model_read(patch_icpp(patch_id)%model%filepath)
+        else
+            model = f_model_read(patch_ib(patch_id)%model%filepath)
+        end if
 
         if (proc_rank == 0) then
             print *, " * Transforming model..."
         end if
-        transform = f_create_transform_matrix(patch_icpp(patch_id)%model)
+
+        if (ib) then
+            transform = f_create_transform_matrix(patch_ib(patch_id)%model)
+        else
+            transform = f_create_transform_matrix(patch_icpp(patch_id)%model)
+        end if
+
         call s_transform_model(model, transform)
 
         bbox = f_create_bbox(model)
@@ -1998,22 +2012,32 @@ contains
                         point = f_convert_cyl_to_cart(point)
                     end if
 
-                    eta = f_model_is_inside(model, point, (/dx, dy, dz/), patch_icpp(patch_id)%model%spc)
-
-                    if (patch_icpp(patch_id)%smoothen) then
-                        if (eta > patch_icpp(patch_id)%model%threshold) then
-                            eta = 1d0
-                        end if
-                    else
-                        if (eta > patch_icpp(patch_id)%model%threshold) then
-                            eta = 1d0
-                        else
-                            eta = 0d0
-                        end if
+                    if (ib) then
+                        eta = f_model_is_inside(model, point, (/dx, dy, dz/), patch_ib(patch_id)%model%spc)
+                    else if (.not. ib) then
+                        eta = f_model_is_inside(model, point, (/dx, dy, dz/), patch_icpp(patch_id)%model%spc)
                     end if
 
-                    call s_assign_patch_primitive_variables(patch_id, i, j, k, &
+                    if (.not. ib) then
+                        if (patch_icpp(patch_id)%smoothen) then
+                            if (eta > patch_icpp(patch_id)%model%threshold) then
+                                eta = 1d0
+                            end if
+                        else
+                            if (eta > patch_icpp(patch_id)%model%threshold) then
+                                eta = 1d0
+                            else
+                                eta = 0d0
+                            end if
+                        end if
+
+                        call s_assign_patch_primitive_variables(patch_id, i, j, k, &
                                                             eta, q_prim_vf, patch_id_fp)
+                    end if
+
+                    if (ib .and. eta > patch_ib(patch_id)%model%threshold) then
+                        patch_id_fp(i, j, k) = patch_id
+                    end if
 
                     ! Note: Should probably use *eta* to compute primitive variables
                     ! if defining them analytically.
