@@ -101,9 +101,9 @@ contains
 
         call s_find_num_ghost_points()
 
-        ! if (proc_rank == 0) then
-        !     call s_mpi_bcast_num_gps(num_gps)
-        ! end if
+        if (proc_rank == 0) then
+            call s_mpi_bcast_num_gps(num_gps)
+        end if
 
         !$acc update device(num_gps, num_inner_gps)
         @:ALLOCATE_GLOBAL(ghost_points(num_gps))
@@ -982,6 +982,8 @@ contains
                 call s_compute_3D_airfoil_levelset(levelset, levelset_norm, i)
             else if (geometry == 5) then
                 call s_compute_2D_STL_levelset(levelset, levelset_norm, i, ghost_points, num_gps, ib_markers)
+            else if (geometry == 12) then
+                call s_compute_3D_STL_levelset(levelset, levelset_norm, i, ghost_points, num_gps, ib_markers)
             end if
         end do
 
