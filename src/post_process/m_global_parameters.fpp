@@ -42,6 +42,8 @@ module m_global_parameters
     integer :: grid_geometry
     !> @}
 
+    logical :: ib
+
     !> @name Global number of cells in each direction
     !> @{
     integer :: m_glb, n_glb, p_glb
@@ -334,6 +336,7 @@ contains
         qm_wrt = .false.
         schlieren_wrt = .false.
         cf_wrt = .false.
+        ib = .false.
 
         schlieren_alpha = dflt_real
 

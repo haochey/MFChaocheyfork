@@ -294,6 +294,7 @@ POST_PROCESS.update({
     'omega_wrt': ParamType.LOG,
     'qbmm': ParamType.LOG,
     'qm_wrt': ParamType.LOG,
+    'ib': ParamType.LOG,
     'cf_wrt': ParamType.LOG
 })
 
