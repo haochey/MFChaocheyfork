@@ -42,10 +42,6 @@ module m_global_parameters
     integer :: grid_geometry
     !> @}
 
-    logical :: ib
-    type(integer_field), public :: ib_markers
-
-
     !> @name Global number of cells in each direction
     !> @{
     integer :: m_glb, n_glb, p_glb
@@ -193,6 +189,7 @@ module m_global_parameters
     logical :: c_wrt
     logical, dimension(3) :: omega_wrt
     logical :: qm_wrt
+    logical :: ib_wrt
     logical :: schlieren_wrt
     logical :: cf_wrt
     !> @}
@@ -338,7 +335,7 @@ contains
         qm_wrt = .false.
         schlieren_wrt = .false.
         cf_wrt = .false.
-        ib = .false.
+        ib_wrt = .false.
 
         schlieren_alpha = dflt_real
 

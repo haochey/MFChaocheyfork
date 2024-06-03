@@ -51,6 +51,8 @@ module m_data_input
     type(scalar_field), allocatable, dimension(:), public :: q_prim_vf !<
     !! Primitive variables
 
+    type(scalar_field), public :: ib_markers_output !<
+
     procedure(s_read_abstract_data_files), pointer :: s_read_data_files => null()
 
 contains
@@ -120,11 +122,6 @@ contains
 
         ! Computing the cell-center locations
         x_cc(0:m) = x_cb(-1:m - 1) + dx(0:m)/2d0
-
-        if (ib) then
-            file_loc = trim(t_step_dir)//'/ib.dat'
-            inquire (FILE=trim(file_loc), EXIST=file_check)
-        end if
 
         ! ==================================================================
 
@@ -209,6 +206,24 @@ contains
             end if
 
         end do
+
+        if (ib_wrt) then
+
+            file_loc = trim(t_step_dir)//'/ib.dat'
+            inquire (FILE=trim(file_loc), EXIST=file_check)
+
+            if (file_check) then
+                open (1, FILE=trim(file_loc), FORM='unformatted', &
+                      STATUS='old', ACTION='read')
+                read (1) ib_markers_output%sf(0:m, 0:n, 0:p)
+                close (1)
+            else
+                call s_mpi_abort('File q_cons_vf'//trim(file_num)// &
+                                 '.dat is missing in '//trim(t_step_dir)// &
+                                 '. Exiting ...')
+            end if
+
+        end if
 
         ! ==================================================================
 
@@ -1084,6 +1099,9 @@ contains
                                               -buff_size:p + buff_size))
                 end do
 
+                allocate (ib_markers_output%sf(-buff_size:m + buff_size, &
+                                        -buff_size:n + buff_size, &
+                                        -buff_size:p + buff_size))
                 ! Simulation is 2D
             else
 
@@ -1095,6 +1113,10 @@ contains
                                               -buff_size:n + buff_size, &
                                               0:0))
                 end do
+
+                allocate (ib_markers_output%sf(-buff_size:m + buff_size, &
+                                        -buff_size:n + buff_size, &
+                                        0:0))
 
             end if
 
@@ -1109,6 +1131,8 @@ contains
                                           0:0, &
                                           0:0))
             end do
+
+            allocate (ib_markers_output%sf(-buff_size:m + buff_size, 0:0, 0:0))
 
         end if
 

@@ -344,8 +344,6 @@ contains
             ! Energy
             if (E_wrt .or. cons_vars_wrt) dbvars = dbvars + 1
 
-            if (ib) dbvars = dbvars + 1
-
             ! Pressure
             if (pres_wrt .or. prim_vars_wrt) dbvars = dbvars + 1
 
@@ -407,6 +405,9 @@ contains
 
             ! Numerical Schlieren function
             if (schlieren_wrt) dbvars = dbvars + 1
+
+            ! IB_markers
+            if (ib_wrt) dbvars = dbvars + 1
 
         end if
 
