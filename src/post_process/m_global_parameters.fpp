@@ -43,6 +43,8 @@ module m_global_parameters
     !> @}
 
     logical :: ib
+    type(integer_field), public :: ib_markers
+
 
     !> @name Global number of cells in each direction
     !> @{
