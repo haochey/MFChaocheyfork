@@ -219,6 +219,16 @@ contains
             end do
         end if
         ! ----------------------------------------------------------------------
+        ! if (ib) then
+
+        !     q_sf = ib%markers
+
+        !     write (varname, '(A)') 'IB'
+        !     call s_write_variable_to_formatted_database_file(varname, t_step)
+
+        !     varname(:) = ' '
+
+        ! end if
 
         ! Adding the density to the formatted database file --------------------
         if (rho_wrt &
