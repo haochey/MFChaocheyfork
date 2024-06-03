@@ -495,7 +495,7 @@ contains
 
         ! Adding IB_markers
         if (ib_wrt) then
-            q_sf = ib_markers_output%sf(-offset_x%beg:m + offset_x%end, &
+            q_sf = ib_markers%sf(-offset_x%beg:m + offset_x%end, &
                                  -offset_y%beg:n + offset_y%end, &
                                  -offset_z%beg:p + offset_z%end)
             varname = 'ib_markers'

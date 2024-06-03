@@ -51,7 +51,7 @@ module m_data_input
     type(scalar_field), allocatable, dimension(:), public :: q_prim_vf !<
     !! Primitive variables
 
-    type(scalar_field), public :: ib_markers_output !<
+    type(scalar_field), public :: ib_markers !<
 
     procedure(s_read_abstract_data_files), pointer :: s_read_data_files => null()
 
@@ -215,10 +215,10 @@ contains
             if (file_check) then
                 open (1, FILE=trim(file_loc), FORM='unformatted', &
                       STATUS='old', ACTION='read')
-                read (1) ib_markers_output%sf(0:m, 0:n, 0:p)
+                read (1) ib_markers%sf;
                 close (1)
             else
-                call s_mpi_abort('File q_cons_vf'//trim(file_num)// &
+                call s_mpi_abort('File ib'//trim(file_num)// &
                                  '.dat is missing in '//trim(t_step_dir)// &
                                  '. Exiting ...')
             end if
@@ -1099,9 +1099,11 @@ contains
                                               -buff_size:p + buff_size))
                 end do
 
-                allocate (ib_markers_output%sf(-buff_size:m + buff_size, &
-                                        -buff_size:n + buff_size, &
-                                        -buff_size:p + buff_size))
+                if (ib_wrt) then
+                    allocate (ib_markers%sf(-buff_size:m + buff_size, &
+                                            -buff_size:n + buff_size, &
+                                            -buff_size:p + buff_size))
+                end if
                 ! Simulation is 2D
             else
 
@@ -1114,10 +1116,11 @@ contains
                                               0:0))
                 end do
 
-                allocate (ib_markers_output%sf(-buff_size:m + buff_size, &
-                                        -buff_size:n + buff_size, &
-                                        0:0))
-
+                if (ib_wrt) then
+                    allocate (ib_markers%sf(-buff_size:m + buff_size, &
+                                            -buff_size:n + buff_size, &
+                                            0:0))
+                end if
             end if
 
             ! Simulation is 1D
@@ -1132,7 +1135,9 @@ contains
                                           0:0))
             end do
 
-            allocate (ib_markers_output%sf(-buff_size:m + buff_size, 0:0, 0:0))
+            if (ib_wrt) then
+                allocate (ib_markers%sf(-buff_size:m + buff_size, 0:0, 0:0))
+            end if
 
         end if
 
@@ -1157,6 +1162,10 @@ contains
 
         deallocate (q_cons_vf)
         deallocate (q_prim_vf)
+
+        ! if (ib_wrt) then
+        !     deallocate (ib_markers_output)
+        ! end if
 
         s_read_data_files => null()
 
