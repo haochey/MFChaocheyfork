@@ -101,10 +101,6 @@ contains
 
         call s_find_num_ghost_points()
 
-        if (proc_rank == 0) then
-            call s_mpi_bcast_num_gps(num_gps)
-        end if
-
         !$acc update device(num_gps, num_inner_gps)
         @:ALLOCATE_GLOBAL(ghost_points(num_gps))
         @:ALLOCATE_GLOBAL(inner_points(num_inner_gps))

@@ -453,7 +453,7 @@ contains
             else if (support(nm) == 4) then
                 ! Support for all x,y
                 f_delta = 1.d0/(dsqrt(2.d0*pi)*sig)* &
-                          dexp(-0.5d0*(hz/sig)**2.d0)
+                          dexp(-0.5d0*(hx/sig)**2.d0)
             else if (support(nm) == 5) then
                 ! Support along 'transducer'
                 hx = x_cc(j) - mono_loc(1)
