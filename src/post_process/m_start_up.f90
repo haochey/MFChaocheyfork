@@ -495,9 +495,10 @@ contains
 
         ! Adding IB_markers
         if (ib_wrt) then
-            q_sf = ib_markers%sf(-offset_x%beg:m + offset_x%end, &
-                                 -offset_y%beg:n + offset_y%end, &
-                                 -offset_z%beg:p + offset_z%end)
+            ! q_sf = ib_markers(-offset_x%beg:m + offset_x%end, &
+            !                      -offset_y%beg:n + offset_y%end, &
+            !                      -offset_z%beg:p + offset_z%end)
+            q_sf = real(ib_markers)
             varname = 'ib_markers'
             call s_write_variable_to_formatted_database_file(varname, t_step)
         end if
