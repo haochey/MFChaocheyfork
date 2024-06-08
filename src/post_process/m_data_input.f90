@@ -52,7 +52,7 @@ module m_data_input
     !! Primitive variables
 
     ! type(scalar_field), public :: ib_markers !<
-    Integer, allocatable, dimension(:,:,:) :: ib_markers
+    type(integer_field), public :: ib_markers
 
     procedure(s_read_abstract_data_files), pointer :: s_read_data_files => null()
 
@@ -216,7 +216,7 @@ contains
             if (file_check) then
                 open (1, FILE=trim(file_loc), FORM='unformatted', &
                       STATUS='old', ACTION='read')
-                read (1) ib_markers;
+                read (1) ib_markers%sf(-1:m+1,-1:n+1,-1:p+1)
                 close (1)
             else
                 call s_mpi_abort('File ib'//trim(file_num)// &
@@ -1101,7 +1101,7 @@ contains
                 end do
 
                 if (ib_wrt) then
-                    allocate (ib_markers(-buff_size:m + buff_size, &
+                    allocate (ib_markers%sf(-buff_size:m + buff_size, &
                                             -buff_size:n + buff_size, &
                                             -buff_size:p + buff_size))
                 end if
@@ -1118,7 +1118,7 @@ contains
                 end do
 
                 if (ib_wrt) then
-                    allocate (ib_markers(-buff_size:m + buff_size, &
+                    allocate (ib_markers%sf(-buff_size:m + buff_size, &
                                             -buff_size:n + buff_size, &
                                             0:0))
                 end if
@@ -1137,7 +1137,7 @@ contains
             end do
 
             if (ib_wrt) then
-                allocate (ib_markers(-buff_size:m + buff_size, 0:0, 0:0))
+                allocate (ib_markers%sf(-buff_size:m + buff_size, 0:0, 0:0))
             end if
 
         end if
