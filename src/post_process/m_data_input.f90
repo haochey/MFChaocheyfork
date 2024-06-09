@@ -216,7 +216,7 @@ contains
             if (file_check) then
                 open (1, FILE=trim(file_loc), FORM='unformatted', &
                       STATUS='old', ACTION='read')
-                read (1) ib_markers%sf(-1:m+1,-1:n+1,-1:p+1)
+                read (1) ib_markers%sf(0:m,0:n,0:p)
                 close (1)
             else
                 call s_mpi_abort('File ib'//trim(file_num)// &
@@ -257,7 +257,7 @@ contains
 
         character(len=10) :: t_step_string
 
-        integer :: i
+        integer :: i,j
 
         allocate (x_cb_glb(-1:m_glb))
         allocate (y_cb_glb(-1:n_glb))
@@ -329,6 +329,7 @@ contains
 
         if (file_per_process) then
             call s_int_to_str(t_step, t_step_string)
+
             ! Open the file to read conservative variables
             write (file_loc, '(I0,A1,I7.7,A)') t_step, '_', proc_rank, '.dat'
             file_loc = trim(case_dir)//'/restart_data/lustre_'//trim(t_step_string)//trim(mpiiofs)//trim(file_loc)
@@ -432,7 +433,50 @@ contains
             else
                 call s_mpi_abort('File '//trim(file_loc)//' is missing. Exiting...')
             end if
+    
         end if
+
+        ! Read the additional ib_marker field data
+        if (ib_wrt) then
+            write (file_loc, '(A)'), 'ib.dat'
+            file_loc = trim(case_dir)//'/restart_data'//trim(mpiiofs)//'ib.dat'
+            inquire (FILE=trim(file_loc), EXIST=file_exist)
+
+            if (file_exist) then
+                call s_initialize_mpi_data(q_cons_vf, ib_markers)
+                call MPI_FILE_OPEN(MPI_COMM_WORLD, file_loc, MPI_MODE_RDONLY, mpi_info_int, ifile, ierr)
+                data_size = (m + 1)*(n + 1)*(p + 1)
+
+                i = 1
+                m_MOK = int(m_glb + 1, MPI_OFFSET_KIND)
+                n_MOK = int(n_glb + 1, MPI_OFFSET_KIND)
+                p_MOK = int(p_glb + 1, MPI_OFFSET_KIND)
+                WP_MOK = int(8d0, MPI_OFFSET_KIND)
+                MOK = int(1d0, MPI_OFFSET_KIND)
+                str_MOK = int(name_len, MPI_OFFSET_KIND)
+                NVARS_MOK = int(1, MPI_OFFSET_KIND)
+                var_MOK = int(i, MPI_OFFSET_KIND)
+
+                ! Initial displacement to skip at beginning of file
+                disp = m_MOK*max(MOK, n_MOK)*max(MOK, p_MOK)*WP_MOK*(var_MOK - 1)
+                print*, proc_rank, disp
+
+                call MPI_FILE_SET_VIEW(ifile, disp, MPI_INTEGER, MPI_IO_IB_DATA%view, &
+                                        'native', mpi_info_int, ierr)
+
+                ! call MPI_FILE_READ_ALL(ifile, ib_markers%sf, data_size, MPI_INTEGER, status, ierr)
+
+                call MPI_FILE_READ_ALL(ifile, MPI_IO_IB_DATA%var%sf, data_size, &
+                                               MPI_DOUBLE_PRECISION, status, ierr)
+
+                ib_markers%sf = MPI_IO_IB_DATA%var%sf
+
+                call s_mpi_barrier()
+                call MPI_FILE_CLOSE(ifile, ierr)
+            else
+                call s_mpi_abort('File '//trim(file_loc)//' is missing. Exiting...')
+            end if
+        end if  
 
         deallocate (x_cb_glb, y_cb_glb, z_cb_glb)
 
@@ -1163,6 +1207,10 @@ contains
 
         deallocate (q_cons_vf)
         deallocate (q_prim_vf)
+
+        if (ib_wrt) then
+            deallocate (ib_markers%sf)
+        end if
 
         ! if (ib_wrt) then
         !     deallocate (ib_markers_output)
