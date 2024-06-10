@@ -445,31 +445,23 @@ contains
             if (file_exist) then
                 call s_initialize_mpi_data(q_cons_vf, ib_markers)
                 call MPI_FILE_OPEN(MPI_COMM_WORLD, file_loc, MPI_MODE_RDONLY, mpi_info_int, ifile, ierr)
-                data_size = (m + 1)*(n + 1)*(p + 1)
+                data_size = (m+1)*(n+1)*(p+1)
 
-                i = 1
-                m_MOK = int(m_glb + 1, MPI_OFFSET_KIND)
-                n_MOK = int(n_glb + 1, MPI_OFFSET_KIND)
-                p_MOK = int(p_glb + 1, MPI_OFFSET_KIND)
-                WP_MOK = int(8d0, MPI_OFFSET_KIND)
-                MOK = int(1d0, MPI_OFFSET_KIND)
-                str_MOK = int(name_len, MPI_OFFSET_KIND)
-                NVARS_MOK = int(1, MPI_OFFSET_KIND)
-                var_MOK = int(i, MPI_OFFSET_KIND)
+                disp = 0
 
-                ! Initial displacement to skip at beginning of file
-                disp = m_MOK*max(MOK, n_MOK)*max(MOK, p_MOK)*WP_MOK*(var_MOK - 1)
-                print*, proc_rank, disp
+                ! call MPI_FILE_SET_VIEW(ifile, disp, MPI_INTEGER, ib_markers, &
+                                        ! 'native', mpi_info_int, ierr)
 
-                call MPI_FILE_SET_VIEW(ifile, disp, MPI_INTEGER, MPI_IO_IB_DATA%view, &
-                                        'native', mpi_info_int, ierr)
+                call MPI_FILE_READ_ALL(ifile, ib_markers%sf, data_size, & 
+                                        MPI_INTEGER, status, ierr)
 
-                ! call MPI_FILE_READ_ALL(ifile, ib_markers%sf, data_size, MPI_INTEGER, status, ierr)
+                ! disp = 0
 
-                call MPI_FILE_READ_ALL(ifile, MPI_IO_IB_DATA%var%sf, data_size, &
-                                               MPI_DOUBLE_PRECISION, status, ierr)
+                ! call MPI_FILE_SET_VIEW(ifile, disp, MPI_INTEGER, MPI_IO_IB_DATA%view, &
+                !                         'native', mpi_info_int, ierr)
 
-                ib_markers%sf = MPI_IO_IB_DATA%var%sf
+                ! call MPI_FILE_READ_ALL(ifile, MPI_IO_IB_DATA%var%sf, data_size, &
+                !                         MPI_INTEGER, status, ierr)
 
                 call s_mpi_barrier()
                 call MPI_FILE_CLOSE(ifile, ierr)

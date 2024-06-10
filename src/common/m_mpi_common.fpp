@@ -137,7 +137,9 @@ contains
 #ifdef MFC_PRE_PROCESS
             MPI_IO_IB_DATA%var%sf => ib_markers%sf
 #else
-            MPI_IO_IB_DATA%var%sf => ib_markers%sf(0:m, 0:n, 0:p)
+            ! MPI_IO_IB_DATA%var%sf => ib_markers%sf(0:m, 0:n, 0:p)
+            MPI_IO_IB_DATA%var%sf => ib_markers%sf
+
 #endif
             call MPI_TYPE_CREATE_SUBARRAY(num_dims, sizes_glb, sizes_loc, start_idx, &
                                           MPI_ORDER_FORTRAN, MPI_INTEGER, MPI_IO_IB_DATA%view, ierr)
