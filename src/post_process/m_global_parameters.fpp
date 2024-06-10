@@ -758,7 +758,8 @@ contains
             deallocate (MPI_IO_DATA%view)
         end if
 
-        if (ib_wrt) deallocate (MPI_IO_IB_DATA%var%sf)
+        if (ib_wrt) MPI_IO_IB_DATA%var%sf => null()
+
 
 #endif
 

@@ -209,21 +209,19 @@ contains
         end do
 
         if (ib_wrt) then
+            write (file_path, '(A,I0,A)') &
+                trim(t_step_dir)//'/ib.dat'
+            inquire (FILE=trim(file_path), EXIST=file_exist)
 
-            file_loc = trim(t_step_dir)//'/ib.dat'
-            inquire (FILE=trim(file_loc), EXIST=file_check)
-
-            if (file_check) then
-                open (1, FILE=trim(file_loc), FORM='unformatted', &
-                      STATUS='old', ACTION='read')
-                read (1) ib_markers%sf(0:m,0:n,0:p)
-                close (1)
+            if (file_exist) then
+                open (2, FILE=trim(file_path), &
+                    FORM='unformatted', &
+                    ACTION='read', &
+                    STATUS='old')
+                read (2) ib_markers%sf(0:m, 0:n, 0:p); close (2)
             else
-                call s_mpi_abort('File ib'//trim(file_num)// &
-                                 '.dat is missing in '//trim(t_step_dir)// &
-                                 '. Exiting ...')
+                call s_mpi_abort(trim(file_path)//' is missing. Exiting ...')
             end if
-
         end if
 
         ! ==================================================================
@@ -339,7 +337,11 @@ contains
                 call MPI_FILE_OPEN(MPI_COMM_SELF, file_loc, MPI_MODE_RDONLY, mpi_info_int, ifile, ierr)
 
                 ! Initialize MPI data I/O
-                call s_initialize_mpi_data(q_cons_vf)
+                if (ib_wrt) then
+                    call s_initialize_mpi_data(q_cons_vf, ib_markers)
+                else
+                    call s_initialize_mpi_data(q_cons_vf)
+                end if
 
                 ! Size of local arrays
                 data_size = (m + 1)*(n + 1)*(p + 1)
@@ -373,6 +375,29 @@ contains
                 call s_mpi_barrier()
 
                 call MPI_FILE_CLOSE(ifile, ierr)
+
+                if (ib_wrt) then
+
+                    write (file_loc, '(A)') 'ib.dat'
+                    file_loc = trim(case_dir)//'/restart_data'//trim(mpiiofs)//trim(file_loc)
+                    inquire (FILE=trim(file_loc), EXIST=file_exist)
+
+                    if (file_exist) then
+
+                        call MPI_FILE_OPEN(MPI_COMM_WORLD, file_loc, MPI_MODE_RDONLY, mpi_info_int, ifile, ierr)
+
+                        disp = 0
+
+                        call MPI_FILE_SET_VIEW(ifile, disp, MPI_INTEGER, MPI_IO_IB_DATA%view, &
+                                               'native', mpi_info_int, ierr)
+                        call MPI_FILE_READ(ifile, MPI_IO_IB_DATA%var%sf, data_size, &
+                                           MPI_INTEGER, status, ierr)
+
+                    else
+                        call s_mpi_abort('File '//trim(file_loc)//' is missing. Exiting...')
+                    end if
+
+                end if
             else
                 call s_mpi_abort('File '//trim(file_loc)//' is missing. Exiting...')
             end if
@@ -386,7 +411,13 @@ contains
                 call MPI_FILE_OPEN(MPI_COMM_WORLD, file_loc, MPI_MODE_RDONLY, mpi_info_int, ifile, ierr)
 
                 ! Initialize MPI data I/O
-                call s_initialize_mpi_data(q_cons_vf)
+                if (ib_wrt) then
+                    call s_initialize_mpi_data(q_cons_vf, ib_markers)
+                else
+
+                    call s_initialize_mpi_data(q_cons_vf)
+
+                end if
 
                 ! Size of local arrays
                 data_size = (m + 1)*(n + 1)*(p + 1)
@@ -430,6 +461,36 @@ contains
                 call s_mpi_barrier()
 
                 call MPI_FILE_CLOSE(ifile, ierr)
+
+                if (ib_wrt) then
+
+                    write (file_loc, '(A)') 'ib.dat'
+                    file_loc = trim(case_dir)//'/restart_data'//trim(mpiiofs)//trim(file_loc)
+                    inquire (FILE=trim(file_loc), EXIST=file_exist)
+
+                    if (file_exist) then
+
+                        call MPI_FILE_OPEN(MPI_COMM_WORLD, file_loc, MPI_MODE_RDONLY, mpi_info_int, ifile, ierr)
+
+                        disp = 0
+
+                        call MPI_FILE_SET_VIEW(ifile, disp, MPI_INTEGER, MPI_IO_IB_DATA%view, &
+                                               'native', mpi_info_int, ierr)
+                        call MPI_FILE_READ(ifile, MPI_IO_IB_DATA%var%sf, data_size, &
+                                           MPI_INTEGER, status, ierr)
+
+                    else
+                        call s_mpi_abort('File '//trim(file_loc)//' is missing. Exiting...')
+                    end if
+
+                    do i = 0,m
+                        do j = 0,n
+                            print*, ib_markers%sf(i,j,0)
+                        end do
+                    end do
+
+                end if
+
             else
                 call s_mpi_abort('File '//trim(file_loc)//' is missing. Exiting...')
             end if
@@ -437,38 +498,38 @@ contains
         end if
 
         ! Read the additional ib_marker field data
-        if (ib_wrt) then
-            write (file_loc, '(A)'), 'ib.dat'
-            file_loc = trim(case_dir)//'/restart_data'//trim(mpiiofs)//'ib.dat'
-            inquire (FILE=trim(file_loc), EXIST=file_exist)
+        ! if (ib_wrt) then
+        !     write (file_loc, '(A)'), 'ib.dat'
+        !     file_loc = trim(case_dir)//'/restart_data'//trim(mpiiofs)//'ib.dat'
+        !     inquire (FILE=trim(file_loc), EXIST=file_exist)
 
-            if (file_exist) then
-                call s_initialize_mpi_data(q_cons_vf, ib_markers)
-                call MPI_FILE_OPEN(MPI_COMM_WORLD, file_loc, MPI_MODE_RDONLY, mpi_info_int, ifile, ierr)
-                data_size = (m+1)*(n+1)*(p+1)
+        !     if (file_exist) then
+        !         call s_initialize_mpi_data(q_cons_vf, ib_markers)
+        !         call MPI_FILE_OPEN(MPI_COMM_WORLD, file_loc, MPI_MODE_RDONLY, mpi_info_int, ifile, ierr)
+        !         data_size = (m+1)*(n+1)*(p+1)
 
-                disp = 0
+        !         disp = 0
 
-                ! call MPI_FILE_SET_VIEW(ifile, disp, MPI_INTEGER, ib_markers, &
-                                        ! 'native', mpi_info_int, ierr)
+        !         ! call MPI_FILE_SET_VIEW(ifile, disp, MPI_INTEGER, ib_markers, &
+        !                                 ! 'native', mpi_info_int, ierr)
 
-                call MPI_FILE_READ_ALL(ifile, ib_markers%sf, data_size, & 
-                                        MPI_INTEGER, status, ierr)
+        !         call MPI_FILE_READ_ALL(ifile, ib_markers%sf, data_size, & 
+        !                                 MPI_INTEGER, status, ierr)
 
-                ! disp = 0
+        !         ! disp = 0
 
-                ! call MPI_FILE_SET_VIEW(ifile, disp, MPI_INTEGER, MPI_IO_IB_DATA%view, &
-                !                         'native', mpi_info_int, ierr)
+        !         ! call MPI_FILE_SET_VIEW(ifile, disp, MPI_INTEGER, MPI_IO_IB_DATA%view, &
+        !         !                         'native', mpi_info_int, ierr)
 
-                ! call MPI_FILE_READ_ALL(ifile, MPI_IO_IB_DATA%var%sf, data_size, &
-                !                         MPI_INTEGER, status, ierr)
+        !         ! call MPI_FILE_READ_ALL(ifile, MPI_IO_IB_DATA%var%sf, data_size, &
+        !         !                         MPI_INTEGER, status, ierr)
 
-                call s_mpi_barrier()
-                call MPI_FILE_CLOSE(ifile, ierr)
-            else
-                call s_mpi_abort('File '//trim(file_loc)//' is missing. Exiting...')
-            end if
-        end if  
+        !         call s_mpi_barrier()
+        !         call MPI_FILE_CLOSE(ifile, ierr)
+        !     else
+        !         call s_mpi_abort('File '//trim(file_loc)//' is missing. Exiting...')
+        !     end if
+        ! end if  
 
         deallocate (x_cb_glb, y_cb_glb, z_cb_glb)
 
@@ -1202,6 +1263,7 @@ contains
 
         if (ib_wrt) then
             deallocate (ib_markers%sf)
+            deallocate (ib_markers)
         end if
 
         ! if (ib_wrt) then
