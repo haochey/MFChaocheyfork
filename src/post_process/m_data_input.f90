@@ -209,18 +209,18 @@ contains
         end do
 
         if (ib_wrt) then
-            write (file_path, '(A,I0,A)') &
+            write (file_loc, '(A,I0,A)') &
                 trim(t_step_dir)//'/ib.dat'
-            inquire (FILE=trim(file_path), EXIST=file_exist)
+            inquire (FILE=trim(file_loc), EXIST=file_check)
 
-            if (file_exist) then
-                open (2, FILE=trim(file_path), &
+            if (file_check) then
+                open (2, FILE=trim(file_loc), &
                     FORM='unformatted', &
                     ACTION='read', &
                     STATUS='old')
                 read (2) ib_markers%sf(0:m, 0:n, 0:p); close (2)
             else
-                call s_mpi_abort(trim(file_path)//' is missing. Exiting ...')
+                call s_mpi_abort(trim(file_loc)//' is missing. Exiting ...')
             end if
         end if
 
@@ -1263,7 +1263,6 @@ contains
 
         if (ib_wrt) then
             deallocate (ib_markers%sf)
-            deallocate (ib_markers)
         end if
 
         ! if (ib_wrt) then
