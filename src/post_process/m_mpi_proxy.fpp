@@ -33,6 +33,9 @@ module m_mpi_proxy
     real(kind(0d0)), allocatable, dimension(:) :: q_cons_buffer_out
     !> @}
 
+    integer, private, allocatable, dimension(:) :: ib_buff_send !<
+    integer, private, allocatable, dimension(:) :: ib_buff_recv !<
+
     !> @name Receive counts and displacement vector variables, respectively, used in
     !! enabling MPI to gather varying amounts of data from all processes to the
     !! root process
@@ -1619,6 +1622,436 @@ contains
 
     end subroutine s_mpi_defragment_1d_flow_variable ! ---------------------
 
+    subroutine s_mpi_sendrecv_ib_buffers(ib_markers)
+
+        type(integer_field), intent(INOUT) :: ib_markers
+
+        integer :: gp_layers
+
+        integer :: i, j, k, l, r !< Generic loop iterators
+
+        gp_layers = 3;
+
+#ifdef MFC_MPI
+
+        if (n > 0) then
+            if (p > 0) then
+                allocate(ib_buff_send(0:-1 + gp_layers * &
+                                        & (m + 2*gp_layers + 1)* &
+                                        & (n + 2*gp_layers + 1)* &
+                                        & (p + 2*gp_layers + 1)/ &
+                                        & (min(m, n, p) + 2*gp_layers + 1)))
+            else
+                allocate(ib_buff_send(0:-1 + gp_layers* &
+                                        & (max(m, n) + 2*gp_layers + 1)))
+            end if
+        else
+            allocate(ib_buff_send(0:-1 + gp_layers))
+        end if
+        allocate(ib_buff_recv(0:ubound(ib_buff_send, 1)))
+
+        !nCalls_time = nCalls_time + 1
+
+        ! MPI Communication in x-direction =================================
+        if (bc_x%beg >= 0) then      ! PBC at the beginning
+
+            if (bc_x%end >= 0) then      ! PBC at the beginning and end
+
+                ! Packing buffer to be sent to bc_x%end
+                do l = 0, p
+                    do k = 0, n
+                        do j = m - gp_layers + 1, m
+                            r = ((j - m - 1) + gp_layers*((k + 1) + (n + 1)*l))
+                            ib_buff_send(r) = ib_markers%sf(j, k, l)
+                        end do
+                    end do
+                end do
+
+                !call MPI_Barrier(MPI_COMM_WORLD, ierr)
+                ! Send/receive buffer to/from bc_x%end/bc_x%beg
+                call MPI_SENDRECV( &
+                    ib_buff_send(0), &
+                    gp_layers*(n + 1)*(p + 1), &
+                    MPI_INTEGER, bc_x%end, 0, &
+                    ib_buff_recv(0), &
+                    gp_layers*(n + 1)*(p + 1), &
+                    MPI_INTEGER, bc_x%beg, 0, &
+                    MPI_COMM_WORLD, MPI_STATUS_IGNORE, ierr)
+
+            else                        ! PBC at the beginning only
+
+                ! Packing buffer to be sent to bc_x%beg
+                do l = 0, p
+                    do k = 0, n
+                        do j = 0, gp_layers - 1
+                            r = (j + gp_layers*(k + (n + 1)*l))
+                            ib_buff_send(r) = ib_markers%sf(j, k, l)
+                        end do
+                    end do
+                end do
+
+                !call MPI_Barrier(MPI_COMM_WORLD, ierr）
+                ! Send/receive buffer to/from bc_x%end/bc_x%beg
+                call MPI_SENDRECV( &
+                    ib_buff_send(0), &
+                    gp_layers*(n + 1)*(p + 1), &
+                    MPI_INTEGER, bc_x%beg, 1, &
+                    ib_buff_recv(0), &
+                    gp_layers*(n + 1)*(p + 1), &
+                    MPI_INTEGER, bc_x%beg, 0, &
+                    MPI_COMM_WORLD, MPI_STATUS_IGNORE, ierr)
+            end if
+
+            ! Unpacking buffer received from bc_x%beg
+            do l = 0, p
+                do k = 0, n
+                    do j = -gp_layers, -1
+                        r = (j + gp_layers*((k + 1) + (n + 1)*l))
+                        ib_markers%sf(j, k, l) = ib_buff_recv(r)
+                    end do
+                end do
+            end do
+
+        end if
+
+        if (bc_x%end >= 0) then                ! PBC at the end
+
+            if (bc_x%beg >= 0) then      ! PBC at the end and beginning
+
+                ! Packing buffer to be sent to bc_x%beg
+                do l = 0, p
+                    do k = 0, n
+                        do j = 0, gp_layers - 1
+                            r = (j + gp_layers*(k + (n + 1)*l))
+                            ib_buff_send(r) = ib_markers%sf(j, k, l)
+                        end do
+                    end do
+                end do
+
+                !call MPI_Barrier(MPI_COMM_WORLD, ierr)
+                call MPI_SENDRECV( &
+                    ib_buff_send(0), &
+                    gp_layers*(n + 1)*(p + 1), &
+                    MPI_INTEGER, bc_x%beg, 1, &
+                    ib_buff_recv(0), &
+                    gp_layers*(n + 1)*(p + 1), &
+                    MPI_INTEGER, bc_x%end, 1, &
+                    MPI_COMM_WORLD, MPI_STATUS_IGNORE, ierr)
+
+            else                        ! PBC at the end only
+
+                ! Packing buffer to be sent to bc_x%end
+                do l = 0, p
+                    do k = 0, n
+                        do j = m - gp_layers + 1, m
+                            r = ((j - m - 1) + gp_layers*((k + 1) + (n + 1)*l))
+                            ib_buff_send(r) = ib_markers%sf(j, k, l)
+                        end do
+                    end do
+                end do
+
+                !call MPI_Barrier(MPI_COMM_WORLD, ierr)
+                call MPI_SENDRECV( &
+                    ib_buff_send(0), &
+                    gp_layers*(n + 1)*(p + 1), &
+                    MPI_INTEGER, bc_x%end, 0, &
+                    ib_buff_recv(0), &
+                    gp_layers*(n + 1)*(p + 1), &
+                    MPI_INTEGER, bc_x%end, 1, &
+                    MPI_COMM_WORLD, MPI_STATUS_IGNORE, ierr)
+
+            end if
+
+            ! Unpacking buffer received from bc_x%end
+            do l = 0, p
+                do k = 0, n
+                    do j = m + 1, m + gp_layers
+                        r = ((j - m - 1) + gp_layers*(k + (n + 1)*l))
+                        ib_markers%sf(j, k, l) = ib_buff_recv(r)
+                    end do
+                end do
+            end do
+
+        end if
+        ! END: MPI Communication in x-direction ============================
+
+        ! MPI Communication in y-direction =================================
+
+        if (bc_y%beg >= 0) then      ! PBC at the beginning
+
+            if (bc_y%end >= 0) then      ! PBC at the beginning and end
+
+                ! Packing buffer to be sent to bc_y%end
+                do l = 0, p
+                    do k = n - gp_layers + 1, n
+                        do j = -gp_layers, m + gp_layers
+                            r = ((j + gp_layers) + (m + 2*gp_layers + 1)* &
+                                 ((k - n + gp_layers - 1) + gp_layers*l))
+                            ib_buff_send(r) = ib_markers%sf(j, k, l)
+                        end do
+                    end do
+                end do
+
+                !call MPI_Barrier(MPI_COMM_WORLD, ierr)
+
+                ! Send/receive buffer to/from bc_x%end/bc_x%beg
+                call MPI_SENDRECV( &
+                    ib_buff_send(0), &
+                    gp_layers*(m + 2*gp_layers + 1)*(p + 1), &
+                    MPI_INTEGER, bc_y%end, 0, &
+                    ib_buff_recv(0), &
+                    gp_layers*(m + 2*gp_layers + 1)*(p + 1), &
+                    MPI_INTEGER, bc_y%beg, 0, &
+                    MPI_COMM_WORLD, MPI_STATUS_IGNORE, ierr)
+
+            else                        ! PBC at the beginning only
+
+                ! Packing buffer to be sent to bc_y%beg
+                do l = 0, p
+                    do k = 0, gp_layers - 1
+                        do j = -gp_layers, m + gp_layers
+                            r = ((j + gp_layers) + (m + 2*gp_layers + 1)* &
+                                 (k + gp_layers*l))
+                            ib_buff_send(r) = ib_markers%sf(j, k, l)
+                        end do
+                    end do
+                end do
+
+                !call MPI_Barrier(MPI_COMM_WORLD, ierr)
+
+                ! Send/receive buffer to/from bc_x%end/bc_x%beg
+                call MPI_SENDRECV( &
+                    ib_buff_send(0), &
+                    gp_layers*(m + 2*gp_layers + 1)*(p + 1), &
+                    MPI_INTEGER, bc_y%beg, 1, &
+                    ib_buff_recv(0), &
+                    gp_layers*(m + 2*gp_layers + 1)*(p + 1), &
+                    MPI_INTEGER, bc_y%beg, 0, &
+                    MPI_COMM_WORLD, MPI_STATUS_IGNORE, ierr)
+            end if
+
+            ! Unpacking buffer received from bc_y%beg
+            do l = 0, p
+                do k = -gp_layers, -1
+                    do j = -gp_layers, m + gp_layers
+                        r = ((j + gp_layers) + (m + 2*gp_layers + 1)* &
+                             ((k + gp_layers) + gp_layers*l))
+                        ib_markers%sf(j, k, l) = ib_buff_recv(r)
+                    end do
+                end do
+            end do
+
+        end if
+
+        if (bc_y%end >= 0) then                   ! PBC at the end
+
+            if (bc_y%beg >= 0) then      ! PBC at the end and beginning
+
+                ! Packing buffer to be sent to bc_y%beg
+                do l = 0, p
+                    do k = 0, gp_layers - 1
+                        do j = -gp_layers, m + gp_layers
+                            r = ((j + gp_layers) + (m + 2*gp_layers + 1)* &
+                                 (k + gp_layers*l))
+                            ib_buff_send(r) = ib_markers%sf(j, k, l)
+                        end do
+                    end do
+                end do
+
+                !call MPI_Barrier(MPI_COMM_WORLD, ierr)
+                ! Send/receive buffer to/from bc_x%end/bc_x%beg
+                call MPI_SENDRECV( &
+                    ib_buff_send(0), &
+                    gp_layers*(m + 2*gp_layers + 1)*(p + 1), &
+                    MPI_INTEGER, bc_y%beg, 1, &
+                    ib_buff_recv(0), &
+                    gp_layers*(m + 2*gp_layers + 1)*(p + 1), &
+                    MPI_INTEGER, bc_y%end, 1, &
+                    MPI_COMM_WORLD, MPI_STATUS_IGNORE, ierr)
+
+            else                        ! PBC at the end only
+
+                ! Packing buffer to be sent to bc_y%end
+                do l = 0, p
+                    do k = n - gp_layers + 1, n
+                        do j = -gp_layers, m + gp_layers
+                            r = ((j + gp_layers) + (m + 2*gp_layers + 1)* &
+                                 ((k - n + gp_layers - 1) + gp_layers*l))
+                            ib_buff_send(r) = ib_markers%sf(j, k, l)
+                        end do
+                    end do
+                end do
+
+                !call MPI_Barrier(MPI_COMM_WORLD, ierr)
+                ! Send/receive buffer to/from bc_x%end/bc_x%beg
+                call MPI_SENDRECV( &
+                    ib_buff_send(0), &
+                    gp_layers*(m + 2*gp_layers + 1)*(p + 1), &
+                    MPI_INTEGER, bc_y%end, 0, &
+                    ib_buff_recv(0), &
+                    gp_layers*(m + 2*gp_layers + 1)*(p + 1), &
+                    MPI_INTEGER, bc_y%end, 1, &
+                    MPI_COMM_WORLD, MPI_STATUS_IGNORE, ierr)
+            end if
+
+            ! Unpacking buffer received form bc_y%end
+            do l = 0, p
+                do k = n + 1, n + gp_layers
+                    do j = -gp_layers, m + gp_layers
+                        r = ((j + gp_layers) + (m + 2*gp_layers + 1)* &
+                             ((k - n - 1) + gp_layers*l))
+                        ib_markers%sf(j, k, l) = ib_buff_recv(r)
+                    end do
+                end do
+            end do
+
+        end if
+        ! END: MPI Communication in y-direction ============================
+
+        ! MPI Communication in z-direction =================================
+        if (bc_z%beg >= 0) then      ! PBC at the beginning
+
+            if (bc_z%end >= 0) then      ! PBC at the beginning and end
+
+                ! Packing buffer to be sent to bc_z%end
+                do l = p - gp_layers + 1, p
+                    do k = -gp_layers, n + gp_layers
+                        do j = -gp_layers, m + gp_layers
+                            r = ((j + gp_layers) + (m + 2*gp_layers + 1)* &
+                                 ((k + gp_layers) + (n + 2*gp_layers + 1)* &
+                                  (l - p + gp_layers - 1)))
+                            ib_buff_send(r) = ib_markers%sf(j, k, l)
+                        end do
+                    end do
+                end do
+
+                !call MPI_Barrier(MPI_COMM_WORLD, ierr)
+                ! Send/receive buffer to/from bc_x%end/bc_x%beg
+                call MPI_SENDRECV( &
+                    ib_buff_send(0), &
+                    gp_layers*(m + 2*gp_layers + 1)*(n + 2*gp_layers + 1), &
+                    MPI_INTEGER, bc_z%end, 0, &
+                    ib_buff_recv(0), &
+                    gp_layers*(m + 2*gp_layers + 1)*(n + 2*gp_layers + 1), &
+                    MPI_INTEGER, bc_z%beg, 0, &
+                    MPI_COMM_WORLD, MPI_STATUS_IGNORE, ierr)
+
+            else                        ! PBC at the beginning only
+
+                ! Packing buffer to be sent to bc_z%beg
+                do l = 0, gp_layers - 1
+                    do k = -gp_layers, n + gp_layers
+                        do j = -gp_layers, m + gp_layers
+                            r = ((j + gp_layers) + (m + 2*gp_layers + 1)* &
+                                 ((k + gp_layers) + (n + 2*gp_layers + 1)*l))
+                            ib_buff_send(r) = ib_markers%sf(j, k, l)
+                        end do
+                    end do
+                end do
+
+                !call MPI_Barrier(MPI_COMM_WORLD, ierr)
+
+                ! Send/receive buffer to/from bc_x%end/bc_x%beg
+                call MPI_SENDRECV( &
+                    ib_buff_send(0), &
+                    gp_layers*(m + 2*gp_layers + 1)*(n + 2*gp_layers + 1), &
+                    MPI_INTEGER, bc_z%beg, 1, &
+                    ib_buff_recv(0), &
+                    gp_layers*(m + 2*gp_layers + 1)*(n + 2*gp_layers + 1), &
+                    MPI_INTEGER, bc_z%beg, 0, &
+                    MPI_COMM_WORLD, MPI_STATUS_IGNORE, ierr)
+
+            end if
+
+            ! Unpacking buffer from bc_z%beg
+            do l = -gp_layers, -1
+                do k = -gp_layers, n + gp_layers
+                    do j = -gp_layers, m + gp_layers
+                        r = ((j + gp_layers) + (m + 2*gp_layers + 1)* &
+                             ((k + gp_layers) + (n + 2*gp_layers + 1)* &
+                              (l + gp_layers)))
+                        ib_markers%sf(j, k, l) = ib_buff_recv(r)
+                    end do
+                end do
+            end do
+
+        end if
+
+        if (bc_z%end >= 0) then                       ! PBC at the end
+
+            if (bc_z%beg >= 0) then      ! PBC at the end and beginning
+
+                ! Packing buffer to be sent to bc_z%beg
+                do l = 0, gp_layers - 1
+                    do k = -gp_layers, n + gp_layers
+                        do j = -gp_layers, m + gp_layers
+                            r = ((j + gp_layers) + (m + 2*gp_layers + 1)* &
+                                 ((k + gp_layers) + (n + 2*gp_layers + 1)*l))
+                            ib_buff_send(r) = ib_markers%sf(j, k, l)
+                        end do
+                    end do
+                end do
+
+                !call MPI_Barrier(MPI_COMM_WORLD, ierr)
+
+                ! Send/receive buffer to/from bc_x%end/bc_x%beg
+                call MPI_SENDRECV( &
+                    ib_buff_send(0), &
+                    gp_layers*(m + 2*gp_layers + 1)*(n + 2*gp_layers + 1), &
+                    MPI_INTEGER, bc_z%beg, 1, &
+                    ib_buff_recv(0), &
+                    gp_layers*(m + 2*gp_layers + 1)*(n + 2*gp_layers + 1), &
+                    MPI_INTEGER, bc_z%end, 1, &
+                    MPI_COMM_WORLD, MPI_STATUS_IGNORE, ierr)
+
+            else                        ! PBC at the end only
+
+                ! Packing buffer to be sent to bc_z%end
+                do l = p - gp_layers + 1, p
+                    do k = -gp_layers, n + gp_layers
+                        do j = -gp_layers, m + gp_layers
+                            r = ((j + gp_layers) + (m + 2*gp_layers + 1)* &
+                                 ((k + gp_layers) + (n + 2*gp_layers + 1)* &
+                                  (l - p + gp_layers - 1)))
+                            ib_buff_send(r) = ib_markers%sf(j, k, l)
+                        end do
+                    end do
+                end do
+
+                !call MPI_Barrier(MPI_COMM_WORLD, ierr)
+
+                ! Send/receive buffer to/from bc_x%end/bc_x%beg
+                call MPI_SENDRECV( &
+                    ib_buff_send(0), &
+                    gp_layers*(m + 2*gp_layers + 1)*(n + 2*gp_layers + 1), &
+                    MPI_INTEGER, bc_z%end, 0, &
+                    ib_buff_recv(0), &
+                    gp_layers*(m + 2*gp_layers + 1)*(n + 2*gp_layers + 1), &
+                    MPI_INTEGER, bc_z%end, 1, &
+                    MPI_COMM_WORLD, MPI_STATUS_IGNORE, ierr)
+            end if
+
+            ! Unpacking buffer received from bc_z%end
+            do l = p + 1, p + gp_layers
+                do k = -gp_layers, n + gp_layers
+                    do j = -gp_layers, m + gp_layers
+                        r = ((j + gp_layers) + (m + 2*gp_layers + 1)* &
+                             ((k + gp_layers) + (n + 2*gp_layers + 1)* &
+                              (l - p - 1)))
+                        ib_markers%sf(j, k, l) = ib_buff_recv(r)
+                    end do
+                end do
+            end do
+
+        end if
+
+        ! END: MPI Communication in z-direction ============================
+        deallocate (ib_buff_send)
+        deallocate (ib_buff_recv)
+#endif
+
+    end subroutine s_mpi_sendrecv_ib_buffers ! ---------
+
     !> Deallocation procedures for the module
     subroutine s_finalize_mpi_proxy_module() ! ---------------------------
 
@@ -1629,6 +2062,11 @@ contains
             deallocate (q_cons_buffer_in)
             deallocate (q_cons_buffer_out)
         end if
+
+        ! if (ib_wrt) then
+        !     deallocate (ib_buff_send)
+        !     deallocate (ib_buff_recv)
+        ! end if
 
         ! Deallocating the receive counts and the displacement vector
         ! variables used in variable-gather communication procedures

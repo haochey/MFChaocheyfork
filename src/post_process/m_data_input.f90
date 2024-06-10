@@ -483,11 +483,19 @@ contains
                         call s_mpi_abort('File '//trim(file_loc)//' is missing. Exiting...')
                     end if
 
-                    do i = 0,m
-                        do j = 0,n
-                            print*, ib_markers%sf(i,j,0)
-                        end do
-                    end do
+                    ! do i = 0,m
+                    !     do j = 0,n
+                    !         if (ib_markers%sf(i,j,0) > 0) then
+                    !             print*, ib_markers%sf(i,j,0)
+                    !         elseif (MPI_IO_IB_DATA%var%sf(i,j,0)>0) then
+                    !             print*, 'good'
+                    !         end if
+                    !     end do
+                    ! end do
+
+                    call s_mpi_sendrecv_ib_buffers(MPI_IO_IB_DATA%var)
+
+                    ib_markers%sf = MPI_IO_IB_DATA%var%sf
 
                 end if
 
