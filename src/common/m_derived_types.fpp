@@ -282,7 +282,7 @@ module m_derived_types
         logical :: slip
         integer, dimension(3) :: DB !< Checks if the ghost cell is adjacent to domain boundary
         integer :: IBB !< Checks if the ghost cell is at the boundary of the immersed object
-        integer :: rank !< Checks if the ghost cell is at the boundary of the immersed object
+        ! integer :: rank !< Checks if the ghost cell is at the boundary of the immersed object
 
 
     end type ghost_point
