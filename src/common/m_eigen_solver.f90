@@ -1059,7 +1059,7 @@ contains
         beta = -1d0
         diff = 100d0
         ! do while (diff <= 1d-13 .and. beta < 0 .and. i < 1000)
-        do i = 1, 200
+        do i = 1, 100
             alpha_old = alpha
             call QR(An, Q, R)
             An = matmul(R, Q)
