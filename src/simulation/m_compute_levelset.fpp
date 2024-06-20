@@ -177,7 +177,7 @@ contains
         integer, intent(IN) :: ib_patch_id
         real(kind(0d0)), dimension(0:num_gps) :: distance
         integer :: i, j, k, ii, jj, kk, q, ii_buffer(6), jj_buffer(6), kk_buffer(6)
-        integer :: buffer_count, n
+        integer :: buffer_count, num_buffer
         type(ghost_point) :: gp
         real(kind(0d0)) :: distance_buffer, distance_q
         type(integer_field), intent(INOUT) :: ib_markers
@@ -188,10 +188,10 @@ contains
                     distance_buffer = 1d12
                     buffer_count = 0
     
-                    do n = 1, 6
-                        ii_buffer(n) = -1000
-                        jj_buffer(n) = -1000
-                        kk_buffer(n) = -1000
+                    do num_buffer = 1, 6
+                        ii_buffer(num_buffer) = -1000
+                        jj_buffer(num_buffer) = -1000
+                        kk_buffer(num_buffer) = -1000
                     end do
     
                     distance = 0d0
@@ -229,20 +229,20 @@ contains
                         end if
                     end do
     
-                    do n = 1, buffer_count
-                        dist_vec_buffer(n, 1) = x_cc(i) - x_cc(ii_buffer(n))
-                        dist_vec_buffer(n, 2) = y_cc(j) - y_cc(jj_buffer(n))
-                        dist_vec_buffer(n, 3) = z_cc(k) - z_cc(kk_buffer(n))
+                    do num_buffer = 1, buffer_count
+                        dist_vec_buffer(num_buffer, 1) = x_cc(i) - x_cc(ii_buffer(num_buffer))
+                        dist_vec_buffer(num_buffer, 2) = y_cc(j) - y_cc(jj_buffer(num_buffer))
+                        dist_vec_buffer(num_buffer, 3) = z_cc(k) - z_cc(kk_buffer(num_buffer))
                     end do
     
                     if (buffer_count > 1) then
                         dist_vec(1) = 0d0
                         dist_vec(2) = 0d0
                         dist_vec(3) = 0d0
-                        do n = 1, buffer_count
-                            dist_vec(1) = dist_vec(1) + dist_vec_buffer(n, 1)
-                            dist_vec(2) = dist_vec(2) + dist_vec_buffer(n, 2)
-                            dist_vec(3) = dist_vec(3) + dist_vec_buffer(n, 3)
+                        do num_buffer = 1, buffer_count
+                            dist_vec(1) = dist_vec(1) + dist_vec_buffer(num_buffer, 1)
+                            dist_vec(2) = dist_vec(2) + dist_vec_buffer(num_buffer, 2)
+                            dist_vec(3) = dist_vec(3) + dist_vec_buffer(num_buffer, 3)
                         end do
                         dist_vec(1) = dist_vec(1) / buffer_count
                         dist_vec(2) = dist_vec(2) / buffer_count
