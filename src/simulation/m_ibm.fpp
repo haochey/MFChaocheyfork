@@ -558,7 +558,7 @@ contains
                             ghost_points(count)%ib_patch_id = &
                                 patch_id
                             ghost_points(count)%slip = patch_ib(patch_id)%slip
-                            ghost_points(count)%rank = proc_rank
+                            ! ghost_points(count)%rank = proc_rank
 
                             if ((x_cc(i) - dx(i)) < x_domain%beg) then
                                 ghost_points(count)%DB(1) = -1
