@@ -20,6 +20,8 @@ module m_derived_variables
     use m_mpi_proxy             !< Message passing interface (MPI) module proxy
 
     use m_variables_conversion
+
+    use m_eigen_solver
     ! ==========================================================================
 
     implicit none
