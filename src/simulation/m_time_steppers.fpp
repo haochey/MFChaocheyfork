@@ -303,13 +303,13 @@ contains
 
         call s_compute_rhs(q_cons_ts(1)%vf, q_prim_vf, rhs_vf, pb_ts(1)%sf, rhs_pb, mv_ts(1)%sf, rhs_mv, t_step, time_avg)
 
-        if (ib .and. t_step == 1) then
-            if (qbmm .and. .not. polytropic) then
-                call s_ibm_correct_state(q_cons_ts(1)%vf, q_prim_vf, pb_ts(1)%sf, mv_ts(1)%sf)
-            else
-                call s_ibm_correct_state(q_cons_ts(1)%vf, q_prim_vf)
-            end if
-        end if
+        ! if (ib .and. t_step == 1) then
+        !     if (qbmm .and. .not. polytropic) then
+        !         call s_ibm_correct_state(q_cons_ts(1)%vf, q_prim_vf, pb_ts(1)%sf, mv_ts(1)%sf)
+        !     else
+        !         call s_ibm_correct_state(q_cons_ts(1)%vf, q_prim_vf)
+        !     end if
+        ! end if
 
 #ifdef DEBUG
         print *, 'got rhs'
@@ -420,13 +420,13 @@ contains
 
         call s_compute_rhs(q_cons_ts(1)%vf, q_prim_vf, rhs_vf, pb_ts(1)%sf, rhs_pb, mv_ts(1)%sf, rhs_mv, t_step, time_avg)
 
-        if (ib .and. t_step == 1) then
-            if (qbmm .and. .not. polytropic) then
-                call s_ibm_correct_state(q_cons_ts(1)%vf, q_prim_vf, pb_ts(1)%sf, mv_ts(1)%sf)
-            else
-                call s_ibm_correct_state(q_cons_ts(1)%vf, q_prim_vf)
-            end if
-        end if
+        ! if (ib .and. t_step == 1) then
+        !     if (qbmm .and. .not. polytropic) then
+        !         call s_ibm_correct_state(q_cons_ts(1)%vf, q_prim_vf, pb_ts(1)%sf, mv_ts(1)%sf)
+        !     else
+        !         call s_ibm_correct_state(q_cons_ts(1)%vf, q_prim_vf)
+        !     end if
+        ! end if
 
         if (run_time_info) then
             call s_write_run_time_information(q_prim_vf, t_step)
@@ -610,13 +610,13 @@ contains
 
         call s_compute_rhs(q_cons_ts(1)%vf, q_prim_vf, rhs_vf, pb_ts(1)%sf, rhs_pb, mv_ts(1)%sf, rhs_mv, t_step, time_avg)
 
-        if (ib .and. t_step == 1) then
-            if (qbmm .and. .not. polytropic) then
-                call s_ibm_correct_state(q_cons_ts(1)%vf, q_prim_vf, pb_ts(1)%sf, mv_ts(1)%sf)
-            else
-                call s_ibm_correct_state(q_cons_ts(1)%vf, q_prim_vf)
-            end if
-        end if
+        ! if (ib .and. t_step == 1) then
+        !     if (qbmm .and. .not. polytropic) then
+        !         call s_ibm_correct_state(q_cons_ts(1)%vf, q_prim_vf, pb_ts(1)%sf, mv_ts(1)%sf)
+        !     else
+        !         call s_ibm_correct_state(q_cons_ts(1)%vf, q_prim_vf)
+        !     end if
+        ! end if
 
         if (run_time_info) then
             call s_write_run_time_information(q_prim_vf, t_step)
