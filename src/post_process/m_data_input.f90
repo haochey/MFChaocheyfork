@@ -121,9 +121,6 @@ contains
         ! Computing the cell-center locations
         x_cc(0:m) = x_cb(-1:m - 1) + dx(0:m)/2d0
 
-        file_loc = trim(t_step_dir)//'/ib.dat'
-        inquire (FILE=trim(file_loc), EXIST=file_check)
-
         ! ==================================================================
 
         ! Reading the Grid Data File for the y-direction ===================

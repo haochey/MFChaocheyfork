@@ -2033,13 +2033,6 @@ contains
 
     end subroutine s_mpi_sendrecv_ib_buffers ! ---------
 
-    subroutine s_mpi_bcast_num_gps(num_gps)
-        integer, intent(INOUT) :: num_gps
-#ifdef MFC_MPI
-        call MPI_BCAST(num_gps, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
-#endif
-    end subroutine s_mpi_bcast_num_gps
-
     subroutine s_mpi_sendrecv_capilary_variables_buffers(c_divs_vf, mpi_dir, pbc_loc)
 
         type(scalar_field), dimension(num_dims + 1), intent(INOUT) :: c_divs_vf
