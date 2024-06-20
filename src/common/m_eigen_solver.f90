@@ -10,7 +10,8 @@ module m_eigen_solver
 
     implicit none
 
-    private; public :: cg, cbal, corth, comqr2, csroot, cdiv, pythag
+    private; public :: cg, cbal, corth, comqr2, csroot, cdiv, pythag, &
+    Findv, FindQ, QR, QR_schur, reorder
 
 contains
 
