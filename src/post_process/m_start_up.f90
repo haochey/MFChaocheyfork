@@ -501,7 +501,7 @@ contains
             varname = 'ib_markers'
             call s_write_variable_to_formatted_database_file(varname, t_step)
         end if
-        
+
         ! Adding Q_M to the formatted database file ------------------
         if (p > 0 .and. qm_wrt) then
             call s_derive_qm(q_prim_vf, q_sf)

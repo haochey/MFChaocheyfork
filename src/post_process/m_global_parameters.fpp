@@ -338,7 +338,6 @@ contains
         cf_wrt = .false.
         ib = .false.
 
-
         schlieren_alpha = dflt_real
 
         fd_order = dflt_int

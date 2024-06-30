@@ -77,7 +77,7 @@ contains
                   int(floor(log10(real(sys_size, kind(0d0))))) + 1) :: file_num !<
             !! Used to store the variable position, in character form, of the
             !! currently manipulated conservative variable file
-            
+
         character(LEN=len_trim(case_dir) + 2*name_len) :: t_step_ib_dir !<
         !! Location of the time-step directory associated with t_step
 
@@ -232,9 +232,9 @@ contains
             inquire (FILE=trim(file_loc_ib), EXIST=file_check)
             if (file_check) then
                 open (2, FILE=trim(file_loc_ib), &
-                        FORM='unformatted', &
-                            ACTION='read', &
-                            STATUS='old')
+                      FORM='unformatted', &
+                      ACTION='read', &
+                      STATUS='old')
                 call s_mpi_abort(trim(file_loc)//' is missing. Exiting ...')
             end if
         end if
