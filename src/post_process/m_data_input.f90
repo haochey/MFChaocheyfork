@@ -81,7 +81,7 @@ contains
         character(LEN=len_trim(case_dir) + 2*name_len) :: t_step_ib_dir !<
         !! Location of the time-step directory associated with t_step
 
-        character(LEN=len_trim(case_dir) + 3*name_len) :: file_loc, file_loc_ib !<
+        character(LEN=len_trim(case_dir) + 3*name_len) :: file_loc_ib !<
 
         logical :: dir_check !<
             !! Generic logical used to test the existence of a particular folder

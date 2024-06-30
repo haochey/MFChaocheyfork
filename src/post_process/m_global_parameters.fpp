@@ -128,6 +128,7 @@ module m_global_parameters
 #ifdef MFC_MPI
 
     type(mpi_io_var), public :: MPI_IO_DATA
+    type(mpi_io_ib_var), public :: MPI_IO_IB_DATA
 
 #endif
 
