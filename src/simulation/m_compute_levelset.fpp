@@ -40,30 +40,32 @@ module m_compute_levelset
 
 contains
 
-    !>  Initialize IBM module
+        !>  Initialize IBM module
     subroutine s_compute_2D_STL_levelset(levelset, levelset_norm, ib_patch_id, ghost_points, num_gps, ib_markers)
         integer, intent(INOUT) :: num_gps
         type(ghost_point), dimension(num_gps), intent(INOUT) :: ghost_points
         real(kind(0d0)), dimension(0:m, 0:n, 0:p, num_ibs), intent(INOUT) :: levelset
         real(kind(0d0)), dimension(0:m, 0:n, 0:p, num_ibs, 3), intent(INOUT) :: levelset_norm
-        real(kind(0d0)), dimension(3) :: dist_vec, dist_vec_buffer1, dist_vec_buffer2, dist_vec_buffer3
+        real(kind(0d0)), dimension(3) :: dist_vec
+        real(kind(0d0)), dimension(1:4,1:3) :: dist_vec_buffer
         integer, intent(IN) :: ib_patch_id
         real(kind(0d0)), dimension(0:num_gps) :: distance
-        integer :: i, j, ii, jj, q, ii_buffer, jj_buffer, a !< Loop index variables
-        integer :: ii_buffer_avg1, jj_buffer_avg1, ii_buffer_avg2, jj_buffer_avg2
+        integer :: i, j, k, ii, jj, q, ii_buffer(4), jj_buffer(4)
+        integer :: buffer_count, num_buffer
         type(ghost_point) :: gp
-        real(kind(0d0)) :: distance_q, distance_buffer
+        real(kind(0d0)) :: distance_buffer, distance_q
         type(integer_field), intent(INOUT) :: ib_markers
 
         do i = 0, m
             do j = 0, n
                 distance_buffer = 1d12
-                ii_buffer = 0
-                jj_buffer = 0
-                ii_buffer_avg1 = -1000
-                jj_buffer_avg1 = -1000
-                ii_buffer_avg2 = -1000
-                jj_buffer_avg2 = -1000
+                buffer_count = 0
+
+                do num_buffer = 1, 4
+                    ii_buffer(num_buffer) = -1000
+                    jj_buffer(num_buffer) = -1000
+                end do
+
                 distance = 0d0
 
                 do q = 1, num_gps
@@ -79,46 +81,42 @@ contains
                     end if
 
                     if (abs(distance_buffer - distance(q)) < 1d-12) then
-                        if (ii_buffer_avg1 == -1000) then
-                            ii_buffer_avg1 = ii
-                            jj_buffer_avg1 = jj
-                        else if (ii_buffer_avg1 /= -1000) then
-                            ii_buffer_avg2 = ii
-                            jj_buffer_avg2 = jj
+                        if (buffer_count < 4) then
+                            buffer_count = buffer_count + 1
+                            ii_buffer(buffer_count) = ii
+                            jj_buffer(buffer_count) = jj
                         end if
                     else if (distance_buffer > distance(q)) then
                         distance_buffer = distance(q)
-                        ii_buffer = ii
-                        jj_buffer = jj
+                        ii_buffer(1) = ii
+                        jj_buffer(1) = jj
+                        ii_buffer(2:4) = 0
+                        jj_buffer(2:4) = 0
+                        buffer_count = 1
                     end if
                 end do
 
-                dist_vec_buffer1(1) = x_cc(i) - x_cc(ii_buffer)
-                dist_vec_buffer1(2) = y_cc(j) - y_cc(jj_buffer)
-                dist_vec_buffer1(3) = 0
+                do num_buffer = 1, buffer_count
+                    dist_vec_buffer(num_buffer, 1) = x_cc(i) - x_cc(ii_buffer(num_buffer))
+                    dist_vec_buffer(num_buffer, 2) = y_cc(j) - y_cc(jj_buffer(num_buffer))
+                    dist_vec_buffer(num_buffer, 3) = 0d0
+                end do
 
-                dist_vec_buffer2(1) = x_cc(i) - x_cc(ii_buffer_avg1)
-                dist_vec_buffer2(2) = y_cc(j) - y_cc(jj_buffer_avg1)
-                dist_vec_buffer2(3) = 0
+                dist_vec(1) = 0d0
+                dist_vec(2) = 0d0
+                dist_vec(3) = 0d0
 
-                dist_vec_buffer3(1) = x_cc(i) - x_cc(ii_buffer_avg2)
-                dist_vec_buffer3(2) = y_cc(j) - y_cc(jj_buffer_avg2)
-                dist_vec_buffer3(3) = 0
-
-                if (ii_buffer_avg2 /= -1000) then
-                    dist_vec(1) = (dist_vec_buffer1(1) + dist_vec_buffer2(1) + dist_vec_buffer3(1))
-                    dist_vec(2) = (dist_vec_buffer1(2) + dist_vec_buffer2(2) + dist_vec_buffer3(2))
-                    dist_vec(3) = 0
-                    distance_q = dsqrt(dist_vec(1)**2 + dist_vec(2)**2 + dist_vec(3)**2)
-                else if (ii_buffer_avg1 /= -1000) then
-                    dist_vec(1) = (dist_vec_buffer1(1) + dist_vec_buffer2(1))
-                    dist_vec(2) = (dist_vec_buffer1(2) + dist_vec_buffer2(2))
-                    dist_vec(3) = 0
-                    distance_q = dsqrt(dist_vec(1)**2 + dist_vec(2)**2 + dist_vec(3)**2)
+                if (buffer_count > 1) then
+                    do num_buffer = 1, buffer_count
+                        dist_vec(1) = dist_vec(1) + dist_vec_buffer(num_buffer, 1)
+                        dist_vec(2) = dist_vec(2) + dist_vec_buffer(num_buffer, 2)
+                    end do
+                    dist_vec(1) = dist_vec(1) / buffer_count
+                    dist_vec(2) = dist_vec(2) / buffer_count
+                    distance_q = dsqrt(dist_vec(1)**2 + dist_vec(2)**2)
                 else
-                    dist_vec(1) = x_cc(i) - x_cc(ii_buffer)
-                    dist_vec(2) = y_cc(j) - y_cc(jj_buffer)
-                    dist_vec(3) = 0
+                    dist_vec(1) = x_cc(i) - x_cc(ii_buffer(1))
+                    dist_vec(2) = y_cc(j) - y_cc(jj_buffer(1))
                     distance_q = distance_buffer
                 end if
 
@@ -134,36 +132,10 @@ contains
                     levelset_norm(i, j, 0, ib_patch_id, :) = 0
                 else
                     levelset_norm(i, j, 0, ib_patch_id, :) = &
-                        dist_vec(:)/abs(distance_q)
+                        dist_vec(:) / abs(distance_q)
                 end if
             end do
         end do
-
-        ! do i = 2, m-2
-        !     do j = 0, n
-        !         do a = 1, 3
-        !             levelset_norm(i, j, 0, ib_patch_id, a) = levelset_norm(i-2, j, 0, ib_patch_id, a) &
-        !                                                         + levelset_norm(i-1, j, 0, ib_patch_id, a) &
-        !                                                         + levelset_norm(i, j, 0, ib_patch_id, a) &
-        !                                                         + levelset_norm(i+1, j, 0, ib_patch_id, a) &
-        !                                                         + levelset_norm(i+2, j, 0, ib_patch_id, a)
-        !         end do
-        !     end do
-        ! end do
-
-        ! do j = 2, n-2
-        !     do i = 0, m
-        !         do a = 1, 3
-        !             levelset_norm(i, j, 0, ib_patch_id, a) = levelset_norm(i, j-2, 0, ib_patch_id, a) &
-        !                                                         + levelset_norm(i, j-1, 0, ib_patch_id, a) &
-        !                                                         + levelset_norm(i, j, 0, ib_patch_id, a) &
-        !                                                         + levelset_norm(i, j+1, 0, ib_patch_id, a) &
-        !                                                         + levelset_norm(i, j+2, 0, ib_patch_id, a)
-        !         end do
-        !         distance_buffer = dsqrt(levelset_norm(i, j, 0, ib_patch_id, 1)**2 + levelset_norm(i, j, 0, ib_patch_id, 2)**2)
-        !         levelset_norm(i, j, 0, ib_patch_id, :) = levelset_norm(i, j, 0, ib_patch_id, :)/distance_buffer
-        !     end do
-        ! end do
 
     end subroutine s_compute_2D_STL_levelset
 
@@ -181,27 +153,27 @@ contains
         type(ghost_point) :: gp
         real(kind(0d0)) :: distance_buffer, distance_q
         type(integer_field), intent(INOUT) :: ib_markers
-    
+
         do i = 0, m
             do j = 0, n
                 do k = 0, p
                     distance_buffer = 1d12
                     buffer_count = 0
-    
+
                     do num_buffer = 1, 6
                         ii_buffer(num_buffer) = -1000
                         jj_buffer(num_buffer) = -1000
                         kk_buffer(num_buffer) = -1000
                     end do
-    
+
                     distance = 0d0
-    
+
                     do q = 1, num_gps
                         gp = ghost_points(q)
                         ii = gp%loc(1)
                         jj = gp%loc(2)
                         kk = gp%loc(3)
-    
+
                         if (gp%IBB > 0) then
                             distance(q) = dsqrt((x_cc(i) - x_cc(ii))**2 &
                                                 + (y_cc(j) - y_cc(jj))**2 &
@@ -209,7 +181,7 @@ contains
                         else
                             distance(q) = 1d12
                         end if
-    
+
                         if (abs(distance_buffer - distance(q)) < 1d-12) then
                             if (buffer_count < 6) then
                                 buffer_count = buffer_count + 1
@@ -228,13 +200,13 @@ contains
                             buffer_count = 1
                         end if
                     end do
-    
+
                     do num_buffer = 1, buffer_count
                         dist_vec_buffer(num_buffer, 1) = x_cc(i) - x_cc(ii_buffer(num_buffer))
                         dist_vec_buffer(num_buffer, 2) = y_cc(j) - y_cc(jj_buffer(num_buffer))
                         dist_vec_buffer(num_buffer, 3) = z_cc(k) - z_cc(kk_buffer(num_buffer))
                     end do
-    
+
                     if (buffer_count > 1) then
                         dist_vec(1) = 0d0
                         dist_vec(2) = 0d0
@@ -254,15 +226,15 @@ contains
                         dist_vec(3) = z_cc(k) - z_cc(kk_buffer(1))
                         distance_q = distance_buffer
                     end if
-    
+
                     if (ib_markers%sf(i, j, k) /= 0) then
                         distance_q = -distance_q
                     else
                         distance_q = abs(distance_q)
                     end if
-    
+
                     levelset(i, j, k, ib_patch_id) = distance_q
-    
+
                     if (distance_q == 0) then
                         levelset_norm(i, j, k, ib_patch_id, :) = 0
                     else
@@ -272,9 +244,9 @@ contains
                 end do
             end do
         end do
-    
-    end subroutine s_compute_3D_STL_levelset
-    
+        
+        end subroutine s_compute_3D_STL_levelset
+        
 
     ! subroutine s_compute_3D_STL_levelset(levelset, levelset_norm, ib_patch_id, ghost_points, num_gps, ib_markers)
     !     integer, intent(INOUT) :: num_gps
