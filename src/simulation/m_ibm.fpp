@@ -122,6 +122,9 @@ contains
         call s_compute_interpolation_coeffs(ghost_points)
         !$acc update device(ghost_points)
 
+        call s_compute_interpolation_coeffs(inner_points)
+        !$acc update device(ghost_points, inner_points)
+
     end subroutine s_ibm_setup
 
     !>  Subroutine that updates the conservative variables at the ghost points
