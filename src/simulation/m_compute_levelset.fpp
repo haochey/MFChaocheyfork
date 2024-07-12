@@ -146,7 +146,7 @@ contains
 
                 levelset(i, j, 0, ib_patch_id) = distance_q
 
-                if (distance_q == 0) then
+                if (distance_q < 1d-10) then
                     levelset_norm(i, j, 0, ib_patch_id, :) = 0
                 else
                     if (ib_markers%sf(i, j, 0) /= 0) then
@@ -158,17 +158,19 @@ contains
                     end if
                 end if
 
-                ! if (j == 50 .and. i == 91) then
-                !     print*, dist_vec_buffer(1, 1)
-                !     print*, dist_vec_buffer(2, 1)
-                !     print*, dist_vec(1)
-                !     print*, '========'
-                !     print*, dist_vec_buffer(1, 2)
-                !     print*, dist_vec_buffer(2, 2)
-                !     print*, dist_vec(2)
-                !     print*, '========'
-                !     print*, levelset_norm(i, j, 0, ib_patch_id, 2)
-                ! end if
+                if (j == 50 .and. i == 91) then
+                    print*, abs(distance_q)
+                    print*, '========'
+                    print*, dist_vec_buffer(1, 1)
+                    print*, dist_vec_buffer(2, 1)
+                    print*, dist_vec(1)
+                    print*, '========'
+                    print*, dist_vec_buffer(1, 2)
+                    print*, dist_vec_buffer(2, 2)
+                    print*, dist_vec(2)
+                    print*, '========'
+                    print*, levelset_norm(i, j, 0, ib_patch_id, 2)
+                end if
 
             end do
         end do
