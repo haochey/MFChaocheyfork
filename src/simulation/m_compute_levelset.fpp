@@ -146,7 +146,7 @@ contains
 
                 levelset(i, j, 0, ib_patch_id) = distance_q
 
-                if (distance_q < 1d-10) then
+                if (abs(distance_q) < 1d-10) then
                     levelset_norm(i, j, 0, ib_patch_id, :) = 0
                 else
                     if (ib_markers%sf(i, j, 0) /= 0) then
