@@ -59,7 +59,7 @@ contains
         do i = 0, m
             do j = 0, n
                 distance_buffer = 1d12
-                buffer_count = 0
+                buffer_count = 1
                 distance = 0d0
 
                 do num_buffer = 1, 4
@@ -79,7 +79,7 @@ contains
                         distance(q) = 1d15
                     end if
 
-                    if (abs(distance_buffer - distance(q)) < 1d-12) then
+                    if (abs(distance_buffer - distance(q)) < 1d-10) then
                         if (buffer_count < 4) then
                             buffer_count = buffer_count + 1
                             ii_buffer(buffer_count) = ii
@@ -91,15 +91,27 @@ contains
                         jj_buffer(1) = jj
                         ii_buffer(2:4) = 0
                         jj_buffer(2:4) = 0
-                        buffer_count = 0
+                        buffer_count = 1
                     end if
                 end do
+
+                ! if (buffer_count > 1) then
+                !     print*, i, j, buffer_count
+                ! end if
 
                 do num_buffer = 1, buffer_count
                     dist_vec_buffer(num_buffer, 1) = x_cc(i) - x_cc(ii_buffer(num_buffer))
                     dist_vec_buffer(num_buffer, 2) = y_cc(j) - y_cc(jj_buffer(num_buffer))
                     dist_vec_buffer(num_buffer, 3) = 0d0
                 end do
+
+                ! if (j == 50 .and. i == 91) then
+                !     print*, y_cc(j)
+                !     print*, y_cc(jj_buffer(1))
+                !     print*, y_cc(jj_buffer(2))
+                !     print*, dist_vec_buffer(1, 2)
+                !     print*, dist_vec_buffer(2, 2)
+                ! end if
 
                 dist_vec(1) = 0d0
                 dist_vec(2) = 0d0
@@ -119,6 +131,13 @@ contains
                     distance_q = distance_buffer
                 end if
 
+                ! if (j == 50 .and. i == 91) then
+                !     print*, y_cc(j)
+                !     print*, dist_vec_buffer(1, 2)
+                !     print*, dist_vec_buffer(2, 2)
+                !     print*, dist_vec(2)
+                ! end if
+
                 if (ib_markers%sf(i, j, 0) /= 0) then
                     distance_q = -distance_q
                 else
@@ -130,9 +149,27 @@ contains
                 if (distance_q == 0) then
                     levelset_norm(i, j, 0, ib_patch_id, :) = 0
                 else
-                    levelset_norm(i, j, 0, ib_patch_id, :) = &
+                    if (ib_markers%sf(i, j, 0) /= 0) then
+                        levelset_norm(i, j, 0, ib_patch_id, :) = &
+                        -dist_vec(:) / abs(distance_q)
+                    else
+                        levelset_norm(i, j, 0, ib_patch_id, :) = &
                         dist_vec(:) / abs(distance_q)
+                    end if
                 end if
+
+                ! if (j == 50 .and. i == 91) then
+                !     print*, dist_vec_buffer(1, 1)
+                !     print*, dist_vec_buffer(2, 1)
+                !     print*, dist_vec(1)
+                !     print*, '========'
+                !     print*, dist_vec_buffer(1, 2)
+                !     print*, dist_vec_buffer(2, 2)
+                !     print*, dist_vec(2)
+                !     print*, '========'
+                !     print*, levelset_norm(i, j, 0, ib_patch_id, 2)
+                ! end if
+
             end do
         end do
 
