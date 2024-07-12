@@ -60,24 +60,23 @@ contains
             do j = 0, n
                 distance_buffer = 1d12
                 buffer_count = 0
+                distance = 0d0
 
                 do num_buffer = 1, 4
                     ii_buffer(num_buffer) = -1000
                     jj_buffer(num_buffer) = -1000
                 end do
 
-                distance = 0d0
-
                 do q = 1, num_gps
                     gp = ghost_points(q)
                     ii = gp%loc(1)
                     jj = gp%loc(2)
 
-                    if (gp%IBB > 0) then
+                    if (gp%IBB == 1) then
                         distance(q) = dsqrt((x_cc(i) - x_cc(ii))**2 &
                                             + (y_cc(j) - y_cc(jj))**2)
                     else
-                        distance(q) = 1d12
+                        distance(q) = 1d15
                     end if
 
                     if (abs(distance_buffer - distance(q)) < 1d-12) then
@@ -92,7 +91,7 @@ contains
                         jj_buffer(1) = jj
                         ii_buffer(2:4) = 0
                         jj_buffer(2:4) = 0
-                        buffer_count = 1
+                        buffer_count = 0
                     end if
                 end do
 
