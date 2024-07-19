@@ -53,8 +53,9 @@ contains
         integer :: i, j, k, ii, jj, q, ii_buffer(4), jj_buffer(4)
         integer :: buffer_count, num_buffer
         type(ghost_point) :: gp
-        real(kind(0d0)) :: distance_buffer, distance_q
+        real(kind(0d0)) :: distance_buffer, distance_q, x_ib_bb_1, x_ib_bb_2, y_ib_bb_1, y_ib_bb_2
         type(integer_field), intent(INOUT) :: ib_markers
+        real(kind(0d0)), dimension(1:num_gps) :: gp_xcc, gp_ycc
 
         do i = 0, m
             do j = 0, n
@@ -71,6 +72,8 @@ contains
                     gp = ghost_points(q)
                     ii = gp%loc(1)
                     jj = gp%loc(2)
+                    gp_xcc(q) = x_cc(ii)
+                    gp_ycc(q) = y_cc(jj)
 
                     if (gp%IBB == 1) then
                         distance(q) = dsqrt((x_cc(i) - x_cc(ii))**2 &
@@ -94,6 +97,11 @@ contains
                         buffer_count = 1
                     end if
                 end do
+
+                x_ib_bb_1 = MINVAL(gp_xcc) 
+                x_ib_bb_2 = MAXVAL(gp_xcc) 
+                y_ib_bb_1 = MINVAL(gp_ycc) 
+                y_ib_bb_2 = MAXVAL(gp_ycc) 
 
                 ! if (buffer_count > 1) then
                 !     print*, i, j, buffer_count
@@ -146,7 +154,7 @@ contains
 
                 levelset(i, j, 0, ib_patch_id) = distance_q
 
-                if (abs(distance_q) < 1d-10) then
+                if (abs(distance_q) < 1d-10 .or. abs(distance_q) > 1d6) then
                     levelset_norm(i, j, 0, ib_patch_id, :) = 0
                 else
                     if (ib_markers%sf(i, j, 0) /= 0) then
@@ -158,19 +166,33 @@ contains
                     end if
                 end if
 
-                if (j == 50 .and. i == 91) then
-                    print*, abs(distance_q)
-                    print*, '========'
-                    print*, dist_vec_buffer(1, 1)
-                    print*, dist_vec_buffer(2, 1)
-                    print*, dist_vec(1)
-                    print*, '========'
-                    print*, dist_vec_buffer(1, 2)
-                    print*, dist_vec_buffer(2, 2)
-                    print*, dist_vec(2)
-                    print*, '========'
-                    print*, levelset_norm(i, j, 0, ib_patch_id, 2)
-                end if
+                ! if (x_cc(i) <  x_ib_bb_1 .and. y_cc(i) <  y_ib_bb_1) then
+                !     levelset_norm(i, j, 0, ib_patch_id, :) = 0
+                ! elseif (x_cc(i) <  x_ib_bb_1 .and. y_cc(i) >  y_ib_bb_2) then
+                !     levelset_norm(i, j, 0, ib_patch_id, :) = 0
+                ! elseif (x_cc(i) >  x_ib_bb_2 .and. y_cc(i) <  y_ib_bb_1) then
+                !     levelset_norm(i, j, 0, ib_patch_id, :) = 0
+                ! elseif (x_cc(i) >  x_ib_bb_2 .and. y_cc(i) >  y_ib_bb_2) then
+                !     levelset_norm(i, j, 0, ib_patch_id, :) = 0
+                ! end if
+
+                ! print*, x_ib_bb_1, x_ib_bb_2, y_ib_bb_1, y_ib_bb_2
+
+                ! if (j == 50 .and. i == 91) then
+                !     print*, abs(distance_q)
+                !     print*, '========'
+                !     print*, dist_vec_buffer(1, 1)
+                !     print*, dist_vec_buffer(2, 1)
+                !     print*, dist_vec(1)
+                !     print*, '========'
+                !     print*, dist_vec_buffer(1, 2)
+                !     print*, dist_vec_buffer(2, 2)
+                !     print*, dist_vec(2)
+                !     print*, '========'
+                !     print*, levelset_norm(i, j, 0, ib_patch_id, 2)
+                !     print*, '========'
+                !     print*, 
+                ! end if
 
             end do
         end do
