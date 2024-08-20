@@ -17,7 +17,9 @@ module m_model
 
     private
 
-    public :: f_model_read, s_model_write, s_model_free, f_model_is_inside
+    public :: f_model_read, s_model_write, s_model_free, f_model_is_inside, & 
+              f_tag_triangle_3D, f_check_boundary, f_find_normals_2D
+            !   f_tag_triangle_2D
 
 contains
 
@@ -536,5 +538,167 @@ contains
         intersects = .true.
 
     end function f_intersects_triangle
+
+    function f_tag_triangle_3D(model, point, spacing) result(normals)
+        type(t_model), intent(in) :: model
+        t_vec3, intent(in) :: point
+        t_vec3, intent(in) :: spacing
+        real(kind(0d0)) :: v1(1:3), v2(1:3), v3(1:3)
+        real(kind(0d0)) :: normals(1:3)
+        real(kind(0d0)) :: x_upper_bound, x_lower_bound, y_upper_bound, y_lower_bound, z_upper_bound, z_lower_bound
+
+        integer :: i, j, k
+
+        x_upper_bound = point(1) + spacing(1);
+        x_lower_bound = point(1) - spacing(1);
+
+        y_upper_bound = point(2) + spacing(2);
+        y_lower_bound = point(2) - spacing(2);
+
+        z_upper_bound = point(3) + spacing(3);
+        z_lower_bound = point(3) - spacing(3);
+
+        normals = (/0d0, 0d0, 0d0/)
+
+        do i = 1, model%ntrs
+            v1 = model%trs(i)%v(1,:)
+            v2 = model%trs(i)%v(2,:)
+            v3 = model%trs(i)%v(3,:)
+            if ((x_lower_bound <= v1(1) .and. x_upper_bound >= v1(1)) .and. &
+                (y_lower_bound <= v1(2) .and. y_upper_bound >= v1(2)) .and. &
+                (z_lower_bound <= v1(3) .and. z_upper_bound >= v1(3))) then
+                normals = model%trs(i)%n
+            end if
+            if ((x_lower_bound <= v2(1) .and. x_upper_bound >= v2(1)) .and. &
+                (y_lower_bound <= v2(2) .and. y_upper_bound >= v2(2)) .and. &
+                (z_lower_bound <= v2(3) .and. z_upper_bound >= v2(3))) then
+                normals = model%trs(i)%n
+            end if
+            if ((x_lower_bound <= v3(1) .and. x_upper_bound >= v3(1)) .and. &
+                (y_lower_bound <= v3(2) .and. y_upper_bound >= v3(2)) .and. &
+                (z_lower_bound <= v3(3) .and. z_upper_bound >= v3(3))) then
+                normals = model%trs(i)%n
+            end if
+        end do
+        
+    end function f_tag_triangle_3D
+
+    subroutine f_check_boundary(model, model_o, boundary_count, n)
+        type(t_model), intent(in) :: model
+        type(t_model), intent(out) :: model_o
+        integer :: n, boundary_count
+        integer :: i, j, k, l
+        real(8), allocatable :: edges(:,:)
+        logical, allocatable :: edge_count(:)
+    
+        ! We'll store the edges in a temporary array
+        n = model%ntrs
+        allocate(edges(6*n, 6))
+        allocate(edge_count(6*n))
+        edge_count = .false.
+    
+        ! Iterate over all triangles
+        l = 0
+        do i = 1, n
+            do j = 1, 3
+                k = mod(j, 3) + 1
+                l = l + 1
+                edges(l, 1:3) = model%trs(i)%v(1:3, j)
+                edges(l, 4:6) = model%trs(i)%v(1:3, k)
+                
+                ! Check for already existing edge
+                do k = 1, l-1
+                    if (all(edges(k, 1:3) == edges(l, 1:3)) .and. all(edges(k, 4:6) == edges(l, 4:6))) then
+                        edge_count(k) = .true.
+                        edge_count(l) = .true.
+                        exit
+                    end if
+                    if (all(edges(k, 1:3) == edges(l, 4:6)) .and. all(edges(k, 4:6) == edges(l, 1:3))) then
+                        edge_count(k) = .true.
+                        edge_count(l) = .true.
+                        exit
+                    end if
+                end do
+            end do
+        end do
+    
+       ! Count boundary edges
+        boundary_count = 0
+        do i = 1, l
+            if (.not. edge_count(i)) boundary_count = boundary_count + 1
+        end do
+
+        ! Allocate space for boundary triangles
+        allocate(model_o%trs(boundary_count))
+
+        ! Store boundary vertices
+        boundary_count = 0
+        do i = 1, l
+            if (.not. edge_count(i)) then
+                boundary_count = boundary_count + 1
+                model_o%trs(boundary_count)%v(1, 1:3) = edges(i, 1:3)
+                model_o%trs(boundary_count)%v(2, 1:3) = edges(i, 4:6)
+            end if
+        end do
+    
+        deallocate(edges)
+        deallocate(edge_count)
+    end subroutine f_check_boundary
+
+    subroutine f_find_normals_2D(model_o, normals, midpoints)
+        type(t_model), intent(in) :: model_o
+        real(8), allocatable :: normals(:,:), midpoints(:,:)
+        integer :: i, n
+        real(8) :: dx, dy, length
+    
+        ! Number of boundary triangles
+        n = size(model_o%trs)
+    
+        ! Allocate space for normals and midpoints
+        allocate(normals(n, 2))
+        allocate(midpoints(n, 2))
+    
+        ! Loop over each boundary triangle and calculate the normal vectors and midpoints
+        do i = 1, n
+          ! Get the x and y coordinates of the two boundary vertices
+          dx = model_o%trs(i)%v(2, 1) - model_o%trs(i)%v(1, 1)
+          dy = model_o%trs(i)%v(2, 2) - model_o%trs(i)%v(1, 2)
+    
+          ! Find the midpoint of the segment
+          midpoints(i, 1) = (model_o%trs(i)%v(1, 1) + model_o%trs(i)%v(2, 1)) / 2.d0
+          midpoints(i, 2) = (model_o%trs(i)%v(1, 2) + model_o%trs(i)%v(2, 2)) / 2.d0
+    
+          ! Calculate the length of the segment
+          length = sqrt(dx**2 + dy**2)
+    
+          ! Normal vector: Rotate the vector (dx, dy) 90 degrees clockwise to get the normal
+          normals(i, 1) = -dy / length
+          normals(i, 2) = dx / length
+        end do
+      end subroutine f_find_normals_2D
+
+    ! function f_tag_triangle_2D(BD_vertices)
+
+    !     do i = 1, model%ntrs
+    !         v1 = model%trs(i)%v(1,:)
+    !         v2 = model%trs(i)%v(2,:)
+    !         v3 = model%trs(i)%v(3,:)
+    !         if ((x_lower_bound <= v1(1) .and. x_upper_bound >= v1(1)) .and. &
+    !             (y_lower_bound <= v1(2) .and. y_upper_bound >= v1(2))) then
+    !             normals = 
+    !         end if
+    !         if ((x_lower_bound <= v2(1) .and. x_upper_bound >= v2(1)) .and. &
+    !             (y_lower_bound <= v2(2) .and. y_upper_bound >= v2(2)) .and. &
+    !             (z_lower_bound <= v2(3) .and. z_upper_bound >= v2(3))) then
+    !             normals = model%trs(i)%n
+    !         end if
+    !         if ((x_lower_bound <= v3(1) .and. x_upper_bound >= v3(1)) .and. &
+    !             (y_lower_bound <= v3(2) .and. y_upper_bound >= v3(2)) .and. &
+    !             (z_lower_bound <= v3(3) .and. z_upper_bound >= v3(3))) then
+    !             normals = model%trs(i)%n
+    !         end if
+    !     end do
+
+    ! end function f_tag_triangle_2D
 
 end module m_model

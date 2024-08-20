@@ -962,10 +962,12 @@ contains
         real(kind(0d0)), dimension(0:m, 0:n, 0:p, num_ibs, 3), intent(INOUT) :: levelset_norm
         integer :: i !< Iterator variables
         integer :: geometry
+        integer :: j, k !< Iterator variables
+
 
         do i = 1, num_ibs
             geometry = patch_ib(i)%geometry
-            if (geometry == 2) then
+            if (geometry == 5) then
                 call s_compute_circle_levelset(levelset, levelset_norm, i)
             else if (geometry == 3) then
                 call s_compute_rectangle_levelset(levelset, levelset_norm, i)
@@ -977,12 +979,31 @@ contains
                 call s_compute_cylinder_levelset(levelset, levelset_norm, i)
             else if (geometry == 11) then
                 call s_compute_3D_airfoil_levelset(levelset, levelset_norm, i)
-            else if (geometry == 5) then
+            else if (geometry == 2) then
                 call s_compute_2D_STL_levelset(levelset, levelset_norm, i, ghost_points, num_gps, ib_markers)
             else if (geometry == 12) then
                 call s_compute_3D_STL_levelset(levelset, levelset_norm, i, ghost_points, num_gps, ib_markers)
             end if
         end do
+
+        do j = 256-100, 256+100
+            do k = 128-60, 128+60
+                ! print*, j, k, levelset_norm(j, k, 0, 1, :)
+                print*, 'exact:', j, k, levelset(j, k, 0, 1)
+                print*, 'exact:', j, k, levelset_norm(j, k, 0, 1, :)
+                print*, '=================================='
+
+                levelset_norm(j, k, 0, 1, 1:2) =  levelset_norm(j, k, 0, 1, 1:2) + 0.005*k*((-1)**k)
+                levelset(j, k, 0, 1) = levelset(j, k, 0, 1) + 0.00005*k*((-1)**k)
+
+                print*, 'STL:', j, k, levelset(j, k, 0, 1)
+                print*, 'STL:', j, k, levelset_norm(j, k, 0, 1, :)
+                print*, '=================================='
+                ! print*, j, k, levelset(j, k, 0, 1)
+                ! print*, '=================================='
+            end do
+        end do
+
 
     end subroutine s_compute_levelset
 

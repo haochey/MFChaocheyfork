@@ -1933,6 +1933,9 @@ contains
 
         type(t_bbox) :: bbox
         type(t_model) :: model
+
+        type(t_model) :: model_o
+
         type(ic_model_parameters) :: params
         logical, intent(IN) :: ib   !< True if this patch is an immersed boundary
 
@@ -1944,6 +1947,10 @@ contains
         integer :: ncells
 
         t_mat4x4 :: transform
+        real(kind(0d0)) :: normals(1:3)
+
+        integer :: boundary_count, nn
+
 
         if (.not. ib .and. proc_rank == 0) then
             print *, " * Reading model: "//trim(patch_icpp(patch_id)%model%filepath)
@@ -1997,11 +2004,15 @@ contains
         do i = 0, m; do j = 0, n; do k = 0, p
 
                     cell_num = i*(n + 1)*(p + 1) + j*(p + 1) + (k + 1)
-                    if (proc_rank == 0 .and. mod(cell_num, ncells/100) == 0) then
-                        write (*, "(A, I3, A)", advance="no") &
+                    if (proc_rank == 0) then
+                        write (*, "(A, F20.2, A)", advance="no") &
                             char(13)//"  * Generating grid: ", &
-                            nint(100*real(cell_num)/ncells), "%"
+                            (100*real(cell_num)/real(ncells)), "%"
                     end if
+
+                    ! if (proc_rank == 0 .and. mod(cell_num, ncells/100) == 0) then
+                    !     print*, (100*real(cell_num)/real(ncells)), '%'
+                    ! end if
 
                     point = (/x_cc(i), y_cc(j), 0d0/)
                     if (p > 0) then
@@ -2035,15 +2046,38 @@ contains
                                                                 eta, q_prim_vf, patch_id_fp)
                     end if
 
+
                     if (ib .and. eta > patch_ib(patch_id)%model%threshold) then
                         patch_id_fp(i, j, k) = patch_id
+                        if (p > 0) then
+                            normals = f_tag_triangle_3D(model, point, (/dx, dy, dz/))
+
+                            ! STL_normals(i,j,k, 1:3) = normals
+                        else
+                            call f_check_boundary(model, model_o, boundary_count, nn)
+                            ! normals = f_tag_triangle_2D(BD_vertices, point, (/dx, dy, 0d0/))
+
+                            ! STL_normals(i,j,0, 1:3) = normals
+                        end if    
                     end if
+
+
+                    ! if (eta > patch_ib(patch_id)%model%threshold) then 
+                    !     print*, '================='
+                    !     print*, i, j, k
+                    !     print*, 'normal:', normals
+                    !     print*, '================='
+                    ! end if
+
+
 
                     ! Note: Should probably use *eta* to compute primitive variables
                     ! if defining them analytically.
                     @:analytical()
 
                 end do; end do; end do
+
+                print*, 'total vertices', nn,'boundary verticies', boundary_count
 
         if (proc_rank == 0) then
             print *, ""
