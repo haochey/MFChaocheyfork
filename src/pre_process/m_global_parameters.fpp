@@ -130,6 +130,9 @@ module m_global_parameters
     type(mpi_io_var), public :: MPI_IO_DATA
     type(mpi_io_ib_var), public :: MPI_IO_IB_DATA
     type(mpi_io_airfoil_ib_var), public :: MPI_IO_airfoil_IB_DATA
+    type(mpi_io_stl_leveset_var), public :: MPI_IO_STL_levelset_DATA
+    ! type(mpi_io_STL_levelsetnorm_var), public :: MPI_IO_STL_levelsetnorm_DATA
+
 
     character(LEN=name_len) :: mpiiofs
     integer :: mpi_info_int !<

@@ -58,6 +58,9 @@ module m_initial_condition
     !! immersed boundary. The default is 0, otherwise the value is assigned
     !! to the patch ID of the immersed boundary.
 
+    real(kind(0d0)), allocatable, dimension(:, :, :, :) :: STL_levelset !<
+
+
 contains
 
     !> Computation of parameters, allocation procedures, and/or
@@ -79,6 +82,8 @@ contains
         allocate (patch_id_fp(0:m, 0:n, 0:p))
 
         allocate (ib_markers%sf(0:m, 0:n, 0:p))
+
+        allocate (STL_levelset(0:m, 0:n, 0:p, 1:num_ibs))
 
         if (qbmm .and. .not. polytropic) then
             !Allocate bubble pressure pb and vapor mass mv for non-polytropic qbmm at all quad nodes and R0 bins
@@ -198,7 +203,7 @@ contains
                     call s_3D_airfoil(i, ib_markers%sf, q_prim_vf, .true.)
 
                 elseif (patch_ib(i)%geometry == 12) then
-                    call s_model(i, ib_markers%sf, q_prim_vf, .true.)
+                    call s_model(i, ib_markers%sf, q_prim_vf, .true., STL_levelset)
                 end if
             end do
             !> @}
@@ -278,7 +283,7 @@ contains
                     call s_airfoil(i, ib_markers%sf, q_prim_vf, .true.)
 
                 elseif (patch_ib(i)%geometry == 5) then
-                    call s_model(i, ib_markers%sf, q_prim_vf, .true.)
+                    call s_model(i, ib_markers%sf, q_prim_vf, .true., STL_levelset)
                 end if
             end do
             !> @}
@@ -657,6 +662,7 @@ contains
         ! Deallocating the patch identities bookkeeping variable
         deallocate (patch_id_fp)
         deallocate (ib_markers%sf)
+        deallocate (STL_levelset)
 
     end subroutine s_finalize_initial_condition_module ! -------------------
 

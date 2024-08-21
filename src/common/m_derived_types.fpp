@@ -245,6 +245,11 @@ module m_derived_types
         type(probe_parameters), allocatable, dimension(:) :: var
     end type mpi_io_airfoil_ib_var
 
+    type mpi_io_stl_leveset_var
+        integer :: view
+        type(probe_parameters), allocatable, dimension(:) :: var
+    end type mpi_io_stl_leveset_var
+
     !> Derived type annexing integral regions
     type integral_parameters
         real(kind(0d0)) :: xmin !< Min. boundary first coordinate direction

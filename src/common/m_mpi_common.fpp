@@ -60,7 +60,7 @@ contains
 
     end subroutine s_mpi_initialize ! --------------------------------------
 
-    subroutine s_initialize_mpi_data(q_cons_vf, ib_markers) ! --------------------------
+    subroutine s_initialize_mpi_data(q_cons_vf, ib_markers, STL_levelset) ! --------------------------
 
         type(scalar_field), &
             dimension(sys_size), &
@@ -69,6 +69,10 @@ contains
         type(integer_field), &
             optional, &
             intent(IN) :: ib_markers
+
+        real(kind(0d0)), &
+            optional, &
+            intent(IN) :: STL_levelset
 
         integer, dimension(num_dims) :: sizes_glb, sizes_loc
         integer, dimension(1) :: airfoil_glb, airfoil_loc, airfoil_start
@@ -187,6 +191,15 @@ contains
 #endif
 
 #endif
+    if (present(STL_levelset)) then
+        do j = 1:num_ibs
+            MPI_IO_STL_levelset_DATA%var(j) = STL_levelset(0:m, 0:n, 0:p, j)
+
+            call MPI_TYPE_CREATE_SUBARRAY(4, sizes_glb, sizes_loc, start_idx, &
+                                            MPI_ORDER_FORTRAN, MPI_DOUBLE_PRECISION, MPI_IO_STL_levelset_DATA%view, ierr)
+            call MPI_TYPE_COMMIT(MPI_IO_STL_levelset_DATA%view, ierr)
+        end do
+    end if
 
     end subroutine s_initialize_mpi_data ! ---------------------------------
 

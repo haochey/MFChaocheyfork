@@ -18,7 +18,7 @@ module m_model
     private
 
     public :: f_model_read, s_model_write, s_model_free, f_model_is_inside, & 
-              f_tag_triangle_3D, f_check_boundary, f_find_normals_2D
+              f_tag_triangle_3D, f_check_boundary, f_find_normals_2D, f_distance
             !   f_tag_triangle_2D
 
 contains
@@ -700,5 +700,53 @@ contains
     !     end do
 
     ! end function f_tag_triangle_2D
+
+    function f_distance(model_o, boundary_count, point, spacing) result(distance)
+        type(t_model), intent(in) :: model_o
+        integer, intent(in) :: boundary_count
+        t_vec3, intent(in) :: point
+        t_vec3, intent(in) :: spacing
+
+        integer :: i, j, k
+        real(kind(0d0)) :: xcc, ycc, zcc, &
+                         & v1_x, v1_y, v1_z, &
+                         & v2_x, v2_y, v2_z, &
+                         & v3_x, v3_y, v3_z
+        
+        real(kind(0d0)) :: dist_buffer1, dist_buffer2, dist_buffer3
+        real(kind(0d0)) :: dist_trs(1:boundary_count)
+        real(kind(0d0)) :: distance
+
+        xcc = point(1); ycc = point(2); zcc = point(3)
+        distance = 0d0
+
+        do i = 1, boundary_count
+            v1_x = model_o%trs(i)%v(1, 1)
+            v1_y = model_o%trs(i)%v(1, 2)
+            v1_z = model_o%trs(i)%v(1, 3)
+            dist_buffer1 = dsqrt((xcc-v1_x)**2 + &
+                                & (ycc-v1_y)**2 + &
+                                & (zcc-v1_z)**2)
+
+            v2_x = model_o%trs(i)%v(2, 1)
+            v2_y = model_o%trs(i)%v(2, 2)
+            v2_z = model_o%trs(i)%v(2, 3)
+            dist_buffer2 = dsqrt((xcc-v2_x)**2 + &
+                                & (ycc-v2_y)**2 + &
+                                & (zcc-v2_z)**2)
+
+            v3_x = model_o%trs(i)%v(3, 1)
+            v3_y = model_o%trs(i)%v(3, 2)
+            v3_z = model_o%trs(i)%v(3, 3)
+            dist_buffer3 = dsqrt((xcc-v3_x)**2 + &
+                                & (ycc-v3_y)**2 + &
+                                & (zcc-v3_z)**2)
+
+            dist_trs(i) = MINVAL((/dist_buffer1, dist_buffer2, dist_buffer3/))
+        end do
+
+        distance = MINVAL(dist_trs)
+    end function f_distance
+
 
 end module m_model

@@ -964,7 +964,6 @@ contains
         integer :: geometry
         integer :: j, k !< Iterator variables
 
-
         do i = 1, num_ibs
             geometry = patch_ib(i)%geometry
             if (geometry == 5) then
@@ -986,24 +985,23 @@ contains
             end if
         end do
 
-        do j = 256-100, 256+100
-            do k = 128-60, 128+60
-                ! print*, j, k, levelset_norm(j, k, 0, 1, :)
-                print*, 'exact:', j, k, levelset(j, k, 0, 1)
-                print*, 'exact:', j, k, levelset_norm(j, k, 0, 1, :)
-                print*, '=================================='
+        ! do j = 256-100, 256+100
+        !     do k = 128-60, 128+60
+        !         ! print*, j, k, levelset_norm(j, k, 0, 1, :)
+        !         print*, 'exact:', j, k, levelset(j, k, 0, 1)
+        !         print*, 'exact:', j, k, levelset_norm(j, k, 0, 1, :)
+        !         print*, '=================================='
 
-                levelset_norm(j, k, 0, 1, 1:2) =  levelset_norm(j, k, 0, 1, 1:2) + 0.005*k*((-1)**k)
-                levelset(j, k, 0, 1) = levelset(j, k, 0, 1) + 0.00005*k*((-1)**k)
+        !         levelset_norm(j, k, 0, 1, 1:2) =  levelset_norm(j, k, 0, 1, 1:2) + 0.005*k*((-1)**k)
+        !         levelset(j, k, 0, 1) = levelset(j, k, 0, 1) + 0.00003*k*((-1)**k)
 
-                print*, 'STL:', j, k, levelset(j, k, 0, 1)
-                print*, 'STL:', j, k, levelset_norm(j, k, 0, 1, :)
-                print*, '=================================='
-                ! print*, j, k, levelset(j, k, 0, 1)
-                ! print*, '=================================='
-            end do
-        end do
-
+        !         print*, 'STL:', j, k, levelset(j, k, 0, 1)
+        !         print*, 'STL:', j, k, levelset_norm(j, k, 0, 1, :)
+        !         print*, '=================================='
+        !         ! print*, j, k, levelset(j, k, 0, 1)
+        !         ! print*, '=================================='
+        !     end do
+        ! end do
 
     end subroutine s_compute_levelset
 
