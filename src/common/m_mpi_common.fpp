@@ -196,8 +196,8 @@ contains
             MPI_IO_STL_levelset_DATA%var(j) = STL_levelset(0:m, 0:n, 0:p, j)
 
             call MPI_TYPE_CREATE_SUBARRAY(4, sizes_glb, sizes_loc, start_idx, &
-                                            MPI_ORDER_FORTRAN, MPI_DOUBLE_PRECISION, MPI_IO_STL_levelset_DATA%view, ierr)
-            call MPI_TYPE_COMMIT(MPI_IO_STL_levelset_DATA%view, ierr)
+                                            MPI_ORDER_FORTRAN, MPI_DOUBLE_PRECISION, MPI_IO_STL_levelset_DATA%view(j), ierr)
+            call MPI_TYPE_COMMIT(MPI_IO_STL_levelset_DATA%view(j), ierr)
         end do
     end if
 
