@@ -58,7 +58,7 @@ module m_initial_condition
     !! immersed boundary. The default is 0, otherwise the value is assigned
     !! to the patch ID of the immersed boundary.
 
-    real(kind(0d0)), allocatable, dimension(:, :, :, :) :: STL_levelset !<
+    ! real(kind(0d0)), allocatable, dimension(:, :, :, :) :: STL_levelset !<
 
 
 contains
@@ -284,6 +284,9 @@ contains
 
                 elseif (patch_ib(i)%geometry == 5) then
                     call s_model(i, ib_markers%sf, q_prim_vf, .true., STL_levelset)
+
+                    ! print*, 'check', STL_levelset(106, 50, 0, 1)
+
                 end if
             end do
             !> @}
@@ -662,6 +665,8 @@ contains
         ! Deallocating the patch identities bookkeeping variable
         deallocate (patch_id_fp)
         deallocate (ib_markers%sf)
+        print*, 'check', STL_levelset(106, 50, 0, 1)
+
         deallocate (STL_levelset)
 
     end subroutine s_finalize_initial_condition_module ! -------------------

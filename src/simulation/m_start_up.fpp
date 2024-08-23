@@ -443,6 +443,20 @@ contains
                         call s_mpi_abort(trim(file_path)//' is missing. Exiting ...')
                     end if
                 end if
+
+                write (file_path, '(A)') &
+                    trim(t_step_dir)//'/STL_levelset.dat'
+                inquire (FILE=trim(file_path), EXIST=file_exist)
+                if (file_exist) then
+                    open (2, FILE=trim(file_path), &
+                          FORM='unformatted', &
+                          ACTION='read', &
+                          STATUS='old')
+                    read (2) STL_levelset; close (2)
+                    ! print*, 'check', STL_levelset(106, 50, 0, 1)
+                else
+                    call s_mpi_abort(trim(file_path)//' is missing. Exiting ...')
+                end if
             end do
 
         end if

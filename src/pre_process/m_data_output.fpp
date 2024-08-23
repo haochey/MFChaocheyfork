@@ -168,6 +168,16 @@ contains
                     write (1) airfoil_grid_l(1:Np)
                     close (1)
                 end if
+
+                if (patch_ib(i)%geometry == 5) then
+
+                    file_loc = trim(t_step_dir)//'/STL_levelset.dat'
+
+                    open (1, FILE=trim(file_loc), FORM='unformatted', STATUS=status)
+                    write (1) STL_levelset
+                    close (1)
+
+                end if
             end do
         end if
         ! ==================================================================
@@ -458,6 +468,27 @@ contains
 
                     print *, "Np", Np
                 end if
+
+                ! print*, 'check5', STL_levelset(106, 50, 0, 1)
+
+
+                if (patch_ib(i)%geometry == 5) then
+
+                    write (file_loc, '(A,I2.2,A)') trim(t_step_dir)//'/STL_levelset.', proc_rank, '.dat'
+                    open (2, FILE=trim(file_loc))
+                    do j = 0, m
+                        do k = 0, n
+                            write (2, FMT) x_cc(j), y_cc(k), real(STL_levelset(j, k, 0, 1))
+                            if (p > 0) then
+                                do l = 0, p
+                                    write (2, FMT) x_cc(j), y_cc(k), z_cc(l), real(STL_levelset(j, k, l, 1))
+                                end do
+                            end if
+                        end do
+                    end do
+
+                    close (2)
+                end if
             end do
         end if
 
@@ -723,25 +754,6 @@ contains
                 !     call MPI_FILE_SET_VIEW(ifile, disp, MPI_DOUBLE_PRECISION, MPI_IO_STL_Levelset_DATA%view(1), &
                 !                            'native', mpi_info_int, ierr)
                 !     call MPI_FILE_WRITE_ALL(ifile, MPI_IO_STL_Levelset_DATA%var(0:m), 3*Np, &
-                !                             MPI_DOUBLE_PRECISION, status, ierr)
-
-                !     call MPI_FILE_CLOSE(ifile, ierr)
-
-                !     write (file_loc, '(A)') 'STL_levelset_norm.dat'
-                !     file_loc = trim(restart_dir)//trim(mpiiofs)//trim(file_loc)
-                !     inquire (FILE=trim(file_loc), EXIST=file_exist)
-                !     if (file_exist .and. proc_rank == 0) then
-                !         call MPI_FILE_DELETE(file_loc, mpi_info_int, ierr)
-                !     end if
-                !     call MPI_FILE_OPEN(MPI_COMM_WORLD, file_loc, ior(MPI_MODE_WRONLY, MPI_MODE_CREATE), &
-                !                        mpi_info_int, ifile, ierr)
-
-                !     ! Initial displacement to skip at beginning of file
-                !     disp = 0
-
-                !     call MPI_FILE_SET_VIEW(ifile, disp, MPI_DOUBLE_PRECISION, MPI_IO_STL_Levelsetnorm_DATA%view(2), &
-                !                            'native', mpi_info_int, ierr)
-                !     call MPI_FILE_WRITE_ALL(ifile, MPI_IO_STL_Levelsetnorm_DATA%var(Np + 1:2*Np), 3*Np, &
                 !                             MPI_DOUBLE_PRECISION, status, ierr)
 
                 !     call MPI_FILE_CLOSE(ifile, ierr)

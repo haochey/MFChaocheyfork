@@ -41,7 +41,7 @@ module m_compute_levelset
 contains
 
         !>  Initialize IBM module
-    subroutine s_compute_2D_STL_levelset(levelset, levelset_norm, ib_patch_id, ghost_points, num_gps, ib_markers)
+    subroutine s_compute_2D_STL_levelset(levelset, levelset_norm, ib_patch_id, ghost_points, num_gps, ib_markers, STL_levelset)
         integer, intent(INOUT) :: num_gps
         type(ghost_point), dimension(num_gps), intent(INOUT) :: ghost_points
         real(kind(0d0)), dimension(0:m, 0:n, 0:p, num_ibs), intent(INOUT) :: levelset
@@ -56,6 +56,8 @@ contains
         real(kind(0d0)) :: distance_buffer, distance_q, x_ib_bb_1, x_ib_bb_2, y_ib_bb_1, y_ib_bb_2
         type(integer_field), intent(INOUT) :: ib_markers
         real(kind(0d0)), dimension(1:num_gps) :: gp_xcc, gp_ycc
+
+        real(kind(0d0)), dimension(0:m, 0:n, 0:p, num_ibs), intent(IN) :: STL_levelset
 
         do i = 0, m
             do j = 0, n
@@ -193,7 +195,7 @@ contains
                 !     print*, '========'
                 !     print*, 
                 ! end if
-
+                levelset(i, j, 0, ib_patch_id) = STL_levelset(i, j, 0, 1)
             end do
         end do
 

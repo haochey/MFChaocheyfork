@@ -2048,8 +2048,11 @@ contains
                     end if
 
                     ! Reading STL boundary vertices and compute the levelset
-                    if (ib .and. eta > patch_ib(patch_id)%model%threshold) then
+                    if (eta > patch_ib(patch_id)%model%threshold) then
                         patch_id_fp(i, j, k) = patch_id
+                    end if
+
+                    if (ib) then
                         if (p > 0) then
                             ! normals = f_tag_triangle_3D(model, point, (/dx, dy, dz/))
                             ! STL_normals(i,j,k, 1:3) = normals
@@ -2062,7 +2065,10 @@ contains
                                                             & boundary_count, point, &
                                                             & (/dx, dy, dz/))
                             
-                            print*, i, j, k, STL_levelset(i, j, 0, patch_id)
+                            if (patch_id_fp(i, j, k) > 0) then
+                                STL_levelset(i, j, 0, patch_id) = -abs(STL_levelset(i, j, 0, patch_id))
+                            end if
+                            ! print*, i, j, k, STL_levelset(200, 100, 0, patch_id)
 
                             ! normals = f_tag_triangle_2D(BD_vertices, point, (/dx, dy, 0d0/))
                             ! STL_normals(i,j,0, 1:3) = normals
@@ -2084,6 +2090,9 @@ contains
                     @:analytical()
 
                 end do; end do; end do
+
+                print*, i, j, k, STL_levelset(100, 50, 0, patch_id)
+
 
                 print*, 'total vertices', nn,'boundary verticies', boundary_count
 

@@ -247,7 +247,7 @@ module m_derived_types
 
     type mpi_io_stl_leveset_var
         integer :: view
-        type(probe_parameters), allocatable, dimension(:) :: var
+        real(kind(0d0)), pointer, dimension(:, :, :, :) :: var => null()
     end type mpi_io_stl_leveset_var
 
     !> Derived type annexing integral regions

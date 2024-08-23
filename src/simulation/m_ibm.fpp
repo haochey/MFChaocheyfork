@@ -38,6 +38,8 @@ module m_ibm
  s_finalize_ibm_module
 
     type(integer_field), public :: ib_markers
+    ! real(kind(0d0)), public, dimension(:, :, :, :) :: STL_levelset
+
 !$acc declare create(ib_markers)
 
 #ifdef CRAY_ACC_WAR
@@ -113,7 +115,7 @@ contains
         call s_determine_IB_boundary(ghost_points)
         !$acc update device(ghost_points)
 
-        call s_compute_levelset(levelset, levelset_norm, ghost_points)
+        call s_compute_levelset(levelset, levelset_norm, ghost_points, STL_levelset)
         !$acc update device(levelset, levelset_norm)
 
         call s_compute_image_points(ghost_points, levelset, levelset_norm)
@@ -956,17 +958,19 @@ contains
         !!  @param fR Current bubble radius
         !!  @param fV Current bubble velocity
         !!  @param fpb Internal bubble pressure
-    subroutine s_compute_levelset(levelset, levelset_norm, ghost_points)
+    subroutine s_compute_levelset(levelset, levelset_norm, ghost_points, STL_levelset)
         type(ghost_point), dimension(num_gps), intent(INOUT) :: ghost_points
         real(kind(0d0)), dimension(0:m, 0:n, 0:p, num_ibs), intent(INOUT) :: levelset
         real(kind(0d0)), dimension(0:m, 0:n, 0:p, num_ibs, 3), intent(INOUT) :: levelset_norm
+        real(kind(0d0)), dimension(0:m, 0:n, 0:p, num_ibs), intent(IN) :: STL_levelset
+
         integer :: i !< Iterator variables
         integer :: geometry
         integer :: j, k !< Iterator variables
 
         do i = 1, num_ibs
             geometry = patch_ib(i)%geometry
-            if (geometry == 5) then
+            if (geometry == 2) then
                 call s_compute_circle_levelset(levelset, levelset_norm, i)
             else if (geometry == 3) then
                 call s_compute_rectangle_levelset(levelset, levelset_norm, i)
@@ -978,12 +982,24 @@ contains
                 call s_compute_cylinder_levelset(levelset, levelset_norm, i)
             else if (geometry == 11) then
                 call s_compute_3D_airfoil_levelset(levelset, levelset_norm, i)
-            else if (geometry == 2) then
-                call s_compute_2D_STL_levelset(levelset, levelset_norm, i, ghost_points, num_gps, ib_markers)
+            else if (geometry == 5) then
+                call s_compute_2D_STL_levelset(levelset, levelset_norm, i, ghost_points, num_gps, ib_markers, STL_levelset)
             else if (geometry == 12) then
                 call s_compute_3D_STL_levelset(levelset, levelset_norm, i, ghost_points, num_gps, ib_markers)
             end if
         end do
+
+        do j = 0,m
+            do k = 0,n
+                levelset(j,k,0,1) = STL_levelset(j,k,0,1)
+            end do
+        end do
+
+        ! do j = m/2,m/2
+        !     do k = n/2-20, n/2+20
+        !         print*, j, k, levelset(j,k,0,1)
+        !     end do
+        ! end do
 
         ! do j = 256-100, 256+100
         !     do k = 128-60, 128+60
