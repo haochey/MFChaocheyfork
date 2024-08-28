@@ -84,6 +84,8 @@ contains
         allocate (ib_markers%sf(0:m, 0:n, 0:p))
 
         allocate (STL_levelset(0:m, 0:n, 0:p, 1:num_ibs))
+        allocate (STL_levelset_norm(0:m, 0:n, 0:p, 1:num_ibs, 1:3))
+
 
         if (qbmm .and. .not. polytropic) then
             !Allocate bubble pressure pb and vapor mass mv for non-polytropic qbmm at all quad nodes and R0 bins
@@ -664,7 +666,6 @@ contains
         deallocate (ib_markers%sf)
         deallocate (STL_levelset)
         deallocate (STL_levelset_norm)
-
 
     end subroutine s_finalize_initial_condition_module ! -------------------
 

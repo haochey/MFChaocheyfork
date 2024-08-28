@@ -1931,7 +1931,6 @@ contains
         real(kind(0d0)), optional, intent(INOUT), dimension(0:m, 0:n, 0:p, 1:num_ibs) :: STL_levelset
         real(kind(0d0)), optional, intent(INOUT), dimension(0:m, 0:n, 0:p, 1:num_ibs, 1:3) :: STL_levelset_norm
 
-
         integer :: i, j, k !< Generic loop iterators
 
         type(t_bbox) :: bbox
@@ -2081,10 +2080,12 @@ contains
                                 & (/dx, dy, dz/), normals)
 
                             if (patch_id_fp(i, j, k) > 0) then
-                                normals = - normals
-                            end if
+                                normals(1:3) = - normals(1:3)  
+                            end if    
 
-                            print*, i, j, normals
+                            STL_levelset_norm(i, j, 0, patch_id, 1:3) = normals(1:3)
+
+                            ! print*, i, j, normals
 
                             ! STL_levelset_norm(i, j, k, patch_id, 1) = normals(1)
                             ! STL_levelset_norm(i, j, k, patch_id, 2) = normals(2)    

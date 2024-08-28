@@ -631,7 +631,7 @@ contains
         t_vec3, intent(in) :: spacing
         t_vec3, intent(out) :: normals
         integer :: i, j, k, idx_2comp, idx_buffer
-        real(kind(0d0)) :: dist_min, dist_buffer, dist_buffer1, dist_buffer2
+        real(kind(0d0)) :: dist_min, dist_buffer, dist_buffer1, dist_buffer2, v_norm
         real(kind(0d0)) :: v1_x, v1_y, v1_z, v2_x, v2_y, v2_z, xcc, ycc, zcc
 
         xcc = point(1); ycc = point(2); zcc = point(3)
@@ -657,11 +657,11 @@ contains
 
             dist_buffer = MINVAL((/dist_buffer1, dist_buffer2/)) 
 
-            ! if (dist_buffer1 > dist_buffer2) then
-            !     idx_2comp = 1
-            ! else
-            !     idx_2comp = 2
-            ! end if
+            if (dist_buffer1 > dist_buffer2) then
+                idx_2comp = 2
+            else
+                idx_2comp = 1
+            end if
 
             if (dist_buffer < dist_min) then
                 dist_min = dist_buffer
@@ -672,6 +672,21 @@ contains
         normals(1) = boundary_v(idx_buffer, 3, 1)
         normals(2) = boundary_v(idx_buffer, 3, 2)
         normals(3) = 0d0
+
+        ! if (idx_2comp == 1) then
+        !     normals(1) = v1_x - xcc
+        !     normals(2) = v1_y - ycc
+        !     v_norm = dsqrt((v1_x - xcc)**2 + (v1_y - ycc)**2)
+        ! else if (idx_2comp == 2) then
+        !     normals(1) = v2_x - xcc
+        !     normals(2) = v2_y - ycc
+        !     v_norm = dsqrt((v2_x - xcc)**2 + (v2_y - ycc)**2)
+        ! end if
+
+        ! normals(3) = 0d0
+
+        ! normals(1) = normals(1)/v_norm
+        ! normals(2) = normals(2)/v_norm
 
         end subroutine f_normals
 
@@ -759,20 +774,48 @@ contains
 
         ! Find the normal vector of the boundary edges
         do i = 1, boundary_edge_count
-            initial = 1d0
-            boundary_edge = boundary_v(i, 1, :) - boundary_v(i, 2, :)
-            edgetan =  boundary_edge(1)/boundary_edge(2)
+            ! boundary_edge = boundary_v(i, 1, :) - boundary_v(i, 2, :)
+            boundary_edge = boundary_v(i, 2, :) - boundary_v(i, 1, :)
 
-            if (edgetan > 1d08) then
-                edgetan = 1d08
-            else if (edgetan < -1d08) then
-                edgetan = -1d08
+            edgetan =  abs(boundary_edge(1)/boundary_edge(2))
+            initial = 1d0
+
+            if (edgetan > 1d06) then
+                edgetan = 1d06
+            else if (edgetan < -1d06) then
+                edgetan = -1d06
             end if
 
             v_norm = dsqrt(initial**2 + (-initial*edgetan)**2)
 
             boundary_v(i, 3, 1) = initial/v_norm
-            boundary_v(i, 3, 2) = -initial*edgetan/v_norm
+            boundary_v(i, 3, 2) = initial*edgetan/v_norm
+
+            if ((boundary_edge(1) > 0d0) .and. &
+                (boundary_edge(2) > 0d0)) then
+
+                boundary_v(i, 3, 1) = -abs(boundary_v(i, 3, 1))
+                boundary_v(i, 3, 2) = abs(boundary_v(i, 3, 2))
+
+            else if ((boundary_edge(1) < 0d0) .and. &
+                (boundary_edge(2) < 0d0)) then
+
+                boundary_v(i, 3, 1) = abs(boundary_v(i, 3, 1))
+                boundary_v(i, 3, 2) = -abs(boundary_v(i, 3, 2))
+
+            else if ((boundary_edge(1) < 0d0) .and. &
+                (boundary_edge(2) > 0d0)) then
+
+                boundary_v(i, 3, 1) = -abs(boundary_v(i, 3, 1))
+                boundary_v(i, 3, 2) = -abs(boundary_v(i, 3, 2))     
+
+            else if ((boundary_edge(1) > 0d0) .and. &
+                (boundary_edge(2) < 0d0)) then
+
+                boundary_v(i, 3, 1) = abs(boundary_v(i, 3, 1))
+                boundary_v(i, 3, 2) = abs(boundary_v(i, 3, 2))  
+
+            end if
         end do
 
     end subroutine f_check_boundary
