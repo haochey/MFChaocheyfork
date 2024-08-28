@@ -1923,12 +1923,14 @@ contains
 
     !> The STL patch is a 2/3D geometry that is imported from an STL file.
     !! @param patch_id is the patch identifier
-    subroutine s_model(patch_id, patch_id_fp, q_prim_vf, ib, STL_levelset) ! ---------------------
+    subroutine s_model(patch_id, patch_id_fp, q_prim_vf, ib, STL_levelset, STL_levelset_norm) ! ---------------------
 
         integer, intent(IN) :: patch_id
         integer, intent(INOUT), dimension(0:m, 0:n, 0:p) :: patch_id_fp
         type(scalar_field), dimension(1:sys_size) :: q_prim_vf
         real(kind(0d0)), optional, intent(INOUT), dimension(0:m, 0:n, 0:p, 1:num_ibs) :: STL_levelset
+        real(kind(0d0)), optional, intent(INOUT), dimension(0:m, 0:n, 0:p, 1:num_ibs, 1:3) :: STL_levelset_norm
+
 
         integer :: i, j, k !< Generic loop iterators
 
@@ -1950,7 +1952,8 @@ contains
         t_mat4x4 :: transform
         real(kind(0d0)) :: normals(1:3)
 
-        integer :: boundary_count, nn
+        integer :: boundary_vertex_count, boundary_edge_count
+        real(kind(0d0)), allocatable, dimension(:, :, :) :: boundary_v
 
 
         if (.not. ib .and. proc_rank == 0) then
@@ -1978,6 +1981,7 @@ contains
         call s_transform_model(model, transform)
 
         bbox = f_create_bbox(model)
+        call f_check_boundary(model, boundary_v, boundary_vertex_count, boundary_edge_count)
 
         if (proc_rank == 0) then
             write (*, "(A, 3(2X, F20.10))") "    > Model:  Min:", bbox%min(1:3)
@@ -2056,22 +2060,39 @@ contains
                         if (p > 0) then
                             ! normals = f_tag_triangle_3D(model, point, (/dx, dy, dz/))
                             ! STL_normals(i,j,k, 1:3) = normals
-                            STL_levelset(i, j, k, patch_id) = f_distance(model, &
-                                                            & model%ntrs, point, &
-                                                            & (/dx, dy, dz/))
+                            ! STL_levelset(i, j, k, patch_id) = f_distance(model, &
+                            !                                 & model%ntrs, point, &
+                            !                                 & (/dx, dy, dz/))
                         else
-                            call f_check_boundary(model, model_o, boundary_count, nn)
-                            STL_levelset(i, j, 0, patch_id) = f_distance(model_o, &
-                                                            & boundary_count, point, &
-                                                            & (/dx, dy, dz/))
+                            STL_levelset(i, j, 0, patch_id) = f_distance(boundary_v, &
+                                                                    boundary_vertex_count, &
+                                                                    boundary_edge_count, &
+                                                                    point, &
+                                                                    & (/dx, dy, dz/))
                             
                             if (patch_id_fp(i, j, k) > 0) then
                                 STL_levelset(i, j, 0, patch_id) = -abs(STL_levelset(i, j, 0, patch_id))
                             end if
-                            ! print*, i, j, k, STL_levelset(200, 100, 0, patch_id)
 
-                            ! normals = f_tag_triangle_2D(BD_vertices, point, (/dx, dy, 0d0/))
-                            ! STL_normals(i,j,0, 1:3) = normals
+                            call f_normals(boundary_v, &
+                                boundary_vertex_count, &
+                                boundary_edge_count, &
+                                point, &
+                                & (/dx, dy, dz/), normals)
+
+                            if (patch_id_fp(i, j, k) > 0) then
+                                normals = - normals
+                            end if
+
+                            print*, i, j, normals
+
+                            ! STL_levelset_norm(i, j, k, patch_id, 1) = normals(1)
+                            ! STL_levelset_norm(i, j, k, patch_id, 2) = normals(2)    
+                            ! STL_levelset_norm(i, j, k, patch_id, 3) = normals(3)    
+
+                            ! print*, i, j, k, STL_levelset(i, j, 0, patch_id)
+                            ! print*, i, j, k, 'normals', STL_levelset_norm(i, j, k, patch_id, 1:3)
+
                         end if    
                     end if
 
@@ -2091,15 +2112,14 @@ contains
 
                 end do; end do; end do
 
-                print*, i, j, k, STL_levelset(100, 50, 0, patch_id)
-
-
-                print*, 'total vertices', nn,'boundary verticies', boundary_count
-
         if (proc_rank == 0) then
             print *, ""
             print *, " * Cleaning up..."
         end if
+
+        ! print*, i, j, 0, STL_levelset(50, 25, 0, patch_id)
+        print*, 'total vertices', 3*model%ntrs,'boundary verticies', boundary_vertex_count
+
 
         call s_model_free(model)
 

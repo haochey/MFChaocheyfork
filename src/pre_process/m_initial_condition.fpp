@@ -203,7 +203,7 @@ contains
                     call s_3D_airfoil(i, ib_markers%sf, q_prim_vf, .true.)
 
                 elseif (patch_ib(i)%geometry == 12) then
-                    call s_model(i, ib_markers%sf, q_prim_vf, .true., STL_levelset)
+                    call s_model(i, ib_markers%sf, q_prim_vf, .true., STL_levelset, STL_levelset_norm)
                 end if
             end do
             !> @}
@@ -283,10 +283,7 @@ contains
                     call s_airfoil(i, ib_markers%sf, q_prim_vf, .true.)
 
                 elseif (patch_ib(i)%geometry == 5) then
-                    call s_model(i, ib_markers%sf, q_prim_vf, .true., STL_levelset)
-
-                    ! print*, 'check', STL_levelset(106, 50, 0, 1)
-
+                    call s_model(i, ib_markers%sf, q_prim_vf, .true., STL_levelset, STL_levelset_norm)
                 end if
             end do
             !> @}
@@ -665,9 +662,9 @@ contains
         ! Deallocating the patch identities bookkeeping variable
         deallocate (patch_id_fp)
         deallocate (ib_markers%sf)
-        print*, 'check', STL_levelset(106, 50, 0, 1)
-
         deallocate (STL_levelset)
+        deallocate (STL_levelset_norm)
+
 
     end subroutine s_finalize_initial_condition_module ! -------------------
 

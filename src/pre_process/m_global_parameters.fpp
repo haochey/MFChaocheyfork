@@ -185,7 +185,9 @@ module m_global_parameters
     type(ib_patch_parameters), dimension(num_patches_max) :: patch_ib
 
     type(probe_parameters), allocatable, dimension(:) :: airfoil_grid_u, airfoil_grid_l
-    real(kind(0d0)), allocatable, dimension(:, :, :, :) :: STL_levelset !<
+    real(kind(0d0)), allocatable, dimension(:, :, :, :) :: STL_levelset
+    real(kind(0d0)), allocatable, dimension(:, :, :, :, :) :: STL_levelset_norm
+
 
     
     !! Database of the immersed boundary patch parameters for each of the

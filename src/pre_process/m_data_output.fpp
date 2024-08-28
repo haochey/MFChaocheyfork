@@ -177,6 +177,12 @@ contains
                     write (1) STL_levelset
                     close (1)
 
+                    file_loc = trim(t_step_dir)//'/STL_levelset_norm.dat'
+
+                    open (1, FILE=trim(file_loc), FORM='unformatted', STATUS=status)
+                    write (1) STL_levelset_norm
+                    close (1)
+
                 end if
             end do
         end if
@@ -488,6 +494,25 @@ contains
                     end do
 
                     close (2)
+
+
+                    ! write (file_loc, '(A,I2.2,A)') trim(t_step_dir)//'/STL_levelset_norm.', proc_rank, '.dat'
+                    ! open (2, FILE=trim(file_loc))
+                    ! do j = 0, m
+                    !     do k = 0, n
+                    !         do r = 1, 3
+                    !             write (2, FMT) x_cc(j), y_cc(k), real(STL_levelset_norm(j, k, 0, 1, i))
+                    !             if (p > 0) then
+                    !                 do l = 0, p
+                    !                     write (2, FMT) x_cc(j), y_cc(k), z_cc(l), real(STL_levelset(j, k, l, 1, i))
+                    !                 end do
+                    !             end if
+                    !         end do    
+                    !     end do
+                    ! end do
+
+                    ! close (2)
+
                 end if
             end do
         end if
