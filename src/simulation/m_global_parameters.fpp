@@ -314,6 +314,9 @@ module m_global_parameters
 
     ! real(kind(0d0)), allocatable, dimension(:, :, :, :) :: STL_levelset
     real(kind(0d0)), dimension(0:300, 0:150, 0:0, 0:0) :: STL_levelset
+    real(kind(0d0)), dimension(0:300, 0:150, 0:0, 0:0, 1:3) :: STL_levelset_norm
+
+
 
     !! Database of the immersed boundary patch parameters for each of the
     !! patches employed in the configuration of the initial condition. Note that

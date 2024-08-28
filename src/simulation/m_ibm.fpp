@@ -115,7 +115,7 @@ contains
         call s_determine_IB_boundary(ghost_points)
         !$acc update device(ghost_points)
 
-        call s_compute_levelset(levelset, levelset_norm, ghost_points, STL_levelset)
+        call s_compute_levelset(levelset, levelset_norm, ghost_points, STL_levelset, STL_levelset_norm)
         !$acc update device(levelset, levelset_norm)
 
         call s_compute_image_points(ghost_points, levelset, levelset_norm)
@@ -958,11 +958,13 @@ contains
         !!  @param fR Current bubble radius
         !!  @param fV Current bubble velocity
         !!  @param fpb Internal bubble pressure
-    subroutine s_compute_levelset(levelset, levelset_norm, ghost_points, STL_levelset)
+    subroutine s_compute_levelset(levelset, levelset_norm, ghost_points, STL_levelset, STL_levelset_norm)
         type(ghost_point), dimension(num_gps), intent(INOUT) :: ghost_points
         real(kind(0d0)), dimension(0:m, 0:n, 0:p, num_ibs), intent(INOUT) :: levelset
         real(kind(0d0)), dimension(0:m, 0:n, 0:p, num_ibs, 3), intent(INOUT) :: levelset_norm
         real(kind(0d0)), dimension(0:m, 0:n, 0:p, num_ibs), intent(IN) :: STL_levelset
+        real(kind(0d0)), dimension(0:m, 0:n, 0:p, num_ibs, 1:3), intent(IN) :: STL_levelset_norm
+
 
         integer :: i !< Iterator variables
         integer :: geometry
@@ -992,6 +994,9 @@ contains
         do j = 0,m
             do k = 0,n
                 levelset(j,k,0,1) = STL_levelset(j,k,0,1)
+                levelset_norm(j,k,0,1,1) = STL_levelset_norm(j,k,0,1,1)
+                levelset_norm(j,k,0,1,2) = STL_levelset_norm(j,k,0,1,2)
+                levelset_norm(j,k,0,1,3) = 0d0
             end do
         end do
 

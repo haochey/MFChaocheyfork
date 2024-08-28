@@ -457,6 +457,19 @@ contains
                 else
                     call s_mpi_abort(trim(file_path)//' is missing. Exiting ...')
                 end if
+
+                write (file_path, '(A)') &
+                    trim(t_step_dir)//'/STL_levelset_norm.dat'
+                inquire (FILE=trim(file_path), EXIST=file_exist)
+                if (file_exist) then
+                    open (2, FILE=trim(file_path), &
+                          FORM='unformatted', &
+                          ACTION='read', &
+                          STATUS='old')
+                    read (2) STL_levelset_norm; close (2)
+                else
+                    call s_mpi_abort(trim(file_path)//' is missing. Exiting ...')
+                end if
             end do
 
         end if
