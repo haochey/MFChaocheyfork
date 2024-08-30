@@ -169,7 +169,7 @@ contains
                     close (1)
                 end if
 
-                if (patch_ib(i)%geometry == 5) then
+                if (patch_ib(i)%geometry == 5 .or. patch_ib(i)%geometry == 12) then
 
                     file_loc = trim(t_step_dir)//'/STL_levelset.dat'
 
@@ -475,10 +475,7 @@ contains
                     print *, "Np", Np
                 end if
 
-                ! print*, 'check5', STL_levelset(106, 50, 0, 1)
-
-
-                if (patch_ib(i)%geometry == 5) then
+                if (patch_ib(i)%geometry == 5 .or. patch_ib(i)%geometry == 12) then
 
                     write (file_loc, '(A,I2.2,A)') trim(t_step_dir)//'/STL_levelset.', proc_rank, '.dat'
                     open (2, FILE=trim(file_loc))
@@ -495,7 +492,7 @@ contains
 
                     close (2)
 
-
+                    print*, 'check_3D'
                     write (file_loc, '(A,I2.2,A)') trim(t_step_dir)//'/STL_levelset_norm.', proc_rank, '.dat'
                     open (2, FILE=trim(file_loc))
                     do j = 0, m

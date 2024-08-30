@@ -444,14 +444,17 @@ contains
                     end if
                 end if
 
+                ! allocate (STL_leveset(0:m, 0:n, 0:p, 0:0))
+                ! allocate (STL_leveset_norm(0:m, 0:n, 0:p, 0:0, 1:3))
+
                 write (file_path, '(A)') &
                     trim(t_step_dir)//'/STL_levelset.dat'
                 inquire (FILE=trim(file_path), EXIST=file_exist)
                 if (file_exist) then
                     open (2, FILE=trim(file_path), &
-                          FORM='unformatted', &
-                          ACTION='read', &
-                          STATUS='old')
+                        FORM='unformatted', &
+                        ACTION='read', &
+                        STATUS='old')
                     read (2) STL_levelset; close (2)
                     ! print*, 'check', STL_levelset(106, 50, 0, 1)
                 else
@@ -463,9 +466,9 @@ contains
                 inquire (FILE=trim(file_path), EXIST=file_exist)
                 if (file_exist) then
                     open (2, FILE=trim(file_path), &
-                          FORM='unformatted', &
-                          ACTION='read', &
-                          STATUS='old')
+                        FORM='unformatted', &
+                        ACTION='read', &
+                        STATUS='old')
                     read (2) STL_levelset_norm; close (2)
                 else
                     call s_mpi_abort(trim(file_path)//' is missing. Exiting ...')

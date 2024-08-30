@@ -18,7 +18,8 @@ module m_model
     private
 
     public :: f_model_read, s_model_write, s_model_free, f_model_is_inside, & 
-              f_check_boundary, f_distance, register_edge, f_normals
+              f_check_boundary, f_distance, register_edge, f_normals, &
+              f_distance_normals_3D
 
 contains
 
@@ -538,49 +539,58 @@ contains
 
     end function f_intersects_triangle
 
-    ! function f_tag_triangle_3D(model, point, spacing) result(normals)
-    !     type(t_model), intent(in) :: model
-    !     t_vec3, intent(in) :: point
-    !     t_vec3, intent(in) :: spacing
-    !     real(kind(0d0)) :: v1(1:3), v2(1:3), v3(1:3)
-    !     real(kind(0d0)) :: normals(1:3)
-    !     real(kind(0d0)) :: x_upper_bound, x_lower_bound, y_upper_bound, y_lower_bound, z_upper_bound, z_lower_bound
+    subroutine f_distance_normals_3D(model, point, normals, distance)
+        type(t_model), INTENT(IN) :: model        
+        t_vec3, intent(in) :: point
+        t_vec3, intent(out) :: normals
+        real(kind(0d0)), intent(out) :: distance
 
-    !     integer :: i, j, k
+        real(kind(0d0)), dimension(1:model%ntrs, 1:3) :: tri_normals
+        real(kind(0d0)), dimension(1:3) :: v1, v2, v3, cross
+        real(kind(0d0)), dimension(1:3) :: face_v1, face_v2, face_v3
+        real(kind(0d0)) :: xcc, ycc, zcc
+        real(kind(0d0)) :: v1_x, v1_y, v1_z, &
+                            v2_x, v2_y, v2_z, &
+                            v3_x, v3_y, v3_z
+        real(kind(0d0)) :: dist_min, dist_buffer, dist_buffer1, dist_buffer2, dist_buffer3
+        integer :: i, tri_idx
 
-    !     x_upper_bound = point(1) + spacing(1);
-    !     x_lower_bound = point(1) - spacing(1);
+        dist_min = 1d12
 
-    !     y_upper_bound = point(2) + spacing(2);
-    !     y_lower_bound = point(2) - spacing(2);
+        do i = 1, model%ntrs
+            v1_x = model%trs(i)%v(1,1)
+            v1_y = model%trs(i)%v(1,2)
+            v1_z = model%trs(i)%v(1,3)
+            dist_buffer1 = dsqrt((xcc-v1_x)**2 + &
+                                 (ycc-v1_y)**2 + &
+                                 (zcc-v1_z)**2)
 
-    !     z_upper_bound = point(3) + spacing(3);
-    !     z_lower_bound = point(3) - spacing(3);
+            v2_x = model%trs(i)%v(2,1)
+            v2_y = model%trs(i)%v(2,2)
+            v2_z = model%trs(i)%v(2,3)
+            dist_buffer2 = dsqrt((xcc-v2_x)**2 + &
+                                (ycc-v2_y)**2 + &
+                                (zcc-v2_z)**2)
 
-    !     normals = (/0d0, 0d0, 0d0/)
+            v3_x = model%trs(i)%v(3,1)
+            v3_y = model%trs(i)%v(3,2)
+            v3_z = model%trs(i)%v(3,3)
+            dist_buffer3 = dsqrt((xcc-v3_x)**2 + &
+                                (ycc-v3_y)**2 + &
+                                (zcc-v3_z)**2)
 
-    !     do i = 1, model%ntrs
-    !         v1 = model%trs(i)%v(1,:)
-    !         v2 = model%trs(i)%v(2,:)
-    !         v3 = model%trs(i)%v(3,:)
-    !         if ((x_lower_bound <= v1(1) .and. x_upper_bound >= v1(1)) .and. &
-    !             (y_lower_bound <= v1(2) .and. y_upper_bound >= v1(2)) .and. &
-    !             (z_lower_bound <= v1(3) .and. z_upper_bound >= v1(3))) then
-    !             normals = model%trs(i)%n
-    !         end if
-    !         if ((x_lower_bound <= v2(1) .and. x_upper_bound >= v2(1)) .and. &
-    !             (y_lower_bound <= v2(2) .and. y_upper_bound >= v2(2)) .and. &
-    !             (z_lower_bound <= v2(3) .and. z_upper_bound >= v2(3))) then
-    !             normals = model%trs(i)%n
-    !         end if
-    !         if ((x_lower_bound <= v3(1) .and. x_upper_bound >= v3(1)) .and. &
-    !             (y_lower_bound <= v3(2) .and. y_upper_bound >= v3(2)) .and. &
-    !             (z_lower_bound <= v3(3) .and. z_upper_bound >= v3(3))) then
-    !             normals = model%trs(i)%n
-    !         end if
-    !     end do
+            dist_buffer = MINVAL((/dist_buffer1, dist_buffer2, dist_buffer3/))
+    
+            if (dist_buffer < dist_min) then
+                dist_min = dist_buffer
+                tri_idx = i
+            end if
+        end do
+
+        normals(1:3) = model%trs(tri_idx)%n(1:3)
+        distance = dist_min
         
-    ! end function f_tag_triangle_3D
+    end subroutine f_distance_normals_3D
 
     function f_distance(boundary_v, boundary_vertex_count, boundary_edge_count, point, spacing) result(distance)
         integer, intent(in) :: boundary_vertex_count, boundary_edge_count
@@ -688,9 +698,9 @@ contains
         ! normals(1) = normals(1)/v_norm
         ! normals(2) = normals(2)/v_norm
 
-        end subroutine f_normals
+    end subroutine f_normals
 
-
+    ! Find all the boundary edges/vertices of the STL file
     subroutine f_check_boundary(model, boundary_v, boundary_vertex_count, boundary_edge_count)
         type(t_model), INTENT(IN) :: model
         real(kind(0d0)), allocatable, INTENT(OUT), dimension(:, :, :) :: boundary_v  ! Output boundary vertices

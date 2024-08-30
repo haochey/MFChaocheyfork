@@ -1950,7 +1950,7 @@ contains
 
         t_mat4x4 :: transform
         real(kind(0d0)) :: normals(1:3)
-
+        real(kind(0d0)) :: distance
         integer :: boundary_vertex_count, boundary_edge_count
         real(kind(0d0)), allocatable, dimension(:, :, :) :: boundary_v
 
@@ -1980,7 +1980,10 @@ contains
         call s_transform_model(model, transform)
 
         bbox = f_create_bbox(model)
-        call f_check_boundary(model, boundary_v, boundary_vertex_count, boundary_edge_count)
+
+        if (p == 0) then
+            call f_check_boundary(model, boundary_v, boundary_vertex_count, boundary_edge_count)
+        end if
 
         if (proc_rank == 0) then
             write (*, "(A, 3(2X, F20.10))") "    > Model:  Min:", bbox%min(1:3)
@@ -2057,11 +2060,22 @@ contains
 
                     if (ib) then
                         if (p > 0) then
-                            ! normals = f_tag_triangle_3D(model, point, (/dx, dy, dz/))
-                            ! STL_normals(i,j,k, 1:3) = normals
-                            ! STL_levelset(i, j, k, patch_id) = f_distance(model, &
-                            !                                 & model%ntrs, point, &
-                            !                                 & (/dx, dy, dz/))
+                            ! STL_levelset(i, j, k, patch_id) = f_distance_3D(model, &
+                            !                                         point)
+
+                            call f_distance_normals_3D(model, point, normals, distance)
+
+                            STL_levelset(i, j, k, patch_id) = distance
+
+                            if (patch_id_fp(i, j, k) > 0) then
+                                STL_levelset(i, j, k, patch_id) = -abs(STL_levelset(i, j, 0, patch_id))
+                            end if
+                            
+                            if (patch_id_fp(i, j, k) == 0) then
+                                normals(1:3) = -normals(1:3)  
+                            end if    
+                            STL_levelset_norm(i, j, 0, patch_id, 1:3) = normals(1:3)
+
                         else
                             STL_levelset(i, j, 0, patch_id) = f_distance(boundary_v, &
                                                                     boundary_vertex_count, &
@@ -2069,7 +2083,7 @@ contains
                                                                     point, &
                                                                     & (/dx, dy, dz/))
                             
-                            if (patch_id_fp(i, j, k) > 0) then
+                            if (patch_id_fp(i, j, 0) > 0) then
                                 STL_levelset(i, j, 0, patch_id) = -abs(STL_levelset(i, j, 0, patch_id))
                             end if
 
@@ -2087,25 +2101,11 @@ contains
 
                             ! print*, i, j, normals
 
-                            ! STL_levelset_norm(i, j, k, patch_id, 1) = normals(1)
-                            ! STL_levelset_norm(i, j, k, patch_id, 2) = normals(2)    
-                            ! STL_levelset_norm(i, j, k, patch_id, 3) = normals(3)    
-
                             ! print*, i, j, k, STL_levelset(i, j, 0, patch_id)
                             ! print*, i, j, k, 'normals', STL_levelset_norm(i, j, k, patch_id, 1:3)
 
                         end if    
                     end if
-
-
-                    ! if (eta > patch_ib(patch_id)%model%threshold) then 
-                    !     print*, '================='
-                    !     print*, i, j, k
-                    !     print*, 'normal:', normals
-                    !     print*, '================='
-                    ! end if
-
-
 
                     ! Note: Should probably use *eta* to compute primitive variables
                     ! if defining them analytically.
@@ -2118,9 +2118,9 @@ contains
             print *, " * Cleaning up..."
         end if
 
-        ! print*, i, j, 0, STL_levelset(50, 25, 0, patch_id)
-        print*, 'total vertices', 3*model%ntrs,'boundary verticies', boundary_vertex_count
-
+        if (p == 0) then
+            print*, 'total vertices', 3*model%ntrs,'boundary verticies', boundary_vertex_count
+        end if
 
         call s_model_free(model)
 

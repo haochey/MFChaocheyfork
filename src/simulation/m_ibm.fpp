@@ -968,7 +968,7 @@ contains
 
         integer :: i !< Iterator variables
         integer :: geometry
-        integer :: j, k !< Iterator variables
+        integer :: j, k, l !< Iterator variables
 
         do i = 1, num_ibs
             geometry = patch_ib(i)%geometry
@@ -993,10 +993,12 @@ contains
 
         do j = 0,m
             do k = 0,n
-                levelset(j,k,0,1) = STL_levelset(j,k,0,1)
-                levelset_norm(j,k,0,1,1) = STL_levelset_norm(j,k,0,1,1)
-                levelset_norm(j,k,0,1,2) = STL_levelset_norm(j,k,0,1,2)
-                levelset_norm(j,k,0,1,3) = 0d0
+                do l = 0,p
+                    levelset(j,k,l,1) = STL_levelset(j,k,l,1)
+                    levelset_norm(j,k,l,1,1) = STL_levelset_norm(j,k,l,1,1)
+                    levelset_norm(j,k,l,1,2) = STL_levelset_norm(j,k,l,1,2)
+                    levelset_norm(j,k,l,1,3) = STL_levelset_norm(j,k,l,1,3)
+                end do
             end do
         end do
 
