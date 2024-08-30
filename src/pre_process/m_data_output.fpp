@@ -45,9 +45,10 @@ module m_data_output
 
         !>  Interface for the conservative data
         !! @param q_cons_vf The conservative variables
-        subroutine s_write_abstract_data_files(q_cons_vf, ib_markers)
+        subroutine s_write_abstract_data_files(q_cons_vf, ib_markers, levelset, levelset_norm)
 
-            import :: scalar_field, integer_field, sys_size, m, n, p, pres_field
+            import :: scalar_field, integer_field, sys_size, m, n, p, &
+                pres_field, levelset_field, levelset_norm_field
 
             ! Conservative variables
             type(scalar_field), &
@@ -57,6 +58,12 @@ module m_data_output
             ! IB markers
             type(integer_field), &
                 intent(IN) :: ib_markers
+
+            type(levelset_field), &
+                intent(IN) :: levelset
+    
+            type(levelset_norm_field), &
+                intent(IN) :: levelset_norm
 
         end subroutine s_write_abstract_data_files ! -------------------
     end interface ! ========================================================
@@ -74,7 +81,7 @@ contains
     !>  Writes grid and initial condition data files to the "0"
         !!  time-step directory in the local processor rank folder
         !! @param q_cons_vf The conservative variables
-    subroutine s_write_serial_data_files(q_cons_vf, ib_markers) ! -----------
+    subroutine s_write_serial_data_files(q_cons_vf, ib_markers, levelset, levelset_norm) ! -----------
         type(scalar_field), &
             dimension(sys_size), &
             intent(IN) :: q_cons_vf
@@ -82,6 +89,12 @@ contains
         ! IB markers
         type(integer_field), &
             intent(IN) :: ib_markers
+
+        type(levelset_field), &
+            intent(IN) :: levelset
+
+        type(levelset_norm_field), &
+            intent(IN) :: levelset_norm
 
         logical :: file_exist !< checks if file exists
 
@@ -96,7 +109,7 @@ contains
         character(LEN=len_trim(t_step_dir) + name_len) :: file_loc !<
             !! Generic string used to store the address of a particular file
 
-        integer :: i, j, k, l, r !< Generic loop iterator
+        integer :: i, j, k, l, r, dir !< Generic loop iterator
         integer :: t_step
 
         real(kind(0d0)), dimension(nb) :: nRtmp         !< Temporary bubble concentration
@@ -152,6 +165,19 @@ contains
         write (1) ib_markers%sf
         close (1)
 
+        ! Outtputting Levelset Info ============================
+        file_loc = trim(t_step_dir)//'/levelset.dat'
+
+        open (1, FILE=trim(file_loc), FORM='unformatted', STATUS=status)
+        write (1) levelset%sf
+        close (1)
+
+        file_loc = trim(t_step_dir)//'/levelset_norm.dat'
+
+        open (1, FILE=trim(file_loc), FORM='unformatted', STATUS=status)
+        write (1) levelset_norm%vf
+        close (1)
+
         if (ib) then
             do i = 1, num_ibs
                 if (patch_ib(i)%geometry == 4) then
@@ -167,22 +193,6 @@ contains
                     open (1, FILE=trim(file_loc), FORM='unformatted', STATUS=status)
                     write (1) airfoil_grid_l(1:Np)
                     close (1)
-                end if
-
-                if (patch_ib(i)%geometry == 5) then
-
-                    file_loc = trim(t_step_dir)//'/STL_levelset.dat'
-
-                    open (1, FILE=trim(file_loc), FORM='unformatted', STATUS=status)
-                    write (1) STL_levelset
-                    close (1)
-
-                    file_loc = trim(t_step_dir)//'/STL_levelset_norm.dat'
-
-                    open (1, FILE=trim(file_loc), FORM='unformatted', STATUS=status)
-                    write (1) STL_levelset_norm
-                    close (1)
-
                 end if
             end do
         end if
@@ -434,23 +444,59 @@ contains
 
         if (ib) then
 
-            do i = 1, num_ibs
+            ! Write IB Markers
+            write (file_loc, '(A,I2.2,A)') trim(t_step_dir)//'/ib_markers.', proc_rank, '.dat'
+            open (2, FILE=trim(file_loc))
+            do j = 0, m
+                do k = 0, n
+                    do l = 0, p
+                        if (p > 0) then
+                            write (2, FMT) x_cc(j), y_cc(k), z_cc(l), real(ib_markers%sf(j, k, l))
+                        else
+                            write (2, FMT) x_cc(j), y_cc(k), real(ib_markers%sf(j, k, l))
+                        end if
+                    end do
+                end do
+            end do
 
-                write (file_loc, '(A,I2.2,A)') trim(t_step_dir)//'/ib_markers.', proc_rank, '.dat'
+            close (2)
+
+            do i = 1, num_ibs
+                ! Write Levelset
+                write (file_loc, '(A,I0,A,I2.2,A)') trim(t_step_dir)//'/levelset.', i, '.', proc_rank, '.dat'
                 open (2, FILE=trim(file_loc))
                 do j = 0, m
                     do k = 0, n
                         do l = 0, p
                             if (p > 0) then
-                                write (2, FMT) x_cc(j), y_cc(k), z_cc(l), real(ib_markers%sf(j, k, l))
+                                write (2, FMT) x_cc(j), y_cc(k), z_cc(l), levelset%sf(j, k, l, i)
                             else
-                                write (2, FMT) x_cc(j), y_cc(k), real(ib_markers%sf(j, k, l))
+                                write (2, FMT) x_cc(j), y_cc(k), levelset%sf(j, k, l, i)
                             end if
                         end do
                     end do
                 end do
 
                 close (2)
+
+                ! Write Levelset Norm
+                write (file_loc, '(A,I0,A,I2.2,A)') trim(t_step_dir)//'/levelset_norm.', i, '.', proc_rank, '.dat'
+                open (2, FILE=trim(file_loc))
+                do j = 0, m
+                    do k = 0, n
+                        do l = 0, p
+                            if (p > 0) then
+                                do dir = 1, 3
+                                    write (2, FMT) x_cc(j), y_cc(k), z_cc(l), levelset_norm%vf(j, k, l, i, dir)
+                                end do
+                            else
+                                do dir = 1, 3
+                                    write (2, FMT) x_cc(j), y_cc(k), levelset_norm%vf(j, k, l, i, dir)
+                                end do
+                            end if
+                        end do
+                    end do
+                end do
             end do
         end if
 
@@ -474,46 +520,6 @@ contains
 
                     print *, "Np", Np
                 end if
-
-                ! print*, 'check5', STL_levelset(106, 50, 0, 1)
-
-
-                if (patch_ib(i)%geometry == 5) then
-
-                    write (file_loc, '(A,I2.2,A)') trim(t_step_dir)//'/STL_levelset.', proc_rank, '.dat'
-                    open (2, FILE=trim(file_loc))
-                    do j = 0, m
-                        do k = 0, n
-                            write (2, FMT) x_cc(j), y_cc(k), real(STL_levelset(j, k, 0, 1))
-                            if (p > 0) then
-                                do l = 0, p
-                                    write (2, FMT) x_cc(j), y_cc(k), z_cc(l), real(STL_levelset(j, k, l, 1))
-                                end do
-                            end if
-                        end do
-                    end do
-
-                    close (2)
-
-
-                    write (file_loc, '(A,I2.2,A)') trim(t_step_dir)//'/STL_levelset_norm.', proc_rank, '.dat'
-                    open (2, FILE=trim(file_loc))
-                    do j = 0, m
-                        do k = 0, n
-                            do r = 1, 3
-                            write (2, FMT) x_cc(j), y_cc(k), real(STL_levelset_norm(j, k, 0, 1, r))
-                                if (p > 0) then
-                                    do l = 0, p
-                                        write (2, FMT) x_cc(j), y_cc(k), z_cc(l), real(STL_levelset_norm(j, k, l, 1, r))
-                                    end do
-                                end if  
-                            end do
-                        end do
-                    end do
-
-                    close (2)
-
-                end if
             end do
         end if
 
@@ -522,7 +528,7 @@ contains
     !> Writes grid and initial condition data files in parallel to the "0"
         !!  time-step directory in the local processor rank folder
         !! @param q_cons_vf The conservative variables
-    subroutine s_write_parallel_data_files(q_cons_vf, ib_markers) ! --
+    subroutine s_write_parallel_data_files(q_cons_vf, ib_markers, levelset, levelset_norm) ! --
 
         ! Conservative variables
         type(scalar_field), &
@@ -532,6 +538,12 @@ contains
         ! IB markers
         type(integer_field), &
             intent(IN) :: ib_markers
+
+        type(levelset_field), &
+            intent(IN) :: levelset
+
+        type(levelset_norm_field), &
+            intent(IN) :: levelset_norm
 
 #ifdef MFC_MPI
 
@@ -563,7 +575,8 @@ contains
 
             ! Initialize MPI data I/O
             if (ib) then
-                call s_initialize_mpi_data(q_cons_vf, ib_markers)
+                call s_initialize_mpi_data(q_cons_vf, ib_markers, &
+                    levelset, levelset_norm)
             else
                 call s_initialize_mpi_data(q_cons_vf)
             end if

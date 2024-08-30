@@ -16,6 +16,8 @@ module m_mpi_common
     use m_derived_types        !< Definitions of the derived types
 
     use m_global_parameters    !< Definitions of the global parameters
+
+    use iso_c_binding, only: c_associated, c_loc, c_ptr
     ! ==========================================================================
 
     implicit none
@@ -60,7 +62,7 @@ contains
 
     end subroutine s_mpi_initialize ! --------------------------------------
 
-    subroutine s_initialize_mpi_data(q_cons_vf, ib_markers, STL_levelset) ! --------------------------
+    subroutine s_initialize_mpi_data(q_cons_vf, ib_markers, levelset, levelset_norm) ! --------------------------
 
         type(scalar_field), &
             dimension(sys_size), &
@@ -70,9 +72,13 @@ contains
             optional, &
             intent(IN) :: ib_markers
 
-        real(kind(0d0)), &
+        type(levelset_field), &
             optional, &
-            intent(IN) :: STL_levelset
+            intent(IN) :: levelset
+
+        type(levelset_norm_field), &
+            optional, &
+            intent(IN) :: levelset_norm
 
         integer, dimension(num_dims) :: sizes_glb, sizes_loc
         integer, dimension(1) :: airfoil_glb, airfoil_loc, airfoil_start
@@ -135,17 +141,29 @@ contains
         end if
 #endif
 
+        print *, "wassup"
 #ifndef MFC_POST_PROCESS
         if (present(ib_markers)) then
 
 #ifdef MFC_PRE_PROCESS
             MPI_IO_IB_DATA%var%sf => ib_markers%sf
+            MPI_IO_levelset_DATA%var%sf => levelset%sf
+            MPI_IO_levelsetnorm_DATA%var%vf => levelset_norm%vf
 #else
             MPI_IO_IB_DATA%var%sf => ib_markers%sf(0:m, 0:n, 0:p)
+            MPI_IO_levelset_DATA%var%sf => levelset%sf(0:m, 0:n, 0:p, 1:num_ibs)
+            MPI_IO_levelsetnorm_DATA%var%vf => levelset_norm%vf(0:m, 0:n, 0:p, 1:num_ibs, 1:3)
 #endif
             call MPI_TYPE_CREATE_SUBARRAY(num_dims, sizes_glb, sizes_loc, start_idx, &
-                                          MPI_ORDER_FORTRAN, MPI_INTEGER, MPI_IO_IB_DATA%view, ierr)
+                                        MPI_ORDER_FORTRAN, MPI_INTEGER, MPI_IO_IB_DATA%view, ierr)
+            call MPI_TYPE_CREATE_SUBARRAY(num_dims, sizes_glb, sizes_loc, start_idx, &
+                                        MPI_ORDER_FORTRAN, MPI_DOUBLE_PRECISION, MPI_IO_levelset_DATA%view, ierr)
+            call MPI_TYPE_CREATE_SUBARRAY(num_dims, sizes_glb, sizes_loc, start_idx, &
+                                        MPI_ORDER_FORTRAN, MPI_DOUBLE_PRECISION, MPI_IO_levelsetnorm_DATA%view, ierr)
+
             call MPI_TYPE_COMMIT(MPI_IO_IB_DATA%view, ierr)
+            call MPI_TYPE_COMMIT(MPI_IO_levelset_DATA%view, ierr)
+            call MPI_TYPE_COMMIT(MPI_IO_levelsetnorm_DATA%view, ierr)
 
         end if
 #endif

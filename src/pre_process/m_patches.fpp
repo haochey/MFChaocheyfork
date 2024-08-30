@@ -1928,8 +1928,8 @@ contains
         integer, intent(IN) :: patch_id
         integer, intent(INOUT), dimension(0:m, 0:n, 0:p) :: patch_id_fp
         type(scalar_field), dimension(1:sys_size) :: q_prim_vf
-        real(kind(0d0)), optional, intent(INOUT), dimension(0:m, 0:n, 0:p, 1:num_ibs) :: STL_levelset
-        real(kind(0d0)), optional, intent(INOUT), dimension(0:m, 0:n, 0:p, 1:num_ibs, 1:3) :: STL_levelset_norm
+        type(levelset_field), optional, intent(INOUT) :: STL_levelset
+        type(levelset_norm_field), optional, intent(INOUT) :: STL_levelset_norm
 
         integer :: i, j, k !< Generic loop iterators
 
@@ -2059,18 +2059,18 @@ contains
                         if (p > 0) then
                             ! normals = f_tag_triangle_3D(model, point, (/dx, dy, dz/))
                             ! STL_normals(i,j,k, 1:3) = normals
-                            ! STL_levelset(i, j, k, patch_id) = f_distance(model, &
+                            ! STL_levelset%sf(i, j, k, patch_id) = f_distance(model, &
                             !                                 & model%ntrs, point, &
                             !                                 & (/dx, dy, dz/))
                         else
-                            STL_levelset(i, j, 0, patch_id) = f_distance(boundary_v, &
+                            STL_levelset%sf(i, j, 0, patch_id) = f_distance(boundary_v, &
                                                                     boundary_vertex_count, &
                                                                     boundary_edge_count, &
                                                                     point, &
                                                                     & (/dx, dy, dz/))
                             
                             if (patch_id_fp(i, j, k) > 0) then
-                                STL_levelset(i, j, 0, patch_id) = -abs(STL_levelset(i, j, 0, patch_id))
+                                STL_levelset%sf(i, j, 0, patch_id) = -abs(STL_levelset%sf(i, j, 0, patch_id))
                             end if
 
                             call f_normals(boundary_v, &
@@ -2083,7 +2083,7 @@ contains
                                 normals(1:3) = - normals(1:3)  
                             end if    
 
-                            STL_levelset_norm(i, j, 0, patch_id, 1:3) = normals(1:3)
+                            STL_levelset_norm%vf(i, j, 0, patch_id, 1:3) = normals(1:3)
 
                             ! print*, i, j, normals
 
