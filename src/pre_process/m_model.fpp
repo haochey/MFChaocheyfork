@@ -556,6 +556,8 @@ contains
         integer :: i, tri_idx
 
         dist_min = 1d12
+        xcc = point(1); ycc = point(2); zcc = point(3)
+        distance = 0d0
 
         do i = 1, model%ntrs
             v1_x = model%trs(i)%v(1,1)

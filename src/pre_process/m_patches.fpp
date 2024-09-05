@@ -2060,21 +2060,19 @@ contains
 
                     if (ib) then
                         if (p > 0) then
-                            ! STL_levelset(i, j, k, patch_id) = f_distance_3D(model, &
-                            !                                         point)
 
                             call f_distance_normals_3D(model, point, normals, distance)
-
                             STL_levelset(i, j, k, patch_id) = distance
 
                             if (patch_id_fp(i, j, k) > 0) then
-                                STL_levelset(i, j, k, patch_id) = -abs(STL_levelset(i, j, 0, patch_id))
+                                STL_levelset(i, j, k, patch_id) = -abs(STL_levelset(i, j, k, patch_id))
                             end if
                             
                             if (patch_id_fp(i, j, k) == 0) then
                                 normals(1:3) = -normals(1:3)  
                             end if    
-                            STL_levelset_norm(i, j, 0, patch_id, 1:3) = normals(1:3)
+
+                            STL_levelset_norm(i, j, k, patch_id, 1:3) = normals(1:3)
 
                         else
                             STL_levelset(i, j, 0, patch_id) = f_distance(boundary_v, &
@@ -2097,14 +2095,18 @@ contains
                                 normals(1:3) = - normals(1:3)  
                             end if    
 
-                            STL_levelset_norm(i, j, 0, patch_id, 1:3) = normals(1:3)
-
-                            ! print*, i, j, normals
+                            ! STL_levelset_norm(i, j, 0, patch_id, 1:3) = normals(1:3)
 
                             ! print*, i, j, k, STL_levelset(i, j, 0, patch_id)
                             ! print*, i, j, k, 'normals', STL_levelset_norm(i, j, k, patch_id, 1:3)
 
                         end if    
+                    end if
+
+                    ! print*, i, j, k, STL_levelset(i, j, 0, patch_id)
+
+                    if (k == 25 .and. j == 25) then
+                        print*, i, j, k, 'normals', STL_levelset_norm(i, j, k, patch_id, 1:3)
                     end if
 
                     ! Note: Should probably use *eta* to compute primitive variables

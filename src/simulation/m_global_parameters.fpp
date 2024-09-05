@@ -312,8 +312,8 @@ module m_global_parameters
     type(probe_parameters), allocatable, dimension(:) :: airfoil_grid_u, airfoil_grid_l
     integer :: Np
 
-    real(kind(0d0)), dimension(0:100, 0:50, 0:50, 0:0) :: STL_levelset
-    real(kind(0d0)), dimension(0:100, 0:50, 0:50, 0:0, 1:3) :: STL_levelset_norm
+    ! real(kind(0d0)), dimension(0:100, 0:50, 0:50, 0:0) :: STL_levelset
+    ! real(kind(0d0)), dimension(0:100, 0:50, 0:50, 0:0, 1:3) :: STL_levelset_norm
 
     ! real(kind(0d0)), allocatable, dimension(:, :, :, :) :: STL_levelset
     ! real(kind(0d0)), allocatable, dimension(:, :, :, :, :) :: STL_levelset_norm

@@ -56,6 +56,8 @@ module m_ibm
     !! Matrix of distance to IB
     real(kind(0d0)), dimension(:, :, :, :, :), allocatable :: levelset_norm
     !! Matrix of normal vector to IB
+    real(kind(0d0)), dimension(:, :, :, :), allocatable :: STL_levelset
+    real(kind(0d0)), dimension(:, :, :, :, :), allocatable :: STL_levelset_norm
     type(ghost_point), dimension(:), allocatable :: ghost_points
     type(ghost_point), dimension(:), allocatable :: inner_points
     !! Matrix of normal vector to IB
@@ -87,6 +89,9 @@ contains
         ! @:ALLOCATE(ib_markers%sf(0:m, 0:n, 0:p))
         @:ALLOCATE_GLOBAL(levelset(0:m, 0:n, 0:p, num_ibs))
         @:ALLOCATE_GLOBAL(levelset_norm(0:m, 0:n, 0:p, num_ibs, 3))
+
+        @:ALLOCATE_GLOBAL(STL_levelset(0:m, 0:n, 0:p, num_ibs))
+        @:ALLOCATE_GLOBAL(STL_levelset_norm(0:m, 0:n, 0:p, num_ibs, 3))
 
         !$acc enter data copyin(gp_layers, num_gps, num_inner_gps)
 
@@ -984,23 +989,25 @@ contains
                 call s_compute_cylinder_levelset(levelset, levelset_norm, i)
             else if (geometry == 11) then
                 call s_compute_3D_airfoil_levelset(levelset, levelset_norm, i)
-            else if (geometry == 5) then
-                call s_compute_2D_STL_levelset(levelset, levelset_norm, i, ghost_points, num_gps, ib_markers, STL_levelset)
-            else if (geometry == 12) then
-                call s_compute_3D_STL_levelset(levelset, levelset_norm, i, ghost_points, num_gps, ib_markers)
+            ! else if (geometry == 5) then
+            !     call s_compute_2D_STL_levelset(levelset, levelset_norm, i, ghost_points, num_gps, ib_markers, STL_levelset)
+            ! else if (geometry == 12) then
+            !     call s_compute_3D_STL_levelset(levelset, levelset_norm, i, ghost_points, num_gps, ib_markers)
             end if
         end do
 
-        do j = 0,m
-            do k = 0,n
-                do l = 0,p
-                    levelset(j,k,l,1) = STL_levelset(j,k,l,1)
-                    levelset_norm(j,k,l,1,1) = STL_levelset_norm(j,k,l,1,1)
-                    levelset_norm(j,k,l,1,2) = STL_levelset_norm(j,k,l,1,2)
-                    levelset_norm(j,k,l,1,3) = STL_levelset_norm(j,k,l,1,3)
+        if (geometry == 5 .or. geometry == 12) then
+            do j = 0,m
+                do k = 0,n
+                    do l = 0,p
+                        levelset(j,k,l,1) = STL_levelset(j,k,l,1)
+                        levelset_norm(j,k,l,1,1) = STL_levelset_norm(j,k,l,1,1)
+                        levelset_norm(j,k,l,1,2) = STL_levelset_norm(j,k,l,1,2)
+                        levelset_norm(j,k,l,1,3) = STL_levelset_norm(j,k,l,1,3)
+                    end do
                 end do
             end do
-        end do
+        end if
 
         ! do j = m/2,m/2
         !     do k = n/2-20, n/2+20
