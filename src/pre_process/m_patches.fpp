@@ -1981,8 +1981,12 @@ contains
 
         bbox = f_create_bbox(model)
 
-        if (p == 0) then
+        if (ib .and. p == 0) then
             call f_check_boundary(model, boundary_v, boundary_vertex_count, boundary_edge_count)
+        end if
+
+        if (proc_rank == 0) then
+            print *, " * Number of triangles:", model%ntrs
         end if
 
         if (proc_rank == 0) then
@@ -2095,7 +2099,7 @@ contains
                                 normals(1:3) = - normals(1:3)  
                             end if    
 
-                            ! STL_levelset_norm(i, j, 0, patch_id, 1:3) = normals(1:3)
+                            STL_levelset_norm(i, j, 0, patch_id, 1:3) = normals(1:3)
 
                             ! print*, i, j, k, STL_levelset(i, j, 0, patch_id)
                             ! print*, i, j, k, 'normals', STL_levelset_norm(i, j, k, patch_id, 1:3)
@@ -2103,9 +2107,7 @@ contains
                         end if    
                     end if
 
-                    ! print*, i, j, k, STL_levelset(i, j, 0, patch_id)
-
-                    if (k == 25 .and. j == 25) then
+                    if (k == 50 .and. j == 50) then
                         print*, i, j, k, 'normals', STL_levelset_norm(i, j, k, patch_id, 1:3)
                     end if
 
@@ -2120,8 +2122,9 @@ contains
             print *, " * Cleaning up..."
         end if
 
-        if (p == 0) then
-            print*, 'total vertices', 3*model%ntrs,'boundary verticies', boundary_vertex_count
+        if (ib .and. p == 0) then
+            print *, ""
+            print*, 'Total number of vertices:', 3*model%ntrs,'Number of boundary verticies:', boundary_vertex_count
         end if
 
         call s_model_free(model)
