@@ -492,7 +492,6 @@ contains
 
                     close (2)
 
-                    print*, 'check_3D'
                     write (file_loc, '(A,I2.2,A)') trim(t_step_dir)//'/STL_levelset_norm.', proc_rank, '.dat'
                     open (2, FILE=trim(file_loc))
                     do j = 0, m

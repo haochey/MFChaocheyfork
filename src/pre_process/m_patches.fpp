@@ -2107,7 +2107,7 @@ contains
                         end if    
                     end if
 
-                    if (k == 50 .and. j == 50) then
+                    if (k == p/2 .and. j == n/2) then
                         print*, i, j, k, 'normals', STL_levelset_norm(i, j, k, patch_id, 1:3)
                     end if
 
