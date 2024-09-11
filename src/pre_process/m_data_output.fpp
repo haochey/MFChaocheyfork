@@ -636,7 +636,8 @@ contains
         else
             ! Initialize MPI data I/O
             if (ib) then
-                call s_initialize_mpi_data(q_cons_vf, ib_markers)
+                call s_initialize_mpi_data(q_cons_vf, ib_markers, &
+                    levelset, levelset_norm)
             else
                 call s_initialize_mpi_data(q_cons_vf)
             end if
@@ -709,7 +710,7 @@ contains
         end if
 
         if (ib) then
-
+            ! IB Markers
             write (file_loc, '(A)') 'ib.dat'
             file_loc = trim(restart_dir)//trim(mpiiofs)//trim(file_loc)
             inquire (FILE=trim(file_loc), EXIST=file_exist)
@@ -726,6 +727,46 @@ contains
                                    'native', mpi_info_int, ierr)
             call MPI_FILE_WRITE_ALL(ifile, MPI_IO_IB_DATA%var%sf, data_size, &
                                     MPI_INTEGER, status, ierr)
+
+            call MPI_FILE_CLOSE(ifile, ierr)
+
+            ! Levelset
+            write (file_loc, '(A)') 'levelset.dat'
+            file_loc = trim(restart_dir)//trim(mpiiofs)//trim(file_loc)
+            inquire (FILE=trim(file_loc), EXIST=file_exist)
+            if (file_exist .and. proc_rank == 0) then
+                call MPI_FILE_DELETE(file_loc, mpi_info_int, ierr)
+            end if
+            call MPI_FILE_OPEN(MPI_COMM_WORLD, file_loc, ior(MPI_MODE_WRONLY, MPI_MODE_CREATE), &
+                               mpi_info_int, ifile, ierr)
+
+            ! Initial displacement to skip at beginning of file
+            disp = 0
+
+            call MPI_FILE_SET_VIEW(ifile, disp, MPI_INTEGER, MPI_IO_levelset_DATA%view, &
+                                   'native', mpi_info_int, ierr)
+            call MPI_FILE_WRITE_ALL(ifile, MPI_IO_levelset_DATA%var%sf, data_size, &
+                                    MPI_DOUBLE_PRECISION, status, ierr)
+
+            call MPI_FILE_CLOSE(ifile, ierr)
+
+            ! Levelset Norm
+            write (file_loc, '(A)') 'levelset_norm.dat'
+            file_loc = trim(restart_dir)//trim(mpiiofs)//trim(file_loc)
+            inquire (FILE=trim(file_loc), EXIST=file_exist)
+            if (file_exist .and. proc_rank == 0) then
+                call MPI_FILE_DELETE(file_loc, mpi_info_int, ierr)
+            end if
+            call MPI_FILE_OPEN(MPI_COMM_WORLD, file_loc, ior(MPI_MODE_WRONLY, MPI_MODE_CREATE), &
+                               mpi_info_int, ifile, ierr)
+
+            ! Initial displacement to skip at beginning of file
+            disp = 0
+
+            call MPI_FILE_SET_VIEW(ifile, disp, MPI_INTEGER, MPI_IO_levelsetnorm_DATA%view, &
+                                   'native', mpi_info_int, ierr)
+            call MPI_FILE_WRITE_ALL(ifile, MPI_IO_levelsetnorm_DATA%var%vf, data_size, &
+                                    MPI_DOUBLE_PRECISION, status, ierr)
 
             call MPI_FILE_CLOSE(ifile, ierr)
         end if
@@ -774,28 +815,6 @@ contains
 
                     call MPI_FILE_CLOSE(ifile, ierr)
                 end if
-
-                ! if (patch_ib(i)%geometry == 5) then
-
-                !     write (file_loc, '(A)') 'STL_levelset.dat'
-                !     file_loc = trim(restart_dir)//trim(mpiiofs)//trim(file_loc)
-                !     inquire (FILE=trim(file_loc), EXIST=file_exist)
-                !     if (file_exist .and. proc_rank == 0) then
-                !         call MPI_FILE_DELETE(file_loc, mpi_info_int, ierr)
-                !     end if
-                !     call MPI_FILE_OPEN(MPI_COMM_WORLD, file_loc, ior(MPI_MODE_WRONLY, MPI_MODE_CREATE), &
-                !                        mpi_info_int, ifile, ierr)
-
-                !     ! Initial displacement to skip at beginning of file
-                !     disp = 0
-
-                !     call MPI_FILE_SET_VIEW(ifile, disp, MPI_DOUBLE_PRECISION, MPI_IO_STL_Levelset_DATA%view(1), &
-                !                            'native', mpi_info_int, ierr)
-                !     call MPI_FILE_WRITE_ALL(ifile, MPI_IO_STL_Levelset_DATA%var(0:m), 3*Np, &
-                !                             MPI_DOUBLE_PRECISION, status, ierr)
-
-                !     call MPI_FILE_CLOSE(ifile, ierr)
-                ! end if
             end do
 
         end if

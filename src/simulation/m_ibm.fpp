@@ -19,8 +19,6 @@ module m_ibm
 
     use m_helper
 
-    use m_compute_levelset
-
     ! ==========================================================================
 
     implicit none
@@ -28,7 +26,6 @@ module m_ibm
     private :: s_compute_image_points, &
                s_compute_interpolation_coeffs, &
                s_interpolate_image_point, &
-               s_compute_levelset, &
                s_find_ghost_points, &
                s_determine_IB_boundary, &
                s_find_num_ghost_points
@@ -38,24 +35,20 @@ module m_ibm
  s_finalize_ibm_module
 
     type(integer_field), public :: ib_markers
-    ! real(kind(0d0)), public, dimension(:, :, :, :) :: STL_levelset
+    type(levelset_field), public :: levelset
+    type(levelset_norm_field), public :: levelset_norm
 
 !$acc declare create(ib_markers)
 
 #ifdef CRAY_ACC_WAR
-    @:CRAY_DECLARE_GLOBAL(real(kind(0d0)), dimension(:, :, :, :), levelset)
-    @:CRAY_DECLARE_GLOBAL(real(kind(0d0)), dimension(:, :, :, :, :), levelset_norm)
+    @:CRAY_DECLARE_GLOBAL(type(levelset_field), levelset)
+    @:CRAY_DECLARE_GLOBAL(type(levelset_norm_field), levelset_norm)
     @:CRAY_DECLARE_GLOBAL(type(ghost_point), dimension(:), ghost_points)
     @:CRAY_DECLARE_GLOBAL(type(ghost_point), dimension(:), inner_points)
 
     !$acc declare link(levelset, levelset_norm, ghost_points, inner_points)
 #else
 
-    !! Marker for solid cells. 0 if liquid, the patch id of its IB if solid
-    real(kind(0d0)), dimension(:, :, :, :), allocatable :: levelset
-    !! Matrix of distance to IB
-    real(kind(0d0)), dimension(:, :, :, :, :), allocatable :: levelset_norm
-    !! Matrix of normal vector to IB
     type(ghost_point), dimension(:), allocatable :: ghost_points
     type(ghost_point), dimension(:), allocatable :: inner_points
     !! Matrix of normal vector to IB
@@ -70,7 +63,7 @@ module m_ibm
 
 contains
 
-    !>  Initialize IBM module
+    !>  Allocates memory for the variables in the IBM module
     subroutine s_initialize_ibm_module()
 
         gp_layers = 3
@@ -78,26 +71,36 @@ contains
         if (p > 0) then
             @:ALLOCATE(ib_markers%sf(-gp_layers:m+gp_layers, &
                 -gp_layers:n+gp_layers, -gp_layers:p+gp_layers))
+            @:ALLOCATE(levelset%sf(-gp_layers:m+gp_layers, &
+                -gp_layers:n+gp_layers, -gp_layers:p+gp_layers, num_ibs))
+            @:ALLOCATE(levelset_norm%vf(-gp_layers:m+gp_layers, &
+                -gp_layers:n+gp_layers, -gp_layers:p+gp_layers, num_ibs, 3))
         else
             @:ALLOCATE(ib_markers%sf(-gp_layers:m+gp_layers, &
                 -gp_layers:n+gp_layers, 0:0))
+            @:ALLOCATE(levelset%sf(-gp_layers:m+gp_layers, &
+                -gp_layers:n+gp_layers, 0:0, num_ibs))
+            @:ALLOCATE(levelset_norm%vf(-gp_layers:m+gp_layers, &
+                -gp_layers:n+gp_layers, 0:0, num_ibs, 3))
         end if
+
         @:ACC_SETUP_SFs(ib_markers)
-
+        @:ACC_SETUP_SFs(levelset)
+        @:ACC_SETUP_VFs(levelset_norm)
         ! @:ALLOCATE(ib_markers%sf(0:m, 0:n, 0:p))
-        @:ALLOCATE_GLOBAL(levelset(0:m, 0:n, 0:p, num_ibs))
-        @:ALLOCATE_GLOBAL(levelset_norm(0:m, 0:n, 0:p, num_ibs, 3))
-
+        
         !$acc enter data copyin(gp_layers, num_gps, num_inner_gps)
 
     end subroutine s_initialize_ibm_module
 
+    !> Initializes the values of various IBM variables, such as ghost points and
+    !! image points.
     subroutine s_ibm_setup()
 
         integer :: i, j, k
 
-        !$acc update device(ib_markers%sf)
-
+        !$acc update device(ib_markers%sf, levelset%sf, levelset_norm%vf)
+    
         ! Get neighboring IB variables from other processors
         call s_mpi_sendrecv_ib_buffers(ib_markers, gp_layers)
 
@@ -115,9 +118,6 @@ contains
         call s_determine_IB_boundary(ghost_points)
         !$acc update device(ghost_points)
 
-        call s_compute_levelset(levelset, levelset_norm, ghost_points, STL_levelset, STL_levelset_norm)
-        !$acc update device(levelset, levelset_norm)
-
         call s_compute_image_points(ghost_points, levelset, levelset_norm)
         !$acc update device(ghost_points)
 
@@ -127,7 +127,10 @@ contains
     end subroutine s_ibm_setup
 
     !>  Subroutine that updates the conservative variables at the ghost points
-        !!  @param q_cons_vf
+        !!  @param q_cons_vf Conservative Variables
+        !!  @param q_prim_vf Primitive variables
+        !!  @param pb Internal bubble pressure
+        !!  @param mv Mass of vapor in bubble
     subroutine s_ibm_correct_state(q_cons_vf, q_prim_vf, pb, mv)
 
         type(scalar_field), &
@@ -339,6 +342,8 @@ contains
 
     end subroutine s_ibm_correct_state
 
+    !> This subroutine determines the ghost points that lie <=1 cell away
+    !! from the immersed boundary
     subroutine s_determine_IB_boundary(ghost_points)
         type(ghost_point), dimension(num_gps), intent(INOUT) :: ghost_points
         integer, dimension(2 + 1, 2 + 1) &
@@ -380,16 +385,15 @@ contains
 
     end subroutine s_determine_IB_boundary
 
-    !>  Function that computes that bubble wall pressure for Gilmore bubbles
-        !!  @param fR0 Equilibrium bubble radius
-        !!  @param fR Current bubble radius
-        !!  @param fV Current bubble velocity
-        !!  @param fpb Internal bubble pressure
+    !>  Function that computes the image points for each ghost point
+        !!  @param ghost_points Ghost Points
+        !!  @param levelset Closest distance from each grid cell to IB
+        !!  @param levelset_norm Vector pointing in the direction of the closest distance
     subroutine s_compute_image_points(ghost_points, levelset, levelset_norm)
 
         type(ghost_point), dimension(num_gps), intent(INOUT) :: ghost_points
-        real(kind(0d0)), dimension(0:m, 0:n, 0:p, num_ibs), intent(IN) :: levelset
-        real(kind(0d0)), dimension(0:m, 0:n, 0:p, num_ibs, 3), intent(IN) :: levelset_norm
+        type(levelset_field), intent(IN) :: levelset
+        type(levelset_norm_field), intent(IN) :: levelset_norm
 
         real(kind(0d0)) :: dist
         real(kind(0d0)), dimension(3) :: norm
@@ -420,8 +424,8 @@ contains
 
             ! Calculate and store the precise location of the image point
             patch_id = gp%ib_patch_id
-            dist = abs(levelset(i, j, k, patch_id))
-            norm(:) = levelset_norm(i, j, k, patch_id, :)
+            dist = abs(levelset%sf(i, j, k, patch_id))
+            norm(:) = levelset_norm%vf(i, j, k, patch_id, :)
             ghost_points(q)%ip_loc(:) = physical_loc(:) + 2*dist*norm(:)
 
             ! Find the closest grid point to the image point
@@ -492,6 +496,8 @@ contains
 
     end subroutine s_compute_image_points
 
+    !> Function that finds the number of ghost points, used for allocating
+    !! memory.
     subroutine s_find_num_ghost_points()
         integer, dimension(2*gp_layers + 1, 2*gp_layers + 1) &
             :: subsection_2D
@@ -532,6 +538,7 @@ contains
 
     end subroutine s_find_num_ghost_points
 
+    !> Function that finds the ghost points
     subroutine s_find_ghost_points(ghost_points, inner_points)
 
         type(ghost_point), dimension(num_gps), intent(INOUT) :: ghost_points
@@ -684,11 +691,7 @@ contains
 
     end subroutine s_find_ghost_points
 
-    !>  Function that computes that bubble wall pressure for Gilmore bubbles
-        !!  @param fR0 Equilibrium bubble radius
-        !!  @param fR Current bubble radius
-        !!  @param fV Current bubble velocity
-        !!  @param fpb Internal bubble pressure
+    !>  Function that computes the interpolation coefficients of image points
     subroutine s_compute_interpolation_coeffs(ghost_points)
 
         type(ghost_point), dimension(num_gps), intent(INOUT) :: ghost_points
@@ -841,6 +844,8 @@ contains
 
     end subroutine s_compute_interpolation_coeffs
 
+    !> Function that uses the interpolation coefficients and the current state
+    !! at the cell centers in order to estimate the state at the image point
     subroutine s_interpolate_image_point(q_prim_vf, gp, alpha_rho_IP, alpha_IP, pres_IP, vel_IP, r_IP, v_IP, pb_IP, mv_IP, nmom_IP, pb, mv, presb_IP, massv_IP)
         !$acc routine seq
         type(scalar_field), &
@@ -953,89 +958,12 @@ contains
 
     end subroutine s_interpolate_image_point
 
-    !>  Function that computes that bubble wall pressure for Gilmore bubbles
-        !!  @param fR0 Equilibrium bubble radius
-        !!  @param fR Current bubble radius
-        !!  @param fV Current bubble velocity
-        !!  @param fpb Internal bubble pressure
-    subroutine s_compute_levelset(levelset, levelset_norm, ghost_points, STL_levelset, STL_levelset_norm)
-        type(ghost_point), dimension(num_gps), intent(INOUT) :: ghost_points
-        real(kind(0d0)), dimension(0:m, 0:n, 0:p, num_ibs), intent(INOUT) :: levelset
-        real(kind(0d0)), dimension(0:m, 0:n, 0:p, num_ibs, 3), intent(INOUT) :: levelset_norm
-        real(kind(0d0)), dimension(0:m, 0:n, 0:p, num_ibs), intent(IN) :: STL_levelset
-        real(kind(0d0)), dimension(0:m, 0:n, 0:p, num_ibs, 1:3), intent(IN) :: STL_levelset_norm
-
-
-        integer :: i !< Iterator variables
-        integer :: geometry
-        integer :: j, k !< Iterator variables
-
-        do i = 1, num_ibs
-            geometry = patch_ib(i)%geometry
-            if (geometry == 2) then
-                call s_compute_circle_levelset(levelset, levelset_norm, i)
-            else if (geometry == 3) then
-                call s_compute_rectangle_levelset(levelset, levelset_norm, i)
-            else if (geometry == 4) then
-                call s_compute_airfoil_levelset(levelset, levelset_norm, i)
-            else if (geometry == 8) then
-                call s_compute_sphere_levelset(levelset, levelset_norm, i)
-            else if (geometry == 10) then
-                call s_compute_cylinder_levelset(levelset, levelset_norm, i)
-            else if (geometry == 11) then
-                call s_compute_3D_airfoil_levelset(levelset, levelset_norm, i)
-            else if (geometry == 5) then
-                call s_compute_2D_STL_levelset(levelset, levelset_norm, i, ghost_points, num_gps, ib_markers, STL_levelset)
-            else if (geometry == 12) then
-                call s_compute_3D_STL_levelset(levelset, levelset_norm, i, ghost_points, num_gps, ib_markers)
-            end if
-        end do
-
-        do j = 0,m
-            do k = 0,n
-                levelset(j,k,0,1) = STL_levelset(j,k,0,1)
-                levelset_norm(j,k,0,1,1) = STL_levelset_norm(j,k,0,1,1)
-                levelset_norm(j,k,0,1,2) = STL_levelset_norm(j,k,0,1,2)
-                levelset_norm(j,k,0,1,3) = 0d0
-            end do
-        end do
-
-        ! do j = m/2,m/2
-        !     do k = n/2-20, n/2+20
-        !         print*, j, k, levelset(j,k,0,1)
-        !     end do
-        ! end do
-
-        ! do j = 256-100, 256+100
-        !     do k = 128-60, 128+60
-        !         ! print*, j, k, levelset_norm(j, k, 0, 1, :)
-        !         print*, 'exact:', j, k, levelset(j, k, 0, 1)
-        !         print*, 'exact:', j, k, levelset_norm(j, k, 0, 1, :)
-        !         print*, '=================================='
-
-        !         levelset_norm(j, k, 0, 1, 1:2) =  levelset_norm(j, k, 0, 1, 1:2) + 0.005*k*((-1)**k)
-        !         levelset(j, k, 0, 1) = levelset(j, k, 0, 1) + 0.00003*k*((-1)**k)
-
-        !         print*, 'STL:', j, k, levelset(j, k, 0, 1)
-        !         print*, 'STL:', j, k, levelset_norm(j, k, 0, 1, :)
-        !         print*, '=================================='
-        !         ! print*, j, k, levelset(j, k, 0, 1)
-        !         ! print*, '=================================='
-        !     end do
-        ! end do
-
-    end subroutine s_compute_levelset
-
-    !>  Function that computes that bubble wall pressure for Gilmore bubbles
-        !!  @param fR0 Equilibrium bubble radius
-        !!  @param fR Current bubble radius
-        !!  @param fV Current bubble velocity
-        !!  @param fpb Internal bubble pressure
+    !> Subroutine to deallocate memory reserved for the IBM module
     subroutine s_finalize_ibm_module()
 
         @:DEALLOCATE(ib_markers%sf)
-        @:DEALLOCATE_GLOBAL(levelset)
-        @:DEALLOCATE_GLOBAL(levelset_norm)
+        @:DEALLOCATE_GLOBAL(levelset%sf)
+        @:DEALLOCATE_GLOBAL(levelset_norm%vf)
     end subroutine s_finalize_ibm_module
 
 end module m_ibm
