@@ -463,40 +463,40 @@ contains
 
             do i = 1, num_ibs
                 ! Write Levelset
-                write (file_loc, '(A,I0,A,I2.2,A)') trim(t_step_dir)//'/levelset.', i, '.', proc_rank, '.dat'
-                open (2, FILE=trim(file_loc))
-                do j = 0, m
-                    do k = 0, n
-                        do l = 0, p
-                            if (p > 0) then
-                                write (2, FMT) x_cc(j), y_cc(k), z_cc(l), levelset%sf(j, k, l, i)
-                            else
-                                write (2, FMT) x_cc(j), y_cc(k), levelset%sf(j, k, l, i)
-                            end if
-                        end do
-                    end do
-                end do
+                ! write (file_loc, '(A,I0,A,I2.2,A)') trim(t_step_dir)//'/levelset.', i, '.', proc_rank, '.dat'
+                ! open (2, FILE=trim(file_loc))
+                ! do j = 0, m
+                !     do k = 0, n
+                !         do l = 0, p
+                !             if (p > 0) then
+                !                 write (2, FMT) x_cc(j), y_cc(k), z_cc(l), levelset%sf(j, k, l, i)
+                !             else
+                !                 write (2, FMT) x_cc(j), y_cc(k), levelset%sf(j, k, l, i)
+                !             end if
+                !         end do
+                !     end do
+                ! end do
 
-                close (2)
+                ! close (2)
 
-                ! Write Levelset Norm
-                write (file_loc, '(A,I0,A,I2.2,A)') trim(t_step_dir)//'/levelset_norm.', i, '.', proc_rank, '.dat'
-                open (2, FILE=trim(file_loc))
-                do j = 0, m
-                    do k = 0, n
-                        do l = 0, p
-                            if (p > 0) then
-                                do dir = 1, 3
-                                    write (2, FMT) x_cc(j), y_cc(k), z_cc(l), levelset_norm%vf(j, k, l, i, dir)
-                                end do
-                            else
-                                do dir = 1, 3
-                                    write (2, FMT) x_cc(j), y_cc(k), levelset_norm%vf(j, k, l, i, dir)
-                                end do
-                            end if
-                        end do
-                    end do
-                end do
+                ! ! Write Levelset Norm
+                ! write (file_loc, '(A,I0,A,I2.2,A)') trim(t_step_dir)//'/levelset_norm.', i, '.', proc_rank, '.dat'
+                ! open (2, FILE=trim(file_loc))
+                ! do j = 0, m
+                !     do k = 0, n
+                !         do l = 0, p
+                !             if (p > 0) then
+                !                 do dir = 1, 3
+                !                     write (2, FMT) x_cc(j), y_cc(k), z_cc(l), levelset_norm%vf(j, k, l, i, dir)
+                !                 end do
+                !             else
+                !                 do dir = 1, 3
+                !                     write (2, FMT) x_cc(j), y_cc(k), levelset_norm%vf(j, k, l, i, dir)
+                !                 end do
+                !             end if
+                !         end do
+                !     end do
+                ! end do
             end do
         end if
 
