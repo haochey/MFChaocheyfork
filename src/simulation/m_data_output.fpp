@@ -1227,11 +1227,11 @@ contains
                         l = 0
 
                         ! Computing/Sharing necessary state variables
-                        call s_convert_to_mixture_variables(q_cons_vf, j-2, k-2, l, &
+                        call s_convert_to_mixture_variables(q_cons_vf, j - 2, k - 2, l, &
                                                             rho, gamma, pi_inf, qv, &
                                                             Re, G, fluid_pp(:)%G)
                         do s = 1, num_dims
-                            vel(s) = q_cons_vf(cont_idx%end + s)%sf(j-2 , k-2, l)/rho
+                            vel(s) = q_cons_vf(cont_idx%end + s)%sf(j - 2, k - 2, l)/rho
                         end do
 
                         ! call s_compute_pressure( &
@@ -1243,14 +1243,14 @@ contains
                         !     q_cons_vf(stress_idx%beg)%sf(j - 2, k - 2, l), &
                         !     q_cons_vf(mom_idx%beg)%sf(j - 2, k - 2, l), G)
 
-                        call s_compute_pressure(q_cons_vf(E_idx)%sf(j-2, k-2, l), &
-                                                q_cons_vf(alf_idx)%sf(j-2, k-2, l),&
+                        call s_compute_pressure(q_cons_vf(E_idx)%sf(j - 2, k - 2, l), &
+                                                q_cons_vf(alf_idx)%sf(j - 2, k - 2, l), &
                                                 0.5d0*rho*dot_product(vel, vel), pi_inf, gamma, rho, qv, pres)
 
                         ! call s_compute_pressure(qK_cons_vf(E_idx)%sf(j, k, l), &
                         !                         qK_cons_vf(alf_idx)%sf(j, k, l), &
                         !                         dyn_pres_K, pi_inf_K, gamma_K, rho_K, qv_K, pres)
-                        
+
                         if (model_eqns == 4) then
                             lit_gamma = 1d0/fluid_pp(1)%gamma + 1d0
                         else if (hypoelasticity) then

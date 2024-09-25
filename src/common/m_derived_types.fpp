@@ -309,7 +309,6 @@ module m_derived_types
         integer :: IBB !< Checks if the ghost cell is at the boundary of the immersed object
         ! integer :: rank !< Checks if the ghost cell is at the boundary of the immersed object
 
-
     end type ghost_point
 
 end module m_derived_types

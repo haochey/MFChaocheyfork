@@ -154,11 +154,11 @@ contains
             MPI_IO_levelsetnorm_DATA%var%vf => levelset_norm%vf(0:m, 0:n, 0:p, 1:num_ibs, 1:3)
 #endif
             call MPI_TYPE_CREATE_SUBARRAY(num_dims, sizes_glb, sizes_loc, start_idx, &
-                                        MPI_ORDER_FORTRAN, MPI_INTEGER, MPI_IO_IB_DATA%view, ierr)
+                                          MPI_ORDER_FORTRAN, MPI_INTEGER, MPI_IO_IB_DATA%view, ierr)
             call MPI_TYPE_CREATE_SUBARRAY(num_dims, sizes_glb, sizes_loc, start_idx, &
-                                        MPI_ORDER_FORTRAN, MPI_DOUBLE_PRECISION, MPI_IO_levelset_DATA%view, ierr)
+                                          MPI_ORDER_FORTRAN, MPI_DOUBLE_PRECISION, MPI_IO_levelset_DATA%view, ierr)
             call MPI_TYPE_CREATE_SUBARRAY(num_dims, sizes_glb, sizes_loc, start_idx, &
-                                        MPI_ORDER_FORTRAN, MPI_DOUBLE_PRECISION, MPI_IO_levelsetnorm_DATA%view, ierr)
+                                          MPI_ORDER_FORTRAN, MPI_DOUBLE_PRECISION, MPI_IO_levelsetnorm_DATA%view, ierr)
 
             call MPI_TYPE_COMMIT(MPI_IO_IB_DATA%view, ierr)
             call MPI_TYPE_COMMIT(MPI_IO_levelset_DATA%view, ierr)
@@ -208,15 +208,15 @@ contains
 #endif
 
 #endif
-    ! if (present(STL_levelset)) then
-    !     do j = 1, num_ibs
-    !         MPI_IO_STL_levelset_DATA%var => STL_levelset(0:m, 0:n, 0:p, j)
+        ! if (present(STL_levelset)) then
+        !     do j = 1, num_ibs
+        !         MPI_IO_STL_levelset_DATA%var => STL_levelset(0:m, 0:n, 0:p, j)
 
-    !         call MPI_TYPE_CREATE_SUBARRAY(4, sizes_glb, sizes_loc, start_idx, &
-    !                                         MPI_ORDER_FORTRAN, MPI_DOUBLE_PRECISION, MPI_IO_STL_levelset_DATA%view, ierr)
-    !         call MPI_TYPE_COMMIT(MPI_IO_STL_levelset_DATA%view, ierr)
-    !     end do
-    ! end if
+        !         call MPI_TYPE_CREATE_SUBARRAY(4, sizes_glb, sizes_loc, start_idx, &
+        !                                         MPI_ORDER_FORTRAN, MPI_DOUBLE_PRECISION, MPI_IO_STL_levelset_DATA%view, ierr)
+        !         call MPI_TYPE_COMMIT(MPI_IO_STL_levelset_DATA%view, ierr)
+        !     end do
+        ! end if
 
     end subroutine s_initialize_mpi_data ! ---------------------------------
 

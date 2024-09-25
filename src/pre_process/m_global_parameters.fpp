@@ -187,9 +187,6 @@ module m_global_parameters
     real(kind(0d0)), allocatable, dimension(:, :, :, :) :: STL_levelset
     real(kind(0d0)), allocatable, dimension(:, :, :, :, :) :: STL_levelset_norm
 
-
-
-    
     !! Database of the immersed boundary patch parameters for each of the
     !! patches employed in the configuration of the initial condition. Note that
     !! the maximum allowable number of patches, num_patches_max, may be changed

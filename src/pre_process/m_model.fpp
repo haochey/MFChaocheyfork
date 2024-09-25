@@ -17,7 +17,7 @@ module m_model
 
     private
 
-    public :: f_model_read, s_model_write, s_model_free, f_model_is_inside, & 
+    public :: f_model_read, s_model_write, s_model_free, f_model_is_inside, &
               f_check_boundary, f_distance, register_edge, f_normals
 
 contains
@@ -579,12 +579,12 @@ contains
     !             normals = model%trs(i)%n
     !         end if
     !     end do
-        
+
     ! end function f_tag_triangle_3D
 
     function f_distance(boundary_v, boundary_vertex_count, boundary_edge_count, point, spacing) result(distance)
         integer, intent(in) :: boundary_vertex_count, boundary_edge_count
-        real(kind(0d0)), intent(in), dimension(1:boundary_edge_count, 1:3, 1:2) :: boundary_v 
+        real(kind(0d0)), intent(in), dimension(1:boundary_edge_count, 1:3, 1:2) :: boundary_v
         t_vec3, intent(in) :: point
         t_vec3, intent(in) :: spacing
 
@@ -594,7 +594,7 @@ contains
                          & v1_x, v1_y, v1_z, &
                          & v2_x, v2_y, v2_z, &
                          & v3_x, v3_y, v3_z
-        
+
         real(kind(0d0)) :: dist_buffer1, dist_buffer2, dist_buffer3
         real(kind(0d0)), dimension(1:boundary_edge_count) :: dist_buffer
         real(kind(0d0)) :: distance
@@ -607,20 +607,20 @@ contains
             v1_y = boundary_v(i, 1, 2)
             v1_z = 0d0
 
-            dist_buffer1 = dsqrt((xcc-v1_x)**2 + &
-                                & (ycc-v1_y)**2)
+            dist_buffer1 = dsqrt((xcc - v1_x)**2 + &
+                                & (ycc - v1_y)**2)
 
             v2_x = boundary_v(i, 2, 1)
             v2_y = boundary_v(i, 2, 2)
             v2_z = 0d0
 
-            dist_buffer2 = dsqrt((xcc-v2_x)**2 + &
-                                & (ycc-v2_y)**2)
+            dist_buffer2 = dsqrt((xcc - v2_x)**2 + &
+                                & (ycc - v2_y)**2)
 
-            dist_buffer(i) = MINVAL((/dist_buffer1, dist_buffer2/))
+            dist_buffer(i) = minval((/dist_buffer1, dist_buffer2/))
         end do
 
-        distance = MINVAL(dist_buffer)
+        distance = minval(dist_buffer)
 
     end function f_distance
 
@@ -645,17 +645,17 @@ contains
             v1_y = boundary_v(i, 1, 2)
             v1_z = 0d0
 
-            dist_buffer1 = dsqrt((xcc-v1_x)**2 + &
-                                & (ycc-v1_y)**2)
+            dist_buffer1 = dsqrt((xcc - v1_x)**2 + &
+                                & (ycc - v1_y)**2)
 
             v2_x = boundary_v(i, 2, 1)
             v2_y = boundary_v(i, 2, 2)
             v2_z = 0d0
 
-            dist_buffer2 = dsqrt((xcc-v2_x)**2 + &
-                                & (ycc-v2_y)**2)
+            dist_buffer2 = dsqrt((xcc - v2_x)**2 + &
+                                & (ycc - v2_y)**2)
 
-            dist_buffer = MINVAL((/dist_buffer1, dist_buffer2/)) 
+            dist_buffer = minval((/dist_buffer1, dist_buffer2/))
 
             if (dist_buffer1 > dist_buffer2) then
                 idx_2comp = 2
@@ -688,66 +688,65 @@ contains
         ! normals(1) = normals(1)/v_norm
         ! normals(2) = normals(2)/v_norm
 
-        end subroutine f_normals
-
+    end subroutine f_normals
 
     subroutine f_check_boundary(model, boundary_v, boundary_vertex_count, boundary_edge_count)
-        type(t_model), INTENT(IN) :: model
-        real(kind(0d0)), allocatable, INTENT(OUT), dimension(:, :, :) :: boundary_v  ! Output boundary vertices
-        integer, INTENT(OUT) :: boundary_vertex_count, boundary_edge_count
-    
+        type(t_model), intent(IN) :: model
+        real(kind(0d0)), allocatable, intent(OUT), dimension(:, :, :) :: boundary_v  ! Output boundary vertices
+        integer, intent(OUT) :: boundary_vertex_count, boundary_edge_count
+
         integer :: i, j, edge_count, edge_index, store_index
         real(kind(0d0)), dimension(1:2, 1:2) :: edge
         real(kind(0d0)), dimension(1:2) :: boundary_edge
         real(kind(0d0)), dimension(1:(3*model%ntrs), 1:2, 1:2) :: temp_boundary_v
         integer, dimension(1:(3*model%ntrs)) :: edge_occurrence
         real(kind(0d0)) :: edgetan, initial, v_norm
-    
+
         ! Total number of edges in 2D STL
-        edge_count = 3 * model%ntrs
-        
+        edge_count = 3*model%ntrs
+
         ! Initialize edge_occurrence array to zero
         edge_occurrence = 0
         edge_index = 0
-    
+
         ! Collect all edges of all triangles and store them
         do i = 1, model%ntrs
             ! First edge (v1, v2)
             edge(1, :) = model%trs(i)%v(1, 1:2)
             edge(2, :) = model%trs(i)%v(2, 1:2)
             call register_edge(temp_boundary_v, edge, edge_index, edge_count)
-    
+
             ! Second edge (v2, v3)
             edge(1, :) = model%trs(i)%v(2, 1:2)
             edge(2, :) = model%trs(i)%v(3, 1:2)
             call register_edge(temp_boundary_v, edge, edge_index, edge_count)
-    
+
             ! Third edge (v3, v1)
             edge(1, :) = model%trs(i)%v(3, 1:2)
             edge(2, :) = model%trs(i)%v(1, 1:2)
             call register_edge(temp_boundary_v, edge, edge_index, edge_count)
         end do
-    
+
         ! Check all edges and count repeated edges
         do i = 1, edge_count
             do j = 1, edge_count
                 if (i /= j) then
                     if (((abs(temp_boundary_v(i, 1, 1) - temp_boundary_v(j, 1, 1)) < 1.0d-8) .and. &
-                        (abs(temp_boundary_v(i, 1, 2) - temp_boundary_v(j, 1, 2)) < 1.0d-8) .and. &
-                        (abs(temp_boundary_v(i, 2, 1) - temp_boundary_v(j, 2, 1)) < 1.0d-8) .and. &
-                        (abs(temp_boundary_v(i, 2, 2) - temp_boundary_v(j, 2, 2)) < 1.0d-8)) .or. &
+                         (abs(temp_boundary_v(i, 1, 2) - temp_boundary_v(j, 1, 2)) < 1.0d-8) .and. &
+                         (abs(temp_boundary_v(i, 2, 1) - temp_boundary_v(j, 2, 1)) < 1.0d-8) .and. &
+                         (abs(temp_boundary_v(i, 2, 2) - temp_boundary_v(j, 2, 2)) < 1.0d-8)) .or. &
                         ((abs(temp_boundary_v(i, 1, 1) - temp_boundary_v(j, 2, 1)) < 1.0d-8) .and. &
-                        (abs(temp_boundary_v(i, 1, 2) - temp_boundary_v(j, 2, 2)) < 1.0d-8) .and. &
-                        (abs(temp_boundary_v(i, 2, 1) - temp_boundary_v(j, 1, 1)) < 1.0d-8) .and. &
-                        (abs(temp_boundary_v(i, 2, 2) - temp_boundary_v(j, 1, 2)) < 1.0d-8))) then
-                        
+                         (abs(temp_boundary_v(i, 1, 2) - temp_boundary_v(j, 2, 2)) < 1.0d-8) .and. &
+                         (abs(temp_boundary_v(i, 2, 1) - temp_boundary_v(j, 1, 1)) < 1.0d-8) .and. &
+                         (abs(temp_boundary_v(i, 2, 2) - temp_boundary_v(j, 1, 2)) < 1.0d-8))) then
+
                         edge_occurrence(i) = edge_occurrence(i) + 1
 
                     end if
                 end if
             end do
         end do
-    
+
         ! Count the number of boundary vertices/edges
         boundary_vertex_count = 0
         boundary_edge_count = 0
@@ -758,10 +757,10 @@ contains
                 boundary_edge_count = boundary_edge_count + 1
             end if
         end do
-    
+
         ! Allocate the boundary_v array based on the number of boundary edges
-        allocate(boundary_v(boundary_edge_count, 1:3, 1:2))
-    
+        allocate (boundary_v(boundary_edge_count, 1:3, 1:2))
+
         ! Store boundary vertices
         store_index = 0
         do i = 1, edge_count
@@ -777,7 +776,7 @@ contains
             ! boundary_edge = boundary_v(i, 1, :) - boundary_v(i, 2, :)
             boundary_edge = boundary_v(i, 2, :) - boundary_v(i, 1, :)
 
-            edgetan =  abs(boundary_edge(1)/boundary_edge(2))
+            edgetan = abs(boundary_edge(1)/boundary_edge(2))
             initial = 1d0
 
             if (edgetan > 1d06) then
@@ -798,39 +797,38 @@ contains
                 boundary_v(i, 3, 2) = abs(boundary_v(i, 3, 2))
 
             else if ((boundary_edge(1) < 0d0) .and. &
-                (boundary_edge(2) < 0d0)) then
+                     (boundary_edge(2) < 0d0)) then
 
                 boundary_v(i, 3, 1) = abs(boundary_v(i, 3, 1))
                 boundary_v(i, 3, 2) = -abs(boundary_v(i, 3, 2))
 
             else if ((boundary_edge(1) < 0d0) .and. &
-                (boundary_edge(2) > 0d0)) then
+                     (boundary_edge(2) > 0d0)) then
 
                 boundary_v(i, 3, 1) = -abs(boundary_v(i, 3, 1))
-                boundary_v(i, 3, 2) = -abs(boundary_v(i, 3, 2))     
+                boundary_v(i, 3, 2) = -abs(boundary_v(i, 3, 2))
 
             else if ((boundary_edge(1) > 0d0) .and. &
-                (boundary_edge(2) < 0d0)) then
+                     (boundary_edge(2) < 0d0)) then
 
                 boundary_v(i, 3, 1) = abs(boundary_v(i, 3, 1))
-                boundary_v(i, 3, 2) = abs(boundary_v(i, 3, 2))  
+                boundary_v(i, 3, 2) = abs(boundary_v(i, 3, 2))
 
             end if
         end do
 
     end subroutine f_check_boundary
-    
-    
+
     subroutine register_edge(temp_boundary_v, edge, edge_index, edge_count)
         integer, intent(inout) :: edge_index, edge_count
         real(kind(0d0)), intent(in), dimension(1:2, 1:2) :: edge
         real(kind(0d0)), dimension(1:edge_count, 1:2, 1:2) :: temp_boundary_v
-    
+
         ! Increment edge index and store the edge
         edge_index = edge_index + 1
         temp_boundary_v(edge_index, 1, :) = edge(1, :)
         temp_boundary_v(edge_index, 2, :) = edge(2, :)
-    
+
     end subroutine register_edge
 
 end module m_model

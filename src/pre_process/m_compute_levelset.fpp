@@ -307,7 +307,7 @@ contains
                             levelset_norm%vf(i, j, 0, ib_patch_id, 1) = 0d0
                         else
                             levelset_norm%vf(i, j, 0, ib_patch_id, 1) = side_dists(1)/ &
-                                                                     abs(side_dists(1))
+                                                                        abs(side_dists(1))
                         end if
 
                     else if (min_dist == abs(side_dists(2))) then
@@ -316,7 +316,7 @@ contains
                             levelset_norm%vf(i, j, 0, ib_patch_id, 1) = 0d0
                         else
                             levelset_norm%vf(i, j, 0, ib_patch_id, 1) = side_dists(2)/ &
-                                                                     abs(side_dists(2))
+                                                                        abs(side_dists(2))
                         end if
 
                     else if (min_dist == abs(side_dists(3))) then
@@ -324,7 +324,7 @@ contains
                             levelset_norm%vf(i, j, 0, ib_patch_id, 1) = 0d0
                         else
                             levelset_norm%vf(i, j, 0, ib_patch_id, 1) = side_dists(3)/ &
-                                                                     abs(side_dists(3))
+                                                                        abs(side_dists(3))
                         end if
 
                     else if (min_dist == abs(side_dists(4))) then
@@ -332,7 +332,7 @@ contains
                             levelset_norm%vf(i, j, 0, ib_patch_id, 1) = 0d0
                         else
                             levelset_norm%vf(i, j, 0, ib_patch_id, 1) = side_dists(4)/ &
-                                                                     abs(side_dists(4))
+                                                                        abs(side_dists(4))
                         end if
 
                     end if

@@ -1954,7 +1954,6 @@ contains
         integer :: boundary_vertex_count, boundary_edge_count
         real(kind(0d0)), allocatable, dimension(:, :, :) :: boundary_v
 
-
         if (.not. ib .and. proc_rank == 0) then
             print *, " * Reading model: "//trim(patch_icpp(patch_id)%model%filepath)
         else if (ib .and. proc_rank == 0) then
@@ -2068,7 +2067,7 @@ contains
                                                                     boundary_edge_count, &
                                                                     point, &
                                                                     & (/dx, dy, dz/))
-                            
+
                             if (patch_id_fp(i, j, k) > 0) then
                                 STL_levelset%sf(i, j, 0, patch_id) = -abs(STL_levelset%sf(i, j, 0, patch_id))
                             end if
@@ -2080,32 +2079,29 @@ contains
                                 & (/dx, dy, dz/), normals)
 
                             if (patch_id_fp(i, j, k) > 0) then
-                                normals(1:3) = - normals(1:3)  
-                            end if    
+                                normals(1:3) = -normals(1:3)
+                            end if
 
                             STL_levelset_norm%vf(i, j, 0, patch_id, 1:3) = normals(1:3)
 
                             ! print*, i, j, normals
 
                             ! STL_levelset_norm(i, j, k, patch_id, 1) = normals(1)
-                            ! STL_levelset_norm(i, j, k, patch_id, 2) = normals(2)    
-                            ! STL_levelset_norm(i, j, k, patch_id, 3) = normals(3)    
+                            ! STL_levelset_norm(i, j, k, patch_id, 2) = normals(2)
+                            ! STL_levelset_norm(i, j, k, patch_id, 3) = normals(3)
 
                             ! print*, i, j, k, STL_levelset(i, j, 0, patch_id)
                             ! print*, i, j, k, 'normals', STL_levelset_norm(i, j, k, patch_id, 1:3)
 
-                        end if    
+                        end if
                     end if
 
-
-                    ! if (eta > patch_ib(patch_id)%model%threshold) then 
+                    ! if (eta > patch_ib(patch_id)%model%threshold) then
                     !     print*, '================='
                     !     print*, i, j, k
                     !     print*, 'normal:', normals
                     !     print*, '================='
                     ! end if
-
-
 
                     ! Note: Should probably use *eta* to compute primitive variables
                     ! if defining them analytically.
@@ -2119,8 +2115,7 @@ contains
         end if
 
         ! print*, i, j, 0, STL_levelset(50, 25, 0, patch_id)
-        print*, 'total vertices', 3*model%ntrs,'boundary verticies', boundary_vertex_count
-
+        print *, 'total vertices', 3*model%ntrs, 'boundary verticies', boundary_vertex_count
 
         call s_model_free(model)
 

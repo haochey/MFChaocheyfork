@@ -88,7 +88,7 @@ contains
         @:ACC_SETUP_SFs(levelset)
         @:ACC_SETUP_VFs(levelset_norm)
         ! @:ALLOCATE(ib_markers%sf(0:m, 0:n, 0:p))
-        
+
         !$acc enter data copyin(gp_layers, num_gps, num_inner_gps)
 
     end subroutine s_initialize_ibm_module
@@ -100,7 +100,7 @@ contains
         integer :: i, j, k
 
         !$acc update device(ib_markers%sf)
-    
+
         ! Get neighboring IB variables from other processors
         call s_mpi_sendrecv_ib_buffers(ib_markers, gp_layers)
 

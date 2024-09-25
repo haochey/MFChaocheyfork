@@ -118,7 +118,7 @@ contains
         call s_int_to_str(patch_id, iStr)
 
         ! Constraints the general domain parameters
-        if (n == 0 .or. p ==0) then
+        if (n == 0 .or. p == 0) then
 
             call s_mpi_abort('Inconsistency(ies) detected in '// &
                              'geometric parameters of circle '// &
