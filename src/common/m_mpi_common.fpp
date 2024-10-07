@@ -141,7 +141,6 @@ contains
         end if
 #endif
 
-        print *, "wassup"
 #ifndef MFC_POST_PROCESS
         if (present(ib_markers)) then
 
