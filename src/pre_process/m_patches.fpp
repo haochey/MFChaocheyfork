@@ -2017,7 +2017,10 @@ contains
             call f_check_interpolation_2D(boundary_v, boundary_vertex_count, (/dx, dy, dz/), interpolate)
         end if
 
-        print*, 'boundary edge', boundary_edge_count
+        if (proc_rank == 0 .and. p == 0) then
+            print*, 'Number of 2D STL edges:', 3*model%ntrs
+            print*, 'Number of 2D STL boundary edges:', boundary_edge_count
+        end if
 
         if (interpolate) then
 
@@ -2037,7 +2040,7 @@ contains
         end if
 
         if (proc_rank == 0) then
-            print*, 'Total number of vertices:', total_vertices
+            print*, 'Total number of interpolated boundary vertices:', total_vertices
         end if
 
         if (proc_rank == 0) then
@@ -2066,11 +2069,11 @@ contains
         do i = 0, m; do j = 0, n; do k = 0, p
 
                     cell_num = i*(n + 1)*(p + 1) + j*(p + 1) + (k + 1)
-                    ! if (proc_rank == 0) then
-                    !     write (*, "(A, F20.2, A)", advance="no") &
-                    !         char(13)//"  * Generating grid: ", &
-                    !         (100*real(cell_num)/real(ncells)), "%"
-                    ! end if
+                    if (proc_rank == 0) then
+                        write (*, "(A, F20.2, A)", advance="no") &
+                            char(13)//"  * Generating grid: ", &
+                            (100*real(cell_num)/real(ncells)), "%"
+                    end if
 
                     point = (/x_cc(i), y_cc(j), 0d0/)
                     if (p > 0) then
@@ -2123,12 +2126,12 @@ contains
 
                             end if
 
-                            if (patch_id_fp(i, j, k) == 0) then
+                            if (patch_id_fp(i, j, k) > 0) then
                                 STL_levelset%sf(i, j, k, patch_id) = -abs(STL_levelset%sf(i, j, k, patch_id))
                             end if
                             
                             if (patch_id_fp(i, j, k) == 0) then
-                                normals(1:3) = normals(1:3)  
+                                normals(1:3) = -normals(1:3)  
                             end if    
 
                             STL_levelset_norm%vf(i, j, k, patch_id, 1:3) = normals(1:3)
@@ -2159,24 +2162,17 @@ contains
                                 & (/dx, dy, dz/), normals)
 
                             if (patch_id_fp(i, j, k) == 0) then
-                                normals(1:3) = - normals(1:3)  
+                                normals(1:3) = -normals(1:3)  
                             end if    
 
                             STL_levelset_norm%vf(i, j, k, patch_id, 1:3) = normals(1:3)
-
-                            ! print*, i, j, normals
-
-                            ! STL_levelset_norm(i, j, k, patch_id, 1) = normals(1)
-                            ! STL_levelset_norm(i, j, k, patch_id, 2) = normals(2)    
-                            ! STL_levelset_norm(i, j, k, patch_id, 3) = normals(3)    
-                            ! print*, i, j, k, 'normals', STL_levelset_norm(i, j, k, patch_id, 1:3)
 
                         end if 
                     end if
 
                     if (i == 37) then
                         ! print*, i, j, 'levelset', STL_levelset%sf(i, j, 0, patch_id), patch_id_fp(i, j, k)
-                        print*, i, j, STL_levelset_norm%vf(i, j, k, patch_id, 1:3)
+                        ! print*, i, j, STL_levelset_norm%vf(i, j, k, patch_id, 1:3)
                     end if
     
                     if (j == 41) then
@@ -2184,15 +2180,6 @@ contains
                         ! print*, i, j, normals
 
                     end if
-    
-                    ! if (eta > patch_ib(patch_id)%model%threshold) then 
-                    !     print*, '================='
-                    !     print*, i, j, k
-                    !     print*, 'normal:', normals
-                    !     print*, '================='
-                    ! end if
-
-
 
                     ! Note: Should probably use *eta* to compute primitive variables
                     ! if defining them analytically.
