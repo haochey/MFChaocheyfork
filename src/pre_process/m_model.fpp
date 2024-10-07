@@ -917,7 +917,6 @@ contains
       
     end subroutine f_interpolate_2D
 
-   
     subroutine f_interpolate_3D(model, spacing, interpolated_boundary_v, total_vertices)
         t_vec3, intent(in) :: spacing
         type(t_model), intent(in) :: model
@@ -933,7 +932,7 @@ contains
         real(kind(0d0)), allocatable :: temp_boundary_v(:, :)
     
         ! Number of triangles in the model
-        num_triangles = size(model%trs)
+        num_triangles = model%ntrs
         cell_width = minval(spacing)
 
         ! Find the minimum surface area
@@ -983,11 +982,9 @@ contains
             tri_area = f_tri_area(x1, y1, z1, x2, y2, z2, x3, y3, z3)
 
             if (tri_area > 0.1*cell_area) then
-                num_inner_vertices = 100*ceiling(tri_area / cell_area)
-                ! num_inner_vertices = 100 * ceiling(edge_length / cell_width)
+                num_inner_vertices = 100 * ceiling(edge_length / cell_width)
                 total_vertices = total_vertices + num_inner_vertices
             end if
-            ! num_inner_vertices = 1*ceiling(tri_area / cell_area)
         end do
     
         ! Allocate memory for the new boundary vertices array
@@ -1059,14 +1056,14 @@ contains
                     v = 1d0 - v
                 end if
                 w = 1d0 - u - v
-    
+
                 total_vertices = total_vertices + 1
                 interpolated_boundary_v(total_vertices, 1) = u * x1 + v * x2 + w * x3
                 interpolated_boundary_v(total_vertices, 2) = u * y1 + v * y2 + w * y3
                 interpolated_boundary_v(total_vertices, 3) = u * z1 + v * z2 + w * z3
             end do
         end do
-    
+        
     end subroutine f_interpolate_3D
 
     

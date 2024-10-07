@@ -1983,7 +1983,6 @@ contains
         real(kind(0d0)) :: distance
         logical :: interpolate
 
-
         if (.not. ib .and. proc_rank == 0) then
             print *, " * Reading model: "//trim(patch_icpp(patch_id)%model%filepath)
         else if (ib .and. proc_rank == 0) then
@@ -2069,11 +2068,11 @@ contains
         do i = 0, m; do j = 0, n; do k = 0, p
 
                     cell_num = i*(n + 1)*(p + 1) + j*(p + 1) + (k + 1)
-                    if (proc_rank == 0) then
-                        write (*, "(A, F20.2, A)", advance="no") &
-                            char(13)//"  * Generating grid: ", &
-                            (100*real(cell_num)/real(ncells)), "%"
-                    end if
+                    ! if (proc_rank == 0) then
+                    !     write (*, "(A, F20.2, A)", advance="no") &
+                    !         char(13)//"  * Generating grid: ", &
+                    !         (100*real(cell_num)/real(ncells)), "%"
+                    ! end if
 
                     point = (/x_cc(i), y_cc(j), 0d0/)
                     if (p > 0) then
@@ -2137,7 +2136,6 @@ contains
                             STL_levelset_norm%vf(i, j, k, patch_id, 1:3) = normals(1:3)
 
                         else
-
                             if (interpolate) then
                                 STL_levelset%sf(i, j, 0, patch_id) = f_interpolated_distance(interpolated_boundary_v, &
                                                                                         total_vertices, &
@@ -2162,17 +2160,24 @@ contains
                                 & (/dx, dy, dz/), normals)
 
                             if (patch_id_fp(i, j, k) == 0) then
-                                normals(1:3) = -normals(1:3)  
+                                normals(1:3) = - normals(1:3)  
                             end if    
 
                             STL_levelset_norm%vf(i, j, k, patch_id, 1:3) = normals(1:3)
 
+                            ! print*, i, j, normals
+
+                            ! STL_levelset_norm(i, j, k, patch_id, 1) = normals(1)
+                            ! STL_levelset_norm(i, j, k, patch_id, 2) = normals(2)    
+                            ! STL_levelset_norm(i, j, k, patch_id, 3) = normals(3)    
+                            ! print*, i, j, k, 'normals', STL_levelset_norm(i, j, k, patch_id, 1:3)
+
                         end if 
                     end if
 
-                    if (i == 37) then
-                        ! print*, i, j, 'levelset', STL_levelset%sf(i, j, 0, patch_id), patch_id_fp(i, j, k)
-                        ! print*, i, j, STL_levelset_norm%vf(i, j, k, patch_id, 1:3)
+                    if (i == 33 .and. j > 10 .and. j < 30) then
+                        ! print*, i, j, k, 'levelset', STL_levelset%sf(i, j, k, patch_id), patch_id_fp(i, j, k)
+                        ! print*, i, j, k, STL_levelset_norm%vf(i, j, k, patch_id, 1:3)
                     end if
     
                     if (j == 41) then
@@ -2180,6 +2185,13 @@ contains
                         ! print*, i, j, normals
 
                     end if
+    
+                    ! if (eta > patch_ib(patch_id)%model%threshold) then 
+                    !     print*, '================='
+                    !     print*, i, j, k
+                    !     print*, 'normal:', normals
+                    !     print*, '================='
+                    ! end if
 
                     ! Note: Should probably use *eta* to compute primitive variables
                     ! if defining them analytically.

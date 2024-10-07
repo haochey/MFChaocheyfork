@@ -342,16 +342,6 @@ contains
 
                 end if
 
-                ! if (i == 46) then
-                !     print*, i, j, 'levelset', levelset%sf(i, j, 0, ib_patch_id)
-                ! end if
-
-                if (i == 37) then
-                    ! print*, i, j, levelset%sf(i, j, k, ib_patch_id)
-                    print*, i, j, levelset_norm%vf(i, j, 0, ib_patch_id, 1)
-                end if
-
-
             end do
         end do
 
@@ -463,14 +453,6 @@ contains
 
                         end if
 
-                    end if
-
-                    ! if (i == 46) then
-                    !     print*, i, j, 'levelset', levelset%sf(i, j, 0, ib_patch_id)
-                    ! end if
-
-                    if (j == 21) then
-                        print*, i, j, levelset%sf(i, j, 0, ib_patch_id)
                     end if
 
                 end do
