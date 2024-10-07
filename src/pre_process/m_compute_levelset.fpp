@@ -316,7 +316,7 @@ contains
                         if (side_dists(2) == 0) then
                             levelset_norm%vf(i, j, 0, ib_patch_id, 1) = 0d0
                         else
-                            levelset_norm%vf(i, j, 0, ib_patch_id, 1) = side_dists(2)/ &
+                            levelset_norm%vf(i, j, 0, ib_patch_id, 1) = -side_dists(2)/ &
                                                                      abs(side_dists(2))
                         end if
 
@@ -334,7 +334,7 @@ contains
                         if (side_dists(4) == 0) then
                             levelset_norm%vf(i, j, 0, ib_patch_id, 2) = 0d0
                         else
-                            levelset_norm%vf(i, j, 0, ib_patch_id, 2) = side_dists(4)/ &
+                            levelset_norm%vf(i, j, 0, ib_patch_id, 2) = -side_dists(4)/ &
                                                                      abs(side_dists(4))
                         end if
 
@@ -421,7 +421,7 @@ contains
                             if (side_dists(2) == 0) then
                                 levelset_norm%vf(i, j, k, ib_patch_id, 1) = 0d0
                             else
-                                levelset_norm%vf(i, j, k, ib_patch_id, 1) = side_dists(2)/ &
+                                levelset_norm%vf(i, j, k, ib_patch_id, 1) = -side_dists(2)/ &
                                                                         abs(side_dists(2))
                             end if
 
@@ -439,7 +439,7 @@ contains
                             if (side_dists(4) == 0) then
                                 levelset_norm%vf(i, j, k, ib_patch_id, 2) = 0d0
                             else
-                                levelset_norm%vf(i, j, k, ib_patch_id, 2) = side_dists(4)/ &
+                                levelset_norm%vf(i, j, k, ib_patch_id, 2) = -side_dists(4)/ &
                                                                         abs(side_dists(4))
                             end if
 
@@ -457,7 +457,7 @@ contains
                             if (side_dists(6) == 0) then
                                 levelset_norm%vf(i, j, k, ib_patch_id, 3) = 0d0
                             else
-                                levelset_norm%vf(i, j, k, ib_patch_id, 3) = side_dists(6)/ &
+                                levelset_norm%vf(i, j, k, ib_patch_id, 3) = -side_dists(6)/ &
                                                                         abs(side_dists(6))
                             end if
 

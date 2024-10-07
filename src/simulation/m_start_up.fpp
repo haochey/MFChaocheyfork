@@ -699,7 +699,7 @@ contains
 
                         call MPI_FILE_SET_VIEW(ifile, disp, MPI_INTEGER, MPI_IO_levelset_DATA%view, &
                                                'native', mpi_info_int, ierr)
-                        call MPI_FILE_READ(ifile, MPI_IO_levelsetnorm_DATA%var%vf, data_size, &
+                        call MPI_FILE_READ(ifile, MPI_IO_levelsetnorm_DATA%var%vf, data_size*3, &
                                            MPI_DOUBLE_PRECISION, status, ierr)
 
                     else
@@ -845,7 +845,7 @@ contains
 
                         call MPI_FILE_SET_VIEW(ifile, disp, MPI_INTEGER, MPI_IO_levelset_DATA%view, &
                                                'native', mpi_info_int, ierr)
-                        call MPI_FILE_READ(ifile, MPI_IO_levelsetnorm_DATA%var%vf, data_size, &
+                        call MPI_FILE_READ(ifile, MPI_IO_levelsetnorm_DATA%var%vf, data_size*3, &
                                            MPI_DOUBLE_PRECISION, status, ierr)
 
                     else
