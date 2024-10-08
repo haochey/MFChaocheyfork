@@ -982,7 +982,7 @@ contains
             tri_area = f_tri_area(x1, y1, z1, x2, y2, z2, x3, y3, z3)
 
             if (tri_area > 0.1*cell_area) then
-                num_inner_vertices = 3 * ceiling(tri_area / cell_area)
+                num_inner_vertices = ceiling(tri_area / cell_area)
                 total_vertices = total_vertices + num_inner_vertices
             end if
         end do
@@ -1047,7 +1047,7 @@ contains
             tri_area = f_tri_area(x1, y1, z1, x2, y2, z2, x3, y3, z3)
 
             if (tri_area > 0.1*cell_area) then
-                num_inner_vertices = 3 * ceiling(tri_area / cell_area)
+                num_inner_vertices = ceiling(tri_area / cell_area)
             end if
             
             !Use barycentric coordinates for randomly distributed points
