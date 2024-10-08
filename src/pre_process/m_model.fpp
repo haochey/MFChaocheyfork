@@ -960,7 +960,7 @@ contains
     
                 ! Determine the number of segments
                 if (edge_length > cell_width) then
-                    num_segments = 10 * ceiling(edge_length / cell_width)
+                    num_segments = 5 * ceiling(edge_length / cell_width)
                 else
                     num_segments = 1
                 end if
@@ -982,7 +982,7 @@ contains
             tri_area = f_tri_area(x1, y1, z1, x2, y2, z2, x3, y3, z3)
 
             if (tri_area > 0.1*cell_area) then
-                num_inner_vertices = 100 * ceiling(edge_length / cell_width)
+                num_inner_vertices = 3 * ceiling(tri_area / cell_area)
                 total_vertices = total_vertices + num_inner_vertices
             end if
         end do
@@ -1008,7 +1008,7 @@ contains
     
                 ! Determine the number of segments and interpolation step
                 if (edge_length > cell_width) then
-                    num_segments = 10 * ceiling(edge_length / cell_width)
+                    num_segments = 5 * ceiling(edge_length / cell_width)
                     del_x = (x2 - x1) / num_segments
                     del_y = (y2 - y1) / num_segments
                     del_z = (z2 - z1) / num_segments
@@ -1044,9 +1044,14 @@ contains
             x3 = model%trs(i)%v(3, 1)
             y3 = model%trs(i)%v(3, 2)
             z3 = model%trs(i)%v(3, 3)
+            tri_area = f_tri_area(x1, y1, z1, x2, y2, z2, x3, y3, z3)
+
+            if (tri_area > 0.1*cell_area) then
+                num_inner_vertices = 3 * ceiling(tri_area / cell_area)
+            end if
             
             !Use barycentric coordinates for randomly distributed points
-            do k = 1, num_inner_vertices
+            do k = 0, num_inner_vertices-1
                 call random_number(u)
                 call random_number(v)
 
@@ -1095,6 +1100,8 @@ contains
             if (min_dist > dist_buffer) then
                 min_dist = dist_buffer
             end if
+
+            print*, 'check', i, total_vertices
 
         end do
 

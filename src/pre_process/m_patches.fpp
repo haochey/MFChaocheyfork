@@ -2125,6 +2125,9 @@ contains
 
                             end if
 
+                            print*, 'check'
+
+
                             if (patch_id_fp(i, j, k) > 0) then
                                 STL_levelset%sf(i, j, k, patch_id) = -abs(STL_levelset%sf(i, j, k, patch_id))
                             end if
