@@ -2068,11 +2068,11 @@ contains
         do i = 0, m; do j = 0, n; do k = 0, p
 
                     cell_num = i*(n + 1)*(p + 1) + j*(p + 1) + (k + 1)
-                    ! if (proc_rank == 0) then
-                    !     write (*, "(A, F20.2, A)", advance="no") &
-                    !         char(13)//"  * Generating grid: ", &
-                    !         (100*real(cell_num)/real(ncells)), "%"
-                    ! end if
+                    if (proc_rank == 0) then
+                        write (*, "(A, F20.2, A)", advance="no") &
+                            char(13)//"  * Generating grid: ", &
+                            (100*real(cell_num)/real(ncells)), "%"
+                    end if
 
                     point = (/x_cc(i), y_cc(j), 0d0/)
                     if (p > 0) then
