@@ -1100,9 +1100,6 @@ contains
             if (min_dist > dist_buffer) then
                 min_dist = dist_buffer
             end if
-
-            print*, 'check', i, total_vertices
-
         end do
 
         distance = min_dist
