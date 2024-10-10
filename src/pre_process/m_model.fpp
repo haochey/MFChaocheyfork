@@ -981,10 +981,10 @@ contains
             z3 = model%trs(i)%v(3, 3)
             tri_area = f_tri_area(x1, y1, z1, x2, y2, z2, x3, y3, z3)
 
-            ! if (tri_area > 0.1*cell_area) then
-            !     num_inner_vertices = ceiling(tri_area / cell_area)
-            !     total_vertices = total_vertices + num_inner_vertices
-            ! end if
+            if (tri_area > 0.1*cell_area) then
+                num_inner_vertices = ceiling(tri_area / cell_area)
+                total_vertices = total_vertices + num_inner_vertices
+            end if
         end do
     
         ! Allocate memory for the new boundary vertices array
@@ -1046,26 +1046,26 @@ contains
             z3 = model%trs(i)%v(3, 3)
             tri_area = f_tri_area(x1, y1, z1, x2, y2, z2, x3, y3, z3)
 
-            ! if (tri_area > 0.1*cell_area) then
-            !     num_inner_vertices = ceiling(tri_area / cell_area)
-            !     !Use barycentric coordinates for randomly distributed points
-            !     do k = 0, num_inner_vertices-1
-            !         call random_number(u)
-            !         call random_number(v)
+            if (tri_area > 0.1*cell_area) then
+                num_inner_vertices = ceiling(tri_area / cell_area)
+                !Use barycentric coordinates for randomly distributed points
+                do k = 0, num_inner_vertices-1
+                    call random_number(u)
+                    call random_number(v)
 
-            !         sumuv = u + v
-            !         if (sumuv >= 1.0d0) then
-            !             u = 1d0 - u
-            !             v = 1d0 - v
-            !         end if
-            !         w = 1d0 - u - v
+                    sumuv = u + v
+                    if (sumuv >= 1.0d0) then
+                        u = 1d0 - u
+                        v = 1d0 - v
+                    end if
+                    w = 1d0 - u - v
 
-            !         total_vertices = total_vertices + 1
-            !         interpolated_boundary_v(total_vertices, 1) = u * x1 + v * x2 + w * x3
-            !         interpolated_boundary_v(total_vertices, 2) = u * y1 + v * y2 + w * y3
-            !         interpolated_boundary_v(total_vertices, 3) = u * z1 + v * z2 + w * z3
-            !     end do
-            ! end if
+                    total_vertices = total_vertices + 1
+                    interpolated_boundary_v(total_vertices, 1) = u * x1 + v * x2 + w * x3
+                    interpolated_boundary_v(total_vertices, 2) = u * y1 + v * y2 + w * y3
+                    interpolated_boundary_v(total_vertices, 3) = u * z1 + v * z2 + w * z3
+                end do
+            end if
         end do
         
     end subroutine f_interpolate_3D
