@@ -2171,7 +2171,7 @@ contains
                             ! STL_levelset_norm(i, j, k, patch_id, 2) = normals(2)    
                             ! STL_levelset_norm(i, j, k, patch_id, 3) = normals(3)    
                             ! print*, i, j, k, 'normals', STL_levelset_norm(i, j, k, patch_id, 1:3)
-
+                            ! deallocate(interpolated_boundary_v(1:total_vertices, 1:3))
                         end if 
                     end if
 

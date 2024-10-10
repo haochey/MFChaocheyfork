@@ -834,7 +834,7 @@ contains
     subroutine f_interpolate_2D(boundary_v, boundary_edge_count, spacing, interpolated_boundary_v, total_vertices)
         real(kind(0d0)), intent(in), dimension(:, :, :) :: boundary_v
         t_vec3, intent(in) :: spacing
-        real(kind(0d0)), allocatable, intent(out), dimension(:, :) :: interpolated_boundary_v
+        real(kind(0d0)), allocatable, intent(inout), dimension(:, :) :: interpolated_boundary_v
         
         integer :: i, j, num_segments, total_vertices, boundary_edge_count
         real(kind(0d0)) :: x1, y1, x2, y2, edge_length, del_x, del_y, cell_width
@@ -920,7 +920,7 @@ contains
     subroutine f_interpolate_3D(model, spacing, interpolated_boundary_v, total_vertices)
         t_vec3, intent(in) :: spacing
         type(t_model), intent(in) :: model
-        real(kind(0d0)), allocatable, intent(out), dimension(:, :) :: interpolated_boundary_v
+        real(kind(0d0)), allocatable, intent(inout), dimension(:, :) :: interpolated_boundary_v
         integer, intent(out) :: total_vertices
     
         integer :: i, j, k, num_triangles, num_segments
