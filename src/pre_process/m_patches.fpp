@@ -2014,6 +2014,40 @@ contains
         call s_transform_model(model, transform)
 
         bbox = f_create_bbox(model)
+        call f_check_boundary(model, boundary_v, boundary_vertex_count, boundary_edge_count)
+
+        if (p > 0) then
+            call f_check_interpolation_3D(model, (/dx, dy, dz/), interpolate)
+        else
+            call f_check_interpolation_2D(boundary_v, boundary_vertex_count, (/dx, dy, dz/), interpolate)
+        end if
+
+        if (proc_rank == 0 .and. p == 0) then
+            print*, 'Number of 2D STL edges:', 3*model%ntrs
+            print*, 'Number of 2D STL boundary edges:', boundary_edge_count
+        end if
+
+        if (interpolate) then
+
+            if (proc_rank == 0) then
+                print*, 'Interpolating STL vertices...'
+            end if
+
+            if (p > 0) then
+                call f_initialize_interploate_3D(model, (/dx, dy, dz/), interpolated_boundary_v)
+                call f_interpolate_3D(model, (/dx, dy, dz/), interpolated_boundary_v, total_vertices)
+            else
+                call f_interpolate_2D(boundary_v, boundary_edge_count, (/dx, dy, dz/), interpolated_boundary_v, total_vertices)
+            end if
+        end if
+
+        if (proc_rank == 0) then
+            print*, 'Number of STL vertices:', 3*model%ntrs
+        end if
+
+        if (proc_rank == 0) then
+            print*, 'Total number of interpolated boundary vertices:', total_vertices
+        end if
 
         if (proc_rank == 0) then
             write (*, "(A, 3(2X, F20.10))") "    > Model:  Min:", bbox%min(1:3)
@@ -2078,6 +2112,19 @@ contains
                     @:analytical()
 
                 end do; end do; end do
+
+        if (interpolate) then
+
+            if (proc_rank == 0) then
+                print*, 'Cleaning interpolated STL vertices...'
+            end if
+
+            if (p > 0) then
+                call f_finalize_interploate_3D(interpolated_boundary_v)
+            else
+                ! call f_finalize_interploate_2D(model, (/dx, dy, dz/), interpolated_boundary_v, total_vertices)
+            end if
+        end if
 
         if (proc_rank == 0) then
             print *, ""
