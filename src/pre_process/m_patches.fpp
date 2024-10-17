@@ -2209,7 +2209,7 @@ contains
             if (p > 0) then
                 call f_finalize_3DSTL(interpolated_boundary_v)
             else
-                call f_finalize_3DSTL(model, (/dx, dy, dz/), interpolated_boundary_v)
+                ! call f_finalize_3DSTL(model, (/dx, dy, dz/), interpolated_boundary_v)
             end if
         end if
                 
