@@ -186,6 +186,8 @@ module m_global_parameters
     type(probe_parameters), allocatable, dimension(:) :: airfoil_grid_u, airfoil_grid_l
     real(kind(0d0)), allocatable, dimension(:, :, :, :) :: STL_levelset
     real(kind(0d0)), allocatable, dimension(:, :, :, :, :) :: STL_levelset_norm
+    real(kind(0d0)), allocatable, dimension(:, :) :: interpolated_boundary_v
+
 
 
 

@@ -22,7 +22,8 @@ module m_model
               f_distance_normals_3D, f_interpolate_2D, f_interpolate_3D, &
               f_interpolated_distance, & 
               f_check_interpolation_2D, &
-              f_check_interpolation_3D, f_tri_area
+              f_check_interpolation_3D, f_tri_area, &
+              f_initialize_3DSTL, f_finalize_3DSTL
 
 contains
 
@@ -1189,5 +1190,84 @@ contains
         cross_magnitude = sqrt(cross_x**2 + cross_y**2 + cross_z**2)
         tri_area = 0.5d0 * cross_magnitude
     end function f_tri_area
+
+    subroutine f_initialize_3DSTL(model, spacing, interpolated_boundary_v)
+        t_vec3, intent(in) :: spacing
+        type(t_model), intent(in) :: model
+        real(kind(0d0)), allocatable, intent(inout), dimension(:, :) :: interpolated_boundary_v
+        integer :: total_vertices
+
+        integer :: i, j, k, num_triangles, num_segments
+        real(kind(0d0)) :: x1, y1, z1, x2, y2, z2, x3, y3, z3
+        real(kind(0d0)) :: edge_length, del_x, del_y, del_z, cell_width
+        real(kind(0d0)) :: area_xy, area_xz, area_yz, cell_area, tri_area
+        real(kind(0d0)) :: u, v, w, sumuv
+        integer :: num_inner_vertices
+
+        ! Number of triangles in the model
+        num_triangles = model%ntrs
+        cell_width = minval(spacing)
+
+        ! Find the minimum surface area
+        area_xy = spacing(1) * spacing(2)
+        area_xz = spacing(1) * spacing(3)
+        area_yz = spacing(2) * spacing(3)
+        cell_area = minval((/ area_xy, area_xz, area_yz /))
+        num_inner_vertices = 0
+
+        ! Calculate the total number of vertices including interpolated ones
+        total_vertices = 0
+        do i = 1, num_triangles
+            do j = 1, 3
+                ! Get the coordinates of the two vertices of the current edge
+                x1 = model%trs(i)%v(j, 1)
+                y1 = model%trs(i)%v(j, 2)
+                z1 = model%trs(i)%v(j, 3)
+                ! Next vertex in the triangle (cyclic)
+                x2 = model%trs(i)%v(mod(j, 3) + 1, 1)
+                y2 = model%trs(i)%v(mod(j, 3) + 1, 2)
+                z2 = model%trs(i)%v(mod(j, 3) + 1, 3)
+
+                ! Compute the length of the edge
+                edge_length = dsqrt((x2 - x1)**2 + (y2 - y1)**2 + (z2 - z1)**2)
+
+                ! Determine the number of segments
+                if (edge_length > cell_width) then
+                    num_segments = 5 * ceiling(edge_length / cell_width)
+                else
+                    num_segments = 1
+                end if
+
+                ! Each edge contributes num_segments vertices
+                total_vertices = total_vertices + num_segments
+            end do
+
+            ! Add vertices inside the triangle
+            x1 = model%trs(i)%v(1, 1)
+            y1 = model%trs(i)%v(1, 2)
+            z1 = model%trs(i)%v(1, 3)
+            x2 = model%trs(i)%v(2, 1)
+            y2 = model%trs(i)%v(2, 2)
+            z2 = model%trs(i)%v(2, 3)
+            x3 = model%trs(i)%v(3, 1)
+            y3 = model%trs(i)%v(3, 2)
+            z3 = model%trs(i)%v(3, 3)
+            tri_area = f_tri_area(x1, y1, z1, x2, y2, z2, x3, y3, z3)
+
+            if (tri_area > 0.1*cell_area) then
+                num_inner_vertices = ceiling(tri_area / cell_area)
+                total_vertices = total_vertices + num_inner_vertices
+            end if
+        end do
+
+        ! Allocate memory for the new boundary vertices array
+        allocate(interpolated_boundary_v(1:total_vertices, 1:3))
+    end subroutine 
+
+    subroutine f_finalize_3DSTL(interpolated_boundary_v)
+        real(kind(0d0)), allocatable, intent(inout), dimension(:, :) :: interpolated_boundary_v
+
+        deallocate(interpolated_boundary_v)
+    end subroutine
 
 end module m_model

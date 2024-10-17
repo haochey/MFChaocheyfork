@@ -2024,10 +2024,11 @@ contains
         if (interpolate) then
 
             if (proc_rank == 0) then
-                print*, 'Interpolating STL vertices...'
+                print*, '* Interpolating STL vertices...'
             end if
 
             if (p > 0) then
+                call f_initialize_3DSTL(model, (/dx, dy, dz/), interpolated_boundary_v)
                 call f_interpolate_3D(model, (/dx, dy, dz/), interpolated_boundary_v, total_vertices)
             else
                 call f_interpolate_2D(boundary_v, boundary_edge_count, (/dx, dy, dz/), interpolated_boundary_v, total_vertices)
@@ -2199,6 +2200,19 @@ contains
 
                 end do; end do; end do
 
+        if (interpolate) then
+
+            if (proc_rank == 0) then
+                print*, '* Cleaning interpolated STL vertices...'
+            end if
+
+            if (p > 0) then
+                call f_finalize_3DSTL(interpolated_boundary_v)
+            else
+                call f_finalize_3DSTL(model, (/dx, dy, dz/), interpolated_boundary_v)
+            end if
+        end if
+                
         if (proc_rank == 0) then
             print *, ""
             print *, " * Cleaning up..."
