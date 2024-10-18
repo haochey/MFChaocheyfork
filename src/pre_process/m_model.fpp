@@ -966,7 +966,7 @@ contains
                 end if
     
                 ! Each edge contributes num_segments vertices
-                total_vertices = total_vertices + num_segments
+                total_vertices = total_vertices + num_segments + 1
             end do
     
             ! Add vertices inside the triangle
@@ -1049,7 +1049,7 @@ contains
             if (tri_area > 0.1*cell_area) then
                 num_inner_vertices = ceiling(tri_area / cell_area)
                 !Use barycentric coordinates for randomly distributed points
-                do k = 0, num_inner_vertices-1
+                do k = 1, num_inner_vertices
                     call random_number(u)
                     call random_number(v)
 

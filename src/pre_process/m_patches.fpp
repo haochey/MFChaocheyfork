@@ -2016,6 +2016,10 @@ contains
             call f_check_interpolation_2D(boundary_v, boundary_vertex_count, (/dx, dy, dz/), interpolate)
         end if
 
+        if (proc_rank == 0) then
+            print*, 'Number of STL vertices:', 3*model%ntrs
+        end if
+
         if (proc_rank == 0 .and. p == 0) then
             print*, 'Number of 2D STL edges:', 3*model%ntrs
             print*, 'Number of 2D STL boundary edges:', boundary_edge_count
@@ -2032,14 +2036,11 @@ contains
             else
                 call f_interpolate_2D(boundary_v, boundary_edge_count, (/dx, dy, dz/), interpolated_boundary_v, total_vertices)
             end if
-        end if
 
-        if (proc_rank == 0) then
-            print*, 'Number of STL vertices:', 3*model%ntrs
-        end if
+            if (proc_rank == 0) then
+                print*, 'Total number of interpolated boundary vertices:', total_vertices
+            end if
 
-        if (proc_rank == 0) then
-            print*, 'Total number of interpolated boundary vertices:', total_vertices
         end if
 
         if (proc_rank == 0) then
@@ -2164,14 +2165,6 @@ contains
                             end if    
 
                             STL_levelset_norm%vf(i, j, k, patch_id, 1:3) = normals(1:3)
-
-                            ! print*, i, j, normals
-
-                            ! STL_levelset_norm(i, j, k, patch_id, 1) = normals(1)
-                            ! STL_levelset_norm(i, j, k, patch_id, 2) = normals(2)    
-                            ! STL_levelset_norm(i, j, k, patch_id, 3) = normals(3)    
-                            ! print*, i, j, k, 'normals', STL_levelset_norm(i, j, k, patch_id, 1:3)
-                            ! deallocate(interpolated_boundary_v(1:total_vertices, 1:3))
                         end if 
                     end if
 
@@ -2185,13 +2178,6 @@ contains
                         ! print*, i, j, normals
 
                     end if
-    
-                    ! if (eta > patch_ib(patch_id)%model%threshold) then 
-                    !     print*, '================='
-                    !     print*, i, j, k
-                    !     print*, 'normal:', normals
-                    !     print*, '================='
-                    ! end if
 
                     ! Note: Should probably use *eta* to compute primitive variables
                     ! if defining them analytically.
