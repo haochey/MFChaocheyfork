@@ -693,7 +693,7 @@ contains
 
     !> This procedure check if interpolates is needed for 2D models.
     !! @param boundary_v                Temporary edge end vertex buffer
-    !! @param boundary_edge_count       Output total number of boudary edges
+    !! @param boundary_edge_count       Output total number of boundary edges
     !! @param spacing                   Dimensions of the current levelset cell
     !! @param interpolate               Logical output
     subroutine f_check_interpolation_2D(boundary_v, boundary_edge_count, spacing, interpolate)
@@ -923,7 +923,7 @@ contains
             z3 = model%trs(i)%v(3, 3)
             tri_area = f_tri_area(x1, y1, z1, x2, y2, z2, x3, y3, z3)
 
-            if (tri_area > threhold_bary*cell_area) then
+            if (tri_area > threshold_bary*cell_area) then
                 num_inner_vertices = Ifactor_bary_3D*ceiling(tri_area/cell_area)
                 total_vertices = total_vertices + num_inner_vertices
             end if
@@ -988,7 +988,7 @@ contains
             z3 = model%trs(i)%v(3, 3)
             tri_area = f_tri_area(x1, y1, z1, x2, y2, z2, x3, y3, z3)
 
-            if (tri_area > threhold_bary*cell_area) then
+            if (tri_area > threshold_bary*cell_area) then
                 num_inner_vertices = Ifactor_bary_3D*ceiling(tri_area/cell_area)
                 !Use barycentric coordinates for randomly distributed points
                 do k = 1, num_inner_vertices
