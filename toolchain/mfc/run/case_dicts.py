@@ -110,11 +110,7 @@ for ib_id in range(1, 10+1):
     for real_attr_stl2 in ["translate", "scale", "rotate"]:
         for j in range(1, 4):
             PRE_PROCESS[f"patch_ib({ib_id})%model%{real_attr_stl2}({j})"] = ParamType.REAL
-    
-    # PRE_PROCESS[f"patch_ib({ib_id})%model%filepath"] = ParamType.STR
-    # PRE_PROCESS[f"patch_ib({ib_id})%model%spc"] = ParamType.INT
-    # PRE_PROCESS[f"patch_ib({ib_id})%model%threshold"] = ParamType.REAL
-
+ 
 for cmp in ["x", "y", "z"]:
     for prepend in ["domain%beg", "domain%end", "a", "b"]:
         PRE_PROCESS[f"{cmp}_{prepend}"] = ParamType.REAL

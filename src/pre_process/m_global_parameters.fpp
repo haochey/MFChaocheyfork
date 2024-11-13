@@ -446,7 +446,7 @@ contains
             patch_ib(i)%p = dflt_real
             patch_ib(i)%slip = .false.
 
-            ! Proper default values for translating STL models 
+            ! Proper default values for translating STL models
             patch_ib(i)%model%scale(:) = 1d0
             patch_ib(i)%model%translate(:) = 0d0
             patch_ib(i)%model%rotate(:) = 0d0

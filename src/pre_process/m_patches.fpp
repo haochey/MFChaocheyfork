@@ -2021,7 +2021,7 @@ contains
             transform = f_create_transform_matrix(patch_ib(patch_id)%model)
         else
             transform = f_create_transform_matrix(patch_icpp(patch_id)%model)
-        end if   
+        end if
 
         call s_transform_model(model, transform)
 
@@ -2029,7 +2029,7 @@ contains
 
         ! Show the number of vertices in the original STL model
         if (proc_rank == 0) then
-            print*, 'Number of input model vertices:', 3*model%ntrs
+            print *, 'Number of input model vertices:', 3*model%ntrs
         end if
 
         call f_check_boundary(model, boundary_v, boundary_vertex_count, boundary_edge_count)
@@ -2043,16 +2043,16 @@ contains
 
         ! Show the number of edges and boundary edges in 2D STL models
         if (proc_rank == 0 .and. p == 0) then
-            print*, 'Number of 2D model edges:', 3*model%ntrs
-            print*, ""
-            print*, 'Number of 2D model boundary edges:', boundary_edge_count
+            print *, 'Number of 2D model edges:', 3*model%ntrs
+            print *, ""
+            print *, 'Number of 2D model boundary edges:', boundary_edge_count
         end if
 
         ! Interpolate the STL model along the edges (2D) and on triangle facets (3D)
         if (interpolate) then
             if (proc_rank == 0) then
-                print*, ""
-                print*, 'Interpolating STL vertices...'
+                print *, ""
+                print *, 'Interpolating STL vertices...'
             end if
 
             if (p > 0) then
@@ -2062,7 +2062,7 @@ contains
             end if
 
             if (proc_rank == 0) then
-                print*, 'Total number of interpolated boundary vertices:', total_vertices
+                print *, 'Total number of interpolated boundary vertices:', total_vertices
             end if
         end if
 
@@ -2131,7 +2131,7 @@ contains
                         ! Note: Should probably use *eta* to compute primitive variables
                         ! if defining them analytically.
                         @:analytical()
-                    else 
+                    else
                         ! Reading STL boundary vertices and compute the levelset and levelset_norm
                         if (eta > patch_ib(patch_id)%model%threshold) then
                             patch_id_fp(i, j, k) = patch_id
@@ -2146,10 +2146,10 @@ contains
                             ! Get the shortest distance between the cell center and the interpolated model boundary
                             if (interpolate) then
                                 STL_levelset%sf(i, j, k, patch_id) = f_interpolated_distance(interpolated_boundary_v, &
-                                                                                        total_vertices, &
-                                                                                        point, &
-                                                                                        (/dx, dy, dz/))
-                            else 
+                                                                                             total_vertices, &
+                                                                                             point, &
+                                                                                             (/dx, dy, dz/))
+                            else
                                 STL_levelset%sf(i, j, k, patch_id) = distance
                             end if
 
@@ -2157,37 +2157,37 @@ contains
                             if (patch_id_fp(i, j, k) > 0) then
                                 STL_levelset%sf(i, j, k, patch_id) = -abs(STL_levelset%sf(i, j, k, patch_id))
                             end if
-                            
+
                             ! Correct the sign of the levelset_norm
                             if (patch_id_fp(i, j, k) == 0) then
-                                normals(1:3) = -normals(1:3)  
+                                normals(1:3) = -normals(1:3)
                             end if
 
                             ! Assign the levelset_norm
                             STL_levelset_norm%sf(i, j, k, patch_id, 1:3) = normals(1:3)
                         else
-                        ! 2D models
+                            ! 2D models
                             if (interpolate) then
-                            ! Get the shortest distance between the cell center and the model boundary
+                                ! Get the shortest distance between the cell center and the model boundary
                                 STL_levelset%sf(i, j, 0, patch_id) = f_interpolated_distance(interpolated_boundary_v, &
-                                                                                        total_vertices, &
-                                                                                        point, &
-                                                                                        (/dx, dy, dz/))
+                                                                                             total_vertices, &
+                                                                                             point, &
+                                                                                             (/dx, dy, dz/))
                             else
-                            ! Get the shortest distance between the cell center and the interpolated model boundary
+                                ! Get the shortest distance between the cell center and the interpolated model boundary
                                 STL_levelset%sf(i, j, 0, patch_id) = f_distance(boundary_v, &
-                                                                        boundary_vertex_count, &
-                                                                        boundary_edge_count, &
-                                                                        point, &
-                                                                        (/dx, dy, dz/))
+                                                                                boundary_vertex_count, &
+                                                                                boundary_edge_count, &
+                                                                                point, &
+                                                                                (/dx, dy, dz/))
                             end if
-                            
+
                             ! Correct the sign of the levelset
                             if (patch_id_fp(i, j, k) > 0) then
                                 STL_levelset%sf(i, j, 0, patch_id) = -abs(STL_levelset%sf(i, j, 0, patch_id))
                             end if
 
-                            ! Get the boundary normals 
+                            ! Get the boundary normals
                             call f_normals(boundary_v, &
                                             boundary_vertex_count, &
                                             boundary_edge_count, &
@@ -2196,20 +2196,20 @@ contains
 
                             ! Correct the sign of the levelset_norm
                             if (patch_id_fp(i, j, k) == 0) then
-                                normals(1:3) = - normals(1:3)  
-                            end if  
+                                normals(1:3) = -normals(1:3)
+                            end if
 
                             ! Assign the levelset_norm
                             STL_levelset_norm%sf(i, j, k, patch_id, 1:3) = normals(1:3)
 
-                        end if 
+                        end if
                     end if
 
                     if (i == 33 .and. j > 10 .and. j < 30) then
                         ! print*, i, j, k, 'levelset', STL_levelset%sf(i, j, k, patch_id), patch_id_fp(i, j, k)
                         ! print*, i, j, k, STL_levelset_norm%vf(i, j, k, patch_id, 1:3)
                     end if
-    
+
                     if (j == 41) then
                         ! print*, i, j, 0, STL_levelset%sf(i, j, 0, patch_id), patch_id_fp(i, j, k)
                         ! print*, i, j, normals

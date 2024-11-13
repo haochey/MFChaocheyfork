@@ -385,8 +385,8 @@ contains
                     z = z_cc(k)
 
                     if ((x > Left .and. x < Right) .or. &
-                        (y > Bottom .and. y < Top) .or. & 
-                        (z > Back .and. z < Front) ) then
+                        (y > Bottom .and. y < Top) .or. &
+                        (z > Back .and. z < Front)) then
 
                         side_dists(1) = Left - x
                         side_dists(2) = x - Right
@@ -403,7 +403,7 @@ contains
                                 levelset_norm%sf(i, j, k, ib_patch_id, 1) = 0d0
                             else
                                 levelset_norm%sf(i, j, k, ib_patch_id, 1) = side_dists(1)/ &
-                                                                        abs(side_dists(1))
+                                                                            abs(side_dists(1))
                             end if
 
                         else if (min_dist == abs(side_dists(2))) then
@@ -412,7 +412,7 @@ contains
                                 levelset_norm%sf(i, j, k, ib_patch_id, 1) = 0d0
                             else
                                 levelset_norm%sf(i, j, k, ib_patch_id, 1) = -side_dists(2)/ &
-                                                                        abs(side_dists(2))
+                                                                            abs(side_dists(2))
                             end if
 
                         else if (min_dist == abs(side_dists(3))) then
@@ -421,7 +421,7 @@ contains
                                 levelset_norm%sf(i, j, k, ib_patch_id, 2) = 0d0
                             else
                                 levelset_norm%sf(i, j, k, ib_patch_id, 2) = side_dists(3)/ &
-                                                                        abs(side_dists(3))
+                                                                            abs(side_dists(3))
                             end if
 
                         else if (min_dist == abs(side_dists(4))) then
@@ -430,7 +430,7 @@ contains
                                 levelset_norm%sf(i, j, k, ib_patch_id, 2) = 0d0
                             else
                                 levelset_norm%sf(i, j, k, ib_patch_id, 2) = -side_dists(4)/ &
-                                                                        abs(side_dists(4))
+                                                                            abs(side_dists(4))
                             end if
 
                         else if (min_dist == abs(side_dists(5))) then
@@ -439,7 +439,7 @@ contains
                                 levelset_norm%sf(i, j, k, ib_patch_id, 3) = 0d0
                             else
                                 levelset_norm%sf(i, j, k, ib_patch_id, 3) = side_dists(5)/ &
-                                                                        abs(side_dists(5))
+                                                                            abs(side_dists(5))
                             end if
 
                         else if (min_dist == abs(side_dists(6))) then
@@ -448,7 +448,7 @@ contains
                                 levelset_norm%sf(i, j, k, ib_patch_id, 3) = 0d0
                             else
                                 levelset_norm%sf(i, j, k, ib_patch_id, 3) = -side_dists(6)/ &
-                                                                        abs(side_dists(6))
+                                                                            abs(side_dists(6))
                             end if
 
                         end if

@@ -207,7 +207,7 @@ contains
                     call s_3D_airfoil(i, ib_markers%sf, q_prim_vf, .true.)
                     call s_compute_3D_airfoil_levelset(levelset, levelset_norm, i)
 
-                ! STL+IBM patch
+                    ! STL+IBM patch
                 elseif (patch_ib(i)%geometry == 12) then
                     call s_model(i, ib_markers%sf, q_prim_vf, .true., levelset, levelset_norm)
                 end if
@@ -281,14 +281,14 @@ contains
                 if (patch_ib(i)%geometry == 2) then
                     call s_circle(i, ib_markers%sf, q_prim_vf, .true.)
                     call s_compute_circle_levelset(levelset, levelset_norm, i)
-                ! Rectangular patch
+                    ! Rectangular patch
                 elseif (patch_ib(i)%geometry == 3) then
                     call s_rectangle(i, ib_markers%sf, q_prim_vf, .true.)
                     call s_compute_rectangle_levelset(levelset, levelset_norm, i)
                 elseif (patch_ib(i)%geometry == 4) then
                     call s_airfoil(i, ib_markers%sf, q_prim_vf, .true.)
                     call s_compute_airfoil_levelset(levelset, levelset_norm, i)
-                ! STL+IBM patch
+                    ! STL+IBM patch
                 elseif (patch_ib(i)%geometry == 5) then
                     call s_model(i, ib_markers%sf, q_prim_vf, .true., levelset, levelset_norm)
                 end if

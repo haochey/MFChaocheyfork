@@ -20,8 +20,8 @@ module m_model
     public :: f_model_read, s_model_write, s_model_free, f_model_is_inside
 
     ! Subroutines for STL immersed boundaries
-    public :: f_check_boundary, f_register_edge, f_check_interpolation_2D, & 
-              f_check_interpolation_3D, f_interpolate_2D, f_interpolate_3D, & 
+    public :: f_check_boundary, f_register_edge, f_check_interpolation_2D, &
+              f_check_interpolation_3D, f_interpolate_2D, f_interpolate_3D, &
               f_interpolated_distance, f_normals, f_distance, f_distance_normals_3D, f_tri_area
 
 contains
@@ -571,7 +571,7 @@ contains
         real(kind(0d0)), dimension(1:(3*model%ntrs), 1:2, 1:2) :: temp_boundary_v !< Temporary boundary vertex buffer
         integer, dimension(1:(3*model%ntrs)) :: edge_occurrence !< The manifoldness of the edges
         real(kind(0d0)) :: edgetan, initial, v_norm, xnormal, ynormal !< The manifoldness of the edges
-    
+
         ! Total number of edges in 2D STL
         edge_count = 3*model%ntrs
 
@@ -609,7 +609,7 @@ contains
                          (abs(temp_boundary_v(i, 1, 2) - temp_boundary_v(j, 2, 2)) < threshold_edge_zero) .and. &
                          (abs(temp_boundary_v(i, 2, 1) - temp_boundary_v(j, 1, 1)) < threshold_edge_zero) .and. &
                          (abs(temp_boundary_v(i, 2, 2) - temp_boundary_v(j, 1, 2)) < threshold_edge_zero))) then
-                        
+
                         edge_occurrence(i) = edge_occurrence(i) + 1
                     end if
                 end if
@@ -650,7 +650,7 @@ contains
         do i = 1, boundary_edge_count
             boundary_edge(1) = boundary_v(i, 2, 1) - boundary_v(i, 1, 1)
             boundary_edge(2) = boundary_v(i, 2, 2) - boundary_v(i, 1, 2)
-            edgetan =  boundary_edge(1)/boundary_edge(2)
+            edgetan = boundary_edge(1)/boundary_edge(2)
 
             if (abs(boundary_edge(2)) < threshold_vector_zero) then
                 if (edgetan > 0d0) then
@@ -672,7 +672,7 @@ contains
         end do
 
     end subroutine f_check_boundary
-    
+
     !> This procedure appends the edge end vertices to a temporary buffer.
     !! @param temp_boundary_v      Temporary edge end vertex buffer
     !! @param edge                 Edges end points to be registered
@@ -693,19 +693,19 @@ contains
 
     !> This procedure check if interpolates is needed for 2D models.
     !! @param boundary_v                Temporary edge end vertex buffer
-    !! @param boundary_edge_count       Output total number of boudary edges 
+    !! @param boundary_edge_count       Output total number of boudary edges
     !! @param spacing                   Dimensions of the current levelset cell
     !! @param interpolate               Logical output
     subroutine f_check_interpolation_2D(boundary_v, boundary_edge_count, spacing, interpolate)
         logical, intent(out) :: interpolate !< Logical indicator of interpolation
-        integer, intent(in) ::  boundary_edge_count !< Number of boundary edges
+        integer, intent(in) :: boundary_edge_count !< Number of boundary edges
         real(kind(0d0)), optional, intent(in), dimension(1:boundary_edge_count, 1:3, 1:2) :: boundary_v
         t_vec3, intent(in) :: spacing
 
         real(kind(0d0)) :: l1, cell_width !< Length of each boundary edge and cell width
         real(kind(0d0)) :: v1_x, v1_y, v2_x, v2_y !< Boundary points of each boundary edge
         integer :: j !< Boundary edge index iterator
-        
+
         cell_width = minval(spacing(1:2))
         interpolate = .false.
 
@@ -737,7 +737,7 @@ contains
                         & v2_x, v2_y, v2_z, &
                         & v3_x, v3_y, v3_z
         integer :: i
-        
+
         cell_width = minval(spacing)
         interpolate = .false.
 
@@ -775,83 +775,83 @@ contains
         real(kind(0d0)), intent(in), dimension(:, :, :) :: boundary_v
         t_vec3, intent(in) :: spacing
         real(kind(0d0)), allocatable, intent(inout), dimension(:, :) :: interpolated_boundary_v
-        
+
         integer :: i, j, num_segments, total_vertices, boundary_edge_count
         real(kind(0d0)) :: x1, y1, x2, y2, edge_length, del_x, del_y, cell_width
         real(kind(0d0)), allocatable :: temp_boundary_v(:, :)
-      
+
         ! Get the number of boundary edges
         cell_width = minval(spacing(1:2))
         num_segments = 0
-      
+
         ! First pass: Calculate the total number of vertices including interpolated ones
         total_vertices = 1
         do i = 1, boundary_edge_count
-           ! Get the coordinates of the two ends of the current edge
-           x1 = boundary_v(i, 1, 1)
-           y1 = boundary_v(i, 1, 2)
-           x2 = boundary_v(i, 2, 1)
-           y2 = boundary_v(i, 2, 2)
-      
-           ! Compute the length of the edge
-           edge_length = dsqrt((x2 - x1)**2 + (y2 - y1)**2)
-      
-           ! Determine the number of segments
-           if (edge_length > cell_width) then
-              num_segments = Ifactor_2D*ceiling(edge_length/cell_width)
-           else
-              num_segments = 1
-           end if
-      
-           ! Each edge contributes num_segments vertices
-           total_vertices = total_vertices + num_segments
+            ! Get the coordinates of the two ends of the current edge
+            x1 = boundary_v(i, 1, 1)
+            y1 = boundary_v(i, 1, 2)
+            x2 = boundary_v(i, 2, 1)
+            y2 = boundary_v(i, 2, 2)
+
+            ! Compute the length of the edge
+            edge_length = dsqrt((x2 - x1)**2 + (y2 - y1)**2)
+
+            ! Determine the number of segments
+            if (edge_length > cell_width) then
+                num_segments = Ifactor_2D*ceiling(edge_length/cell_width)
+            else
+                num_segments = 1
+            end if
+
+            ! Each edge contributes num_segments vertices
+            total_vertices = total_vertices + num_segments
         end do
-      
+
         ! Allocate memory for the new boundary vertices array
-        allocate(interpolated_boundary_v(1:total_vertices, 1:3))
-      
+        allocate (interpolated_boundary_v(1:total_vertices, 1:3))
+
         ! Fill the new boundary vertices array with original and interpolated vertices
         total_vertices = 1
         do i = 1, boundary_edge_count
-           ! Get the coordinates of the two ends of the current edge
-           x1 = boundary_v(i, 1, 1)
-           y1 = boundary_v(i, 1, 2)
-           x2 = boundary_v(i, 2, 1)
-           y2 = boundary_v(i, 2, 2)
-      
-           ! Compute the length of the edge
-           edge_length = sqrt((x2 - x1)**2 + (y2 - y1)**2)
-      
-           ! Determine the number of segments and interpolation step
-           if (edge_length > cell_width) then
-              num_segments = Ifactor_2D*ceiling(edge_length / cell_width)
-              del_x = (x2 - x1) / num_segments
-              del_y = (y2 - y1) / num_segments
-           else
-              num_segments = 1
-              del_x = 0d0
-              del_y = 0d0
-           end if
-           
-           interpolated_boundary_v(1, 1) = x1
-           interpolated_boundary_v(1, 2) = y1
-           interpolated_boundary_v(1, 3) = 0d0
+            ! Get the coordinates of the two ends of the current edge
+            x1 = boundary_v(i, 1, 1)
+            y1 = boundary_v(i, 1, 2)
+            x2 = boundary_v(i, 2, 1)
+            y2 = boundary_v(i, 2, 2)
 
-           ! Add original and interpolated vertices to the output array
-           do j = 1, num_segments - 1
-              total_vertices = total_vertices + 1
-              interpolated_boundary_v(total_vertices, 1) = x1 + j * del_x
-              interpolated_boundary_v(total_vertices, 2) = y1 + j * del_y
-           end do
-      
-           ! Add the last vertex of the edge
-           if (num_segments > 0) then
-              total_vertices = total_vertices + 1
-              interpolated_boundary_v(total_vertices, 1) = x2
-              interpolated_boundary_v(total_vertices, 2) = y2
-           end if
+            ! Compute the length of the edge
+            edge_length = sqrt((x2 - x1)**2 + (y2 - y1)**2)
+
+            ! Determine the number of segments and interpolation step
+            if (edge_length > cell_width) then
+                num_segments = Ifactor_2D*ceiling(edge_length/cell_width)
+                del_x = (x2 - x1)/num_segments
+                del_y = (y2 - y1)/num_segments
+            else
+                num_segments = 1
+                del_x = 0d0
+                del_y = 0d0
+            end if
+
+            interpolated_boundary_v(1, 1) = x1
+            interpolated_boundary_v(1, 2) = y1
+            interpolated_boundary_v(1, 3) = 0d0
+
+            ! Add original and interpolated vertices to the output array
+            do j = 1, num_segments - 1
+                total_vertices = total_vertices + 1
+                interpolated_boundary_v(total_vertices, 1) = x1 + j*del_x
+                interpolated_boundary_v(total_vertices, 2) = y1 + j*del_y
+            end do
+
+            ! Add the last vertex of the edge
+            if (num_segments > 0) then
+                total_vertices = total_vertices + 1
+                interpolated_boundary_v(total_vertices, 1) = x2
+                interpolated_boundary_v(total_vertices, 2) = y2
+            end if
         end do
-      
+
     end subroutine f_interpolate_2D
 
     !> This procedure interpolates 3D models.
@@ -864,7 +864,7 @@ contains
         type(t_model), intent(in) :: model
         real(kind(0d0)), allocatable, intent(inout), dimension(:, :) :: interpolated_boundary_v
         integer, intent(out) :: total_vertices
-    
+
         integer :: i, j, k, num_triangles, num_segments
         real(kind(0d0)) :: x1, y1, z1, x2, y2, z2, x3, y3, z3
         real(kind(0d0)) :: edge_length, del_x, del_y, del_z, cell_width
@@ -872,16 +872,16 @@ contains
         real(kind(0d0)) :: u, v, w !< Barycentric coordinates
         integer :: num_inner_vertices
         real(kind(0d0)), allocatable :: temp_boundary_v(:, :)
-    
+
         ! Number of triangles in the model
         num_triangles = model%ntrs
         cell_width = minval(spacing)
 
         ! Find the minimum surface area
-        area_xy = spacing(1) * spacing(2)
-        area_xz = spacing(1) * spacing(3)
-        area_yz = spacing(2) * spacing(3)
-        cell_area = minval((/ area_xy, area_xz, area_yz /))
+        area_xy = spacing(1)*spacing(2)
+        area_xz = spacing(1)*spacing(3)
+        area_yz = spacing(2)*spacing(3)
+        cell_area = minval((/area_xy, area_xz, area_yz/))
         num_inner_vertices = 0
 
         ! Calculate the total number of vertices including interpolated ones
@@ -896,21 +896,21 @@ contains
                 x2 = model%trs(i)%v(mod(j, 3) + 1, 1)
                 y2 = model%trs(i)%v(mod(j, 3) + 1, 2)
                 z2 = model%trs(i)%v(mod(j, 3) + 1, 3)
-    
+
                 ! Compute the length of the edge
                 edge_length = dsqrt((x2 - x1)**2 + (y2 - y1)**2 + (z2 - z1)**2)
-    
+
                 ! Determine the number of segments
                 if (edge_length > cell_width) then
-                    num_segments = Ifactor_3D * ceiling(edge_length / cell_width)
+                    num_segments = Ifactor_3D*ceiling(edge_length/cell_width)
                 else
                     num_segments = 1
                 end if
-    
+
                 ! Each edge contributes num_segments vertices
                 total_vertices = total_vertices + num_segments + 1
             end do
-    
+
             ! Add vertices inside the triangle
             x1 = model%trs(i)%v(1, 1)
             y1 = model%trs(i)%v(1, 2)
@@ -924,14 +924,14 @@ contains
             tri_area = f_tri_area(x1, y1, z1, x2, y2, z2, x3, y3, z3)
 
             if (tri_area > threhold_bary*cell_area) then
-                num_inner_vertices = Ifactor_bary_3D*ceiling(tri_area / cell_area)
+                num_inner_vertices = Ifactor_bary_3D*ceiling(tri_area/cell_area)
                 total_vertices = total_vertices + num_inner_vertices
             end if
         end do
-    
+
         ! Allocate memory for the new boundary vertices array
-        allocate(interpolated_boundary_v(1:total_vertices, 1:3))
-    
+        allocate (interpolated_boundary_v(1:total_vertices, 1:3))
+
         ! Fill the new boundary vertices array with original and interpolated vertices
         total_vertices = 0
         do i = 1, num_triangles
@@ -944,39 +944,39 @@ contains
                 x2 = model%trs(i)%v(mod(j, 3) + 1, 1)  ! Next vertex in the triangle (cyclic)
                 y2 = model%trs(i)%v(mod(j, 3) + 1, 2)
                 z2 = model%trs(i)%v(mod(j, 3) + 1, 3)
-    
+
                 ! Compute the length of the edge
                 edge_length = dsqrt((x2 - x1)**2 + (y2 - y1)**2 + (z2 - z1)**2)
-    
+
                 ! Determine the number of segments and interpolation step
                 if (edge_length > cell_width) then
-                    num_segments = Ifactor_3D * ceiling(edge_length / cell_width)
-                    del_x = (x2 - x1) / num_segments
-                    del_y = (y2 - y1) / num_segments
-                    del_z = (z2 - z1) / num_segments
+                    num_segments = Ifactor_3D*ceiling(edge_length/cell_width)
+                    del_x = (x2 - x1)/num_segments
+                    del_y = (y2 - y1)/num_segments
+                    del_z = (z2 - z1)/num_segments
                 else
                     num_segments = 1
                     del_x = 0d0
                     del_y = 0d0
                     del_z = 0d0
                 end if
-    
+
                 ! Add original and interpolated vertices to the output array
                 do k = 0, num_segments - 1
                     total_vertices = total_vertices + 1
-                    interpolated_boundary_v(total_vertices, 1) = x1 + k * del_x
-                    interpolated_boundary_v(total_vertices, 2) = y1 + k * del_y
-                    interpolated_boundary_v(total_vertices, 3) = z1 + k * del_z
+                    interpolated_boundary_v(total_vertices, 1) = x1 + k*del_x
+                    interpolated_boundary_v(total_vertices, 2) = y1 + k*del_y
+                    interpolated_boundary_v(total_vertices, 3) = z1 + k*del_z
                 end do
-    
+
                 ! Add the last vertex of the edge
                 total_vertices = total_vertices + 1
                 interpolated_boundary_v(total_vertices, 1) = x2
                 interpolated_boundary_v(total_vertices, 2) = y2
                 interpolated_boundary_v(total_vertices, 3) = z2
             end do
-        
-            ! Interpolate verties that are not on edges 
+
+            ! Interpolate verties that are not on edges
             x1 = model%trs(i)%v(1, 1)
             y1 = model%trs(i)%v(1, 2)
             z1 = model%trs(i)%v(1, 3)
@@ -989,7 +989,7 @@ contains
             tri_area = f_tri_area(x1, y1, z1, x2, y2, z2, x3, y3, z3)
 
             if (tri_area > threhold_bary*cell_area) then
-                num_inner_vertices = Ifactor_bary_3D*ceiling(tri_area / cell_area)
+                num_inner_vertices = Ifactor_bary_3D*ceiling(tri_area/cell_area)
                 !Use barycentric coordinates for randomly distributed points
                 do k = 1, num_inner_vertices
                     call random_number(u)
@@ -1002,15 +1002,14 @@ contains
                     w = 1d0 - u - v
 
                     total_vertices = total_vertices + 1
-                    interpolated_boundary_v(total_vertices, 1) = u * x1 + v * x2 + w * x3
-                    interpolated_boundary_v(total_vertices, 2) = u * y1 + v * y2 + w * y3
-                    interpolated_boundary_v(total_vertices, 3) = u * z1 + v * z2 + w * z3
+                    interpolated_boundary_v(total_vertices, 1) = u*x1 + v*x2 + w*x3
+                    interpolated_boundary_v(total_vertices, 2) = u*y1 + v*y2 + w*y3
+                    interpolated_boundary_v(total_vertices, 3) = u*z1 + v*z2 + w*z3
                 end do
             end if
         end do
-        
-    end subroutine f_interpolate_3D
 
+    end subroutine f_interpolate_3D
 
     !> This procedure determines the levelset distance and normals of the 3D models without interpolation.
     !! @param model        Model to search in.
@@ -1018,7 +1017,7 @@ contains
     !! @param normals      The output levelset normals
     !! @param distance     The output levelset distance
     subroutine f_distance_normals_3D(model, point, normals, distance)
-        type(t_model), INTENT(IN) :: model        
+        type(t_model), intent(IN) :: model
         t_vec3, intent(in) :: point
         t_vec3, intent(out) :: normals
         real(kind(0d0)), intent(out) :: distance
@@ -1028,8 +1027,8 @@ contains
         real(kind(0d0)), dimension(1:3) :: face_v1, face_v2, face_v3
         real(kind(0d0)) :: xcc, ycc, zcc
         real(kind(0d0)) :: v1_x, v1_y, v1_z, &
-                            v2_x, v2_y, v2_z, &
-                            v3_x, v3_y, v3_z
+                           v2_x, v2_y, v2_z, &
+                           v3_x, v3_y, v3_z
         real(kind(0d0)) :: dist_min, dist_buffer, dist_buffer1, dist_buffer2, dist_buffer3
         real(kind(0d0)) :: dist_min_normal, dist_buffer_normal
         real(kind(0d0)) :: midp(1:3)
@@ -1040,38 +1039,38 @@ contains
         xcc = point(1); ycc = point(2); zcc = point(3)
         distance = 0d0
 
-        tri_idx = 0 
+        tri_idx = 0
         do i = 1, model%ntrs
-            v1_x = model%trs(i)%v(1,1)
-            v1_y = model%trs(i)%v(1,2)
-            v1_z = model%trs(i)%v(1,3)
-            dist_buffer1 = dsqrt((xcc-v1_x)**2 + &
-                                 (ycc-v1_y)**2 + &
-                                 (zcc-v1_z)**2)
+            v1_x = model%trs(i)%v(1, 1)
+            v1_y = model%trs(i)%v(1, 2)
+            v1_z = model%trs(i)%v(1, 3)
+            dist_buffer1 = dsqrt((xcc - v1_x)**2 + &
+                                 (ycc - v1_y)**2 + &
+                                 (zcc - v1_z)**2)
 
-            v2_x = model%trs(i)%v(2,1)
-            v2_y = model%trs(i)%v(2,2)
-            v2_z = model%trs(i)%v(2,3)
-            dist_buffer2 = dsqrt((xcc-v2_x)**2 + &
-                                (ycc-v2_y)**2 + &
-                                (zcc-v2_z)**2)
+            v2_x = model%trs(i)%v(2, 1)
+            v2_y = model%trs(i)%v(2, 2)
+            v2_z = model%trs(i)%v(2, 3)
+            dist_buffer2 = dsqrt((xcc - v2_x)**2 + &
+                                 (ycc - v2_y)**2 + &
+                                 (zcc - v2_z)**2)
 
-            v3_x = model%trs(i)%v(3,1)
-            v3_y = model%trs(i)%v(3,2)
-            v3_z = model%trs(i)%v(3,3)
+            v3_x = model%trs(i)%v(3, 1)
+            v3_y = model%trs(i)%v(3, 2)
+            v3_z = model%trs(i)%v(3, 3)
             dist_buffer3 = dsqrt((xcc - v3_x)**2 + &
-                                (ycc - v3_y)**2 + &
-                                (zcc - v3_z)**2)
+                                 (ycc - v3_y)**2 + &
+                                 (zcc - v3_z)**2)
 
             midp(1) = (v3_x + v2_x + v1_x)/3
             midp(2) = (v3_y + v2_y + v1_y)/3
             midp(3) = (v3_z + v2_z + v1_z)/3
 
-            dist_buffer = MINVAL((/dist_buffer1, dist_buffer2, dist_buffer3/))
+            dist_buffer = minval((/dist_buffer1, dist_buffer2, dist_buffer3/))
             dist_buffer_normal = dsqrt((xcc - midp(1))**2 + &
                                        (ycc - midp(2))**2 + &
                                        (zcc - midp(3))**2)
-    
+
             if (dist_buffer < dist_min) then
                 dist_min = dist_buffer
             end if
@@ -1086,7 +1085,7 @@ contains
         normals(2) = model%trs(tri_idx)%n(2)
         normals(3) = model%trs(tri_idx)%n(3)
         distance = dist_min
-                
+
     end subroutine f_distance_normals_3D
 
     !> This procedure determines the levelset distance of 2D models without interpolation.
@@ -1197,7 +1196,7 @@ contains
     !! @return                             Distance which the levelset distance without interpolation
     function f_interpolated_distance(interpolated_boundary_v, total_vertices, point, spacing) result(distance)
         integer, intent(in) :: total_vertices
-        real(kind(0d0)), intent(in), dimension(1:total_vertices, 1:3) :: interpolated_boundary_v 
+        real(kind(0d0)), intent(in), dimension(1:total_vertices, 1:3) :: interpolated_boundary_v
         t_vec3, intent(in) :: point
         t_vec3, intent(in) :: spacing
         integer :: i
@@ -1215,9 +1214,9 @@ contains
             v1_x = interpolated_boundary_v(i, 1)
             v1_y = interpolated_boundary_v(i, 2)
             v1_z = interpolated_boundary_v(i, 3)
-            dist_buffer = dsqrt((xcc-v1_x)**2 + &
-                                (ycc-v1_y)**2 + &
-                                (zcc-v1_z)**2)
+            dist_buffer = dsqrt((xcc - v1_x)**2 + &
+                                (ycc - v1_y)**2 + &
+                                (zcc - v1_z)**2)
 
             if (min_dist > dist_buffer) then
                 min_dist = dist_buffer
@@ -1241,11 +1240,11 @@ contains
         AC_x = x3 - x1
         AC_y = y3 - y1
         AC_z = z3 - z1
-        cross_x = AB_y * AC_z - AB_z * AC_y
-        cross_y = AB_z * AC_x - AB_x * AC_z
-        cross_z = AB_x * AC_y - AB_y * AC_x
+        cross_x = AB_y*AC_z - AB_z*AC_y
+        cross_y = AB_z*AC_x - AB_x*AC_z
+        cross_z = AB_x*AC_y - AB_y*AC_x
         cross_magnitude = sqrt(cross_x**2 + cross_y**2 + cross_z**2)
-        tri_area = 0.5d0 * cross_magnitude
+        tri_area = 0.5d0*cross_magnitude
     end function f_tri_area
 
 end module m_model
