@@ -1969,6 +1969,9 @@ contains
     !! @param patch_id is the patch identifier
     !! @param patch_id_fp Array to track patch ids
     !! @param q_prim_vf Primitive variables
+    !! @param ib True if this patch is an immersed boundary
+    !! @param STL_levelset STL levelset
+    !! @param STL_levelset_norm STL levelset normals
     subroutine s_model(patch_id, patch_id_fp, q_prim_vf, ib, STL_levelset, STL_levelset_norm)
 
         integer, intent(in) :: patch_id
