@@ -20,9 +20,9 @@ module m_model
     public :: f_model_read, s_model_write, s_model_free, f_model_is_inside
 
     ! Subroutines for STL immersed boundaries
-    public :: f_check_boundary, f_register_edge, f_interpolate_2D, f_check_interpolation_3D,
-              f_interpolate_2D, f_interpolate_3D, f_interpolated_distance, f_normals, 
-              f_distance, f_distance_normals_3D, f_tri_area
+    public :: f_check_boundary, f_register_edge, f_check_interpolation_2D, & 
+              f_check_interpolation_3D, f_interpolate_2D, f_interpolate_3D, & 
+              f_interpolated_distance, f_normals, f_distance, f_distance_normals_3D, f_tri_area
 
 contains
 
@@ -584,17 +584,17 @@ contains
             ! First edge (v1, v2)
             edge(1, :) = model%trs(i)%v(1, 1:2)
             edge(2, :) = model%trs(i)%v(2, 1:2)
-            call register_edge(temp_boundary_v, edge, edge_index, edge_count)
+            call f_register_edge(temp_boundary_v, edge, edge_index, edge_count)
 
             ! Second edge (v2, v3)
             edge(1, :) = model%trs(i)%v(2, 1:2)
             edge(2, :) = model%trs(i)%v(3, 1:2)
-            call register_edge(temp_boundary_v, edge, edge_index, edge_count)
+            call f_register_edge(temp_boundary_v, edge, edge_index, edge_count)
 
             ! Third edge (v3, v1)
             edge(1, :) = model%trs(i)%v(3, 1:2)
             edge(2, :) = model%trs(i)%v(1, 1:2)
-            call register_edge(temp_boundary_v, edge, edge_index, edge_count)
+            call f_register_edge(temp_boundary_v, edge, edge_index, edge_count)
         end do
 
         ! Check all edges and count repeated edges
@@ -857,7 +857,7 @@ contains
         real(kind(0d0)) :: x1, y1, z1, x2, y2, z2, x3, y3, z3
         real(kind(0d0)) :: edge_length, del_x, del_y, del_z, cell_width
         real(kind(0d0)) :: area_xy, area_xz, area_yz, cell_area, tri_area
-        real(kind(0d0)) :: u, v, w, sumuv
+        real(kind(0d0)) :: u, v, w
         integer :: num_inner_vertices
         real(kind(0d0)), allocatable :: temp_boundary_v(:, :)
     
@@ -912,7 +912,7 @@ contains
             tri_area = f_tri_area(x1, y1, z1, x2, y2, z2, x3, y3, z3)
 
             if (tri_area > 0.1*cell_area) then
-                num_inner_vertices = ceiling(tri_area / cell_area)
+                num_inner_vertices = 10*ceiling(tri_area / cell_area)
                 total_vertices = total_vertices + num_inner_vertices
             end if
         end do
@@ -977,14 +977,13 @@ contains
             tri_area = f_tri_area(x1, y1, z1, x2, y2, z2, x3, y3, z3)
 
             if (tri_area > 0.1*cell_area) then
-                num_inner_vertices = ceiling(tri_area / cell_area)
+                num_inner_vertices = 10*ceiling(tri_area / cell_area)
                 !Use barycentric coordinates for randomly distributed points
                 do k = 1, num_inner_vertices
                     call random_number(u)
                     call random_number(v)
 
-                    sumuv = u + v
-                    if (sumuv >= 1.0d0) then
+                    if ((u + v) >= 1.0d0) then
                         u = 1d0 - u
                         v = 1d0 - v
                     end if

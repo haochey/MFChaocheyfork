@@ -1976,8 +1976,8 @@ contains
         type(scalar_field), dimension(1:sys_size), intent(inout) :: q_prim_vf
 
         ! Variables for IBM+STL
-        type(levelset_field), optional, intent(INOUT) :: STL_levelset !< Levelset determined by models
-        type(levelset_norm_field), optional, intent(INOUT) :: STL_levelset_norm !< Levelset_norm determined by models
+        type(levelset_field), optional, intent(inout) :: STL_levelset !< Levelset determined by models
+        type(levelset_norm_field), optional, intent(inout) :: STL_levelset_norm !< Levelset_norm determined by models
         logical, intent(IN) :: ib   !< True if this patch is an immersed boundary
         real(kind(0d0)) :: normals(1:3) !< Boundary normal buffer
         integer :: boundary_vertex_count, boundary_edge_count, total_vertices !< Boundary vertex
@@ -2051,6 +2051,7 @@ contains
         ! Interpolate the STL model along the edges (2D) and on triangle facets (3D)
         if (interpolate) then
             if (proc_rank == 0) then
+                print*, ""
                 print*, 'Interpolating STL vertices...'
             end if
 
@@ -2061,7 +2062,6 @@ contains
             end if
 
             if (proc_rank == 0) then
-                print*, ""
                 print*, 'Total number of interpolated boundary vertices:', total_vertices
             end if
         end if
@@ -2164,7 +2164,7 @@ contains
                             end if
 
                             ! Assign the levelset_norm
-                            STL_levelset_norm%vf(i, j, k, patch_id, 1:3) = normals(1:3)
+                            STL_levelset_norm%sf(i, j, k, patch_id, 1:3) = normals(1:3)
                         else
                         ! 2D models
                             if (interpolate) then
@@ -2200,7 +2200,7 @@ contains
                             end if  
 
                             ! Assign the levelset_norm
-                            STL_levelset_norm%vf(i, j, k, patch_id, 1:3) = normals(1:3)
+                            STL_levelset_norm%sf(i, j, k, patch_id, 1:3) = normals(1:3)
 
                         end if 
                     end if

@@ -400,54 +400,54 @@ contains
                         if (min_dist == abs(side_dists(1))) then
                             levelset%sf(i, j, k, ib_patch_id) = side_dists(1)
                             if (side_dists(1) == 0) then
-                                levelset_norm%vf(i, j, k, ib_patch_id, 1) = 0d0
+                                levelset_norm%sf(i, j, k, ib_patch_id, 1) = 0d0
                             else
-                                levelset_norm%vf(i, j, k, ib_patch_id, 1) = side_dists(1)/ &
+                                levelset_norm%sf(i, j, k, ib_patch_id, 1) = side_dists(1)/ &
                                                                         abs(side_dists(1))
                             end if
 
                         else if (min_dist == abs(side_dists(2))) then
                             levelset%sf(i, j, k, ib_patch_id) = side_dists(2)
                             if (side_dists(2) == 0) then
-                                levelset_norm%vf(i, j, k, ib_patch_id, 1) = 0d0
+                                levelset_norm%sf(i, j, k, ib_patch_id, 1) = 0d0
                             else
-                                levelset_norm%vf(i, j, k, ib_patch_id, 1) = -side_dists(2)/ &
+                                levelset_norm%sf(i, j, k, ib_patch_id, 1) = -side_dists(2)/ &
                                                                         abs(side_dists(2))
                             end if
 
                         else if (min_dist == abs(side_dists(3))) then
                             levelset%sf(i, j, k, ib_patch_id) = side_dists(3)
                             if (side_dists(3) == 0) then
-                                levelset_norm%vf(i, j, k, ib_patch_id, 2) = 0d0
+                                levelset_norm%sf(i, j, k, ib_patch_id, 2) = 0d0
                             else
-                                levelset_norm%vf(i, j, k, ib_patch_id, 2) = side_dists(3)/ &
+                                levelset_norm%sf(i, j, k, ib_patch_id, 2) = side_dists(3)/ &
                                                                         abs(side_dists(3))
                             end if
 
                         else if (min_dist == abs(side_dists(4))) then
                             levelset%sf(i, j, k, ib_patch_id) = side_dists(4)
                             if (side_dists(4) == 0) then
-                                levelset_norm%vf(i, j, k, ib_patch_id, 2) = 0d0
+                                levelset_norm%sf(i, j, k, ib_patch_id, 2) = 0d0
                             else
-                                levelset_norm%vf(i, j, k, ib_patch_id, 2) = -side_dists(4)/ &
+                                levelset_norm%sf(i, j, k, ib_patch_id, 2) = -side_dists(4)/ &
                                                                         abs(side_dists(4))
                             end if
 
                         else if (min_dist == abs(side_dists(5))) then
                             levelset%sf(i, j, k, ib_patch_id) = side_dists(5)
                             if (side_dists(5) == 0) then
-                                levelset_norm%vf(i, j, k, ib_patch_id, 3) = 0d0
+                                levelset_norm%sf(i, j, k, ib_patch_id, 3) = 0d0
                             else
-                                levelset_norm%vf(i, j, k, ib_patch_id, 3) = side_dists(5)/ &
+                                levelset_norm%sf(i, j, k, ib_patch_id, 3) = side_dists(5)/ &
                                                                         abs(side_dists(5))
                             end if
 
                         else if (min_dist == abs(side_dists(6))) then
                             levelset%sf(i, j, k, ib_patch_id) = side_dists(6)
                             if (side_dists(6) == 0) then
-                                levelset_norm%vf(i, j, k, ib_patch_id, 3) = 0d0
+                                levelset_norm%sf(i, j, k, ib_patch_id, 3) = 0d0
                             else
-                                levelset_norm%vf(i, j, k, ib_patch_id, 3) = -side_dists(6)/ &
+                                levelset_norm%sf(i, j, k, ib_patch_id, 3) = -side_dists(6)/ &
                                                                         abs(side_dists(6))
                             end if
 
