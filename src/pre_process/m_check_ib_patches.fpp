@@ -51,19 +51,24 @@ contains
                     call s_check_rectangle_ib_patch_geometry(i)
                 else if (patch_ib(i)%geometry == 8) then
                     call s_check_sphere_ib_patch_geometry(i)
+                else if (patch_ib(i)%geometry == 9) then
+                    call s_check_cuboid_ib_patch_geometry(i)
                 else if (patch_ib(i)%geometry == 4) then
                     call s_check_airfoil_ib_patch_geometry(i)
                 else if (patch_ib(i)%geometry == 11) then
                     call s_check_3d_airfoil_ib_patch_geometry(i)
                 else if (patch_ib(i)%geometry == 10) then
                     call s_check_cylinder_ib_patch_geometry(i)
+                else if (patch_ib(i)%geometry == 5 .or. &
+                         patch_ib(i)%geometry == 12) then
+                    call s_check_model_ib_patch_geometry(i)
                 else if (patch_ib(i)%geometry == dflt_int) then
                     call s_prohibit_abort("IB patch undefined", &
                                           "patch_ib("//trim(iStr)//")%geometry must be set.")
                 else
                     call s_prohibit_abort("Invalid IB patch", &
                                           "patch_ib("//trim(iStr)//")%geometry must be "// &
-                                          "2-4, 8, 10, or 11.")
+                                          "2-4, 8-10, 11 or 12.")
                 end if
             else
                 if (patch_ib(i)%geometry == dflt_int) then
