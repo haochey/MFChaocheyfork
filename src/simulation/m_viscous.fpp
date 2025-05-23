@@ -522,7 +522,7 @@ contains
                              dq_prim_dx_qp, dq_prim_dy_qp, dq_prim_dz_qp, &
                              ix, iy, iz)
 
-        real(wp), dimension(startx:, starty:, startz:, 1:), &
+        real(wp), dimension(idwbuff(1)%beg:, idwbuff(2)%beg:, idwbuff(3)%beg:, 1:), &
             intent(inout) :: qL_prim_rsx_vf, qR_prim_rsx_vf, &
                              qL_prim_rsy_vf, qR_prim_rsy_vf, &
                              qL_prim_rsz_vf, qR_prim_rsz_vf
@@ -968,7 +968,7 @@ contains
         type(scalar_field), dimension(iv%beg:iv%end), intent(in) :: v_vf
         type(scalar_field), dimension(iv%beg:iv%end), intent(inout) :: vL_prim_vf, vR_prim_vf
 
-        real(wp), dimension(startx:, starty:, startz:, 1:), intent(inout) :: vL_x, vL_y, vL_z, vR_x, vR_y, vR_z
+        real(wp), dimension(idwbuff(1)%beg:, idwbuff(2)%beg:, idwbuff(3)%beg:, 1:), intent(inout) :: vL_x, vL_y, vL_z, vR_x, vR_y, vR_z
         integer, intent(in) :: norm_dir
         type(int_bounds_info), intent(in) :: ix, iy, iz
 
@@ -1064,7 +1064,7 @@ contains
                                                              norm_dir, vL_prim_vf, vR_prim_vf, ix, iy, iz)
 
         type(scalar_field), dimension(iv%beg:iv%end), intent(in) :: v_vf
-        real(wp), dimension(startx:, starty:, startz:, iv%beg:), intent(inout) :: vL_x, vL_y, vL_z, vR_x, vR_y, vR_z
+        real(wp), dimension(idwbuff(1)%beg:, idwbuff(2)%beg:, idwbuff(3)%beg:, iv%beg:), intent(inout) :: vL_x, vL_y, vL_z, vR_x, vR_y, vR_z
         type(scalar_field), dimension(iv%beg:iv%end), intent(inout) :: vL_prim_vf, vR_prim_vf
         type(int_bounds_info), intent(in) :: ix, iy, iz
 
@@ -1392,7 +1392,7 @@ contains
             end if
         end if
 
-        if (bc_x%beg <= -3) then
+        if (bc_x%beg <= BC_GHOST_EXTRAPOLATION) then
             !$acc parallel loop collapse(2) gang vector default(present)
             do l = idwbuff(3)%beg, idwbuff(3)%end
                 do k = idwbuff(2)%beg, idwbuff(2)%end
@@ -1401,7 +1401,7 @@ contains
                 end do
             end do
         end if
-        if (bc_x%end <= -3) then
+        if (bc_x%end <= BC_GHOST_EXTRAPOLATION) then
             !$acc parallel loop collapse(2) gang vector default(present)
             do l = idwbuff(3)%beg, idwbuff(3)%end
                 do k = idwbuff(2)%beg, idwbuff(2)%end
@@ -1411,7 +1411,7 @@ contains
             end do
         end if
         if (n > 0) then
-            if (bc_y%beg <= -3 .and. bc_y%beg /= -13) then
+            if (bc_y%beg <= BC_GHOST_EXTRAPOLATION .and. bc_y%beg /= BC_NULL) then
                 !$acc parallel loop collapse(2) gang vector default(present)
                 do l = idwbuff(3)%beg, idwbuff(3)%end
                     do j = idwbuff(1)%beg, idwbuff(1)%end
@@ -1420,7 +1420,7 @@ contains
                     end do
                 end do
             end if
-            if (bc_y%end <= -3) then
+            if (bc_y%end <= BC_GHOST_EXTRAPOLATION) then
                 !$acc parallel loop collapse(2) gang vector default(present)
                 do l = idwbuff(3)%beg, idwbuff(3)%end
                     do j = idwbuff(1)%beg, idwbuff(1)%end
@@ -1430,7 +1430,7 @@ contains
                 end do
             end if
             if (p > 0) then
-                if (bc_z%beg <= -3) then
+                if (bc_z%beg <= BC_GHOST_EXTRAPOLATION) then
                     !$acc parallel loop collapse(2) gang vector default(present)
                     do k = idwbuff(2)%beg, idwbuff(2)%end
                         do j = idwbuff(1)%beg, idwbuff(1)%end
@@ -1440,7 +1440,7 @@ contains
                         end do
                     end do
                 end if
-                if (bc_z%end <= -3) then
+                if (bc_z%end <= BC_GHOST_EXTRAPOLATION) then
                     !$acc parallel loop collapse(2) gang vector default(present)
                     do k = idwbuff(2)%beg, idwbuff(2)%end
                         do j = idwbuff(1)%beg, idwbuff(1)%end

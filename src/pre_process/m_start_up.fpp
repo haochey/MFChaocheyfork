@@ -14,6 +14,8 @@ module m_start_up
 
     use m_mpi_proxy             !< Message passing interface (MPI) module proxy
 
+    use m_mpi_common
+
     use m_variables_conversion  !< Subroutines to change the state variables from
                                 !! one form to another
 
@@ -49,6 +51,10 @@ module m_start_up
     use m_checker_common
 
     use m_checker
+
+    use m_boundary_common
+
+    use m_boundary_conditions
 
     implicit none
 
@@ -127,7 +133,7 @@ contains
             a_z, x_a, y_a, z_a, x_b, y_b, z_b, &
             model_eqns, num_fluids, mpp_lim, &
             weno_order, bc_x, bc_y, bc_z, num_patches, &
-            hypoelasticity, patch_icpp, fluid_pp, precision, parallel_io, &
+            hypoelasticity, mhd, patch_icpp, fluid_pp, precision, parallel_io, &
             mixlayer_vel_profile, mixlayer_vel_coef, mixlayer_domain, &
             mixlayer_perturb, &
             pi_fac, perturb_flow, perturb_flow_fluid, perturb_flow_mag, &
@@ -140,7 +146,10 @@ contains
             file_per_process, relax, relax_model, &
             palpha_eps, ptgalpha_eps, ib, num_ibs, patch_ib, &
             sigma, adv_n, cfl_adap_dt, cfl_const_dt, n_start, &
-            n_start_old, surface_tension, hyperelasticity, pre_stress, rkck_adap_dt
+            n_start_old, surface_tension, hyperelasticity, pre_stress, &
+            elliptic_smoothing, elliptic_smoothing_iters, &
+            viscous, bubbles_lagrange, bc_x, bc_y, bc_z, num_bc_patches, &
+            patch_bc, Bx0, relativity, cont_damage
 
         ! Inquiring the status of the pre_process.inp file
         file_loc = 'pre_process.inp'
@@ -167,7 +176,12 @@ contains
 
             nGlobal = (m_glb + 1)*(n_glb + 1)*(p_glb + 1)
 
-            if (cfl_adap_dt .or. cfl_const_dt .or. rkck_adap_dt) cfl_dt = .true.
+            if (cfl_adap_dt .or. cfl_const_dt) cfl_dt = .true.
+
+            if (any((/bc_x%beg, bc_x%end, bc_y%beg, bc_y%end, bc_z%beg, bc_z%end/) == BC_DIRICHLET) .or. &
+                num_bc_patches > 0) then
+                bc_io = .true.
+            end if
 
         else
             call s_mpi_abort('File pre_process.inp is missing. Exiting.')
@@ -765,12 +779,14 @@ contains
             pb0 = pb0/pref
             pref = 1._wp
         end if
+        call s_initialize_mpi_common_module()
         call s_initialize_data_output_module()
         call s_initialize_variables_conversion_module()
         call s_initialize_grid_module()
         call s_initialize_initial_condition_module()
         call s_initialize_perturbation_module()
         call s_initialize_assign_variables_module()
+        call s_initialize_boundary_common_module()
         if (relax) call s_initialize_phasechange_module()
 
         ! Create the D directory if it doesn't exit, to store
@@ -842,7 +858,7 @@ contains
             call s_infinite_relaxation_k(q_cons_vf)
         end if
 
-        call s_write_data_files(q_cons_vf, ib_markers, levelset, levelset_norm)
+        call s_write_data_files(q_cons_vf, q_prim_vf, ib_markers, levelset, levelset_norm, bc_type)
 
         call cpu_time(finish)
     end subroutine s_apply_initial_condition
@@ -896,7 +912,7 @@ contains
             call s_read_input_file()
             call s_check_input_file()
 
-            print '(" Pre-processing a "I0"x"I0"x"I0" case on "I0" rank(s)")', m, n, p, num_procs
+            print '(" Pre-processing a ", I0, "x", I0, "x", I0, " case on ", I0, " rank(s)")', m, n, p, num_procs
         end if
 
         ! Broadcasting the user inputs to all of the processors and performing the
@@ -915,11 +931,14 @@ contains
         s_write_data_files => null()
 
         ! Deallocation procedures for the modules
+        call s_finalize_mpi_common_module()
         call s_finalize_grid_module()
         call s_finalize_variables_conversion_module()
         call s_finalize_data_output_module()
         call s_finalize_global_parameters_module()
         call s_finalize_assign_variables_module()
+        call s_finalize_perturbation_module()
+        call s_finalize_boundary_common_module()
         if (relax) call s_finalize_relaxation_solver_module()
 
         ! Finalization of the MPI environment

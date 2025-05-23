@@ -13,7 +13,8 @@ module m_perturbation
     use m_mpi_proxy              !< Message passing interface (MPI) module proxy
 
     use m_eigen_solver          ! Subroutines to solve eigenvalue problem for
-    ! complex general matrix
+
+    use m_boundary_common   ! Boundary conditions module
 
     use ieee_arithmetic
 
@@ -25,9 +26,13 @@ module m_perturbation
     integer :: mixlayer_bc_fd ! Order of finite difference applied at the boundaries of mixing layer
     integer :: n_bc_skip ! Number of points skipped in the linear stability analysis due to the boundary condition
 
+    real(wp), allocatable, dimension(:, :, :, :) :: q_prim_temp
+
 contains
 
     subroutine s_initialize_perturbation_module()
+
+        bcxb = bc_x%beg; bcxe = bc_x%end; bcyb = bc_y%beg; bcye = bc_y%end; bczb = bc_z%beg; bcze = bc_z%end
 
         if (mixlayer_perturb) then
             mixlayer_bc_fd = 2
@@ -43,6 +48,10 @@ contains
                 mixlayer_var(4) = momxb + 2
                 mixlayer_var(5) = momxb + 3
             end if
+        end if
+
+        if (elliptic_smoothing) then
+            allocate (q_prim_temp(0:m, 0:n, 0:p, 1:sys_size))
         end if
 
     end subroutine s_initialize_perturbation_module
@@ -334,7 +343,7 @@ contains
         ai = bi + ci
 
         ! Apply BC to ar and ai matrices
-        if (bc_y%beg == -6 .and. bc_y%end == -6) then
+        if (bc_y%beg == BC_CHAR_NR_SUB_BUFFER .and. bc_y%end == BC_CHAR_NR_SUB_BUFFER) then
             ! Nonreflecting subsonic buffer BC
             call s_instability_nonreflecting_subsonic_buffer_bc(ar, ai, hr, hi, rho_mean, mach)
         end if
@@ -605,5 +614,74 @@ contains
         end do
 
     end subroutine s_generate_wave
+
+    subroutine s_elliptic_smoothing(q_prim_vf, bc_type)
+
+        type(scalar_field), dimension(sys_size), intent(inout) :: q_prim_vf
+        type(integer_field), dimension(1:num_dims, -1:1), intent(in) :: bc_type
+        integer :: i, j, k, l, q
+
+        do q = 1, elliptic_smoothing_iters
+
+            ! Communication of buffer regions and apply boundary conditions
+            call s_populate_variables_buffers(q_prim_vf, pb%sf, mv%sf, bc_type)
+
+            ! Perform smoothing and store in temp array
+            if (n == 0) then
+                do j = 0, m
+                    do i = 1, sys_size
+                        q_prim_temp(j, 0, 0, i) = (1._wp/4._wp)* &
+                                                  (q_prim_vf(i)%sf(j + 1, 0, 0) + q_prim_vf(i)%sf(j - 1, 0, 0) + &
+                                                   2._wp*q_prim_vf(i)%sf(j, 0, 0))
+                    end do
+                end do
+            else if (p == 0) then
+                do k = 0, n
+                    do j = 0, m
+                        do i = 1, sys_size
+                            q_prim_temp(j, k, 0, i) = (1._wp/8._wp)* &
+                                                      (q_prim_vf(i)%sf(j + 1, k, 0) + q_prim_vf(i)%sf(j - 1, k, 0) + &
+                                                       q_prim_vf(i)%sf(j, k + 1, 0) + q_prim_vf(i)%sf(j, k - 1, 0) + &
+                                                       4._wp*q_prim_vf(i)%sf(j, k, 0))
+                        end do
+                    end do
+                end do
+            else
+                do l = 0, p
+                    do k = 0, n
+                        do j = 0, m
+                            do i = 1, sys_size
+                                q_prim_temp(j, k, l, i) = (1._wp/12._wp)* &
+                                                          (q_prim_vf(i)%sf(j + 1, k, l) + q_prim_vf(i)%sf(j - 1, k, l) + &
+                                                           q_prim_vf(i)%sf(j, k + 1, l) + q_prim_vf(i)%sf(j, k - 1, l) + &
+                                                           q_prim_vf(i)%sf(j, k, l + 1) + q_prim_vf(i)%sf(j, k, l - 1) + &
+                                                           6._wp*q_prim_vf(i)%sf(j, k, l))
+                            end do
+                        end do
+                    end do
+                end do
+            end if
+
+            ! Copy smoothed data back to array of scalar fields
+            do l = 0, p
+                do k = 0, n
+                    do j = 0, m
+                        do i = 1, sys_size
+                            q_prim_vf(i)%sf(j, k, l) = q_prim_temp(j, k, l, i)
+                        end do
+                    end do
+                end do
+            end do
+        end do
+
+    end subroutine s_elliptic_smoothing
+
+    subroutine s_finalize_perturbation_module()
+
+        if (elliptic_smoothing) then
+            deallocate (q_prim_temp)
+        end if
+
+    end subroutine s_finalize_perturbation_module
 
 end module m_perturbation

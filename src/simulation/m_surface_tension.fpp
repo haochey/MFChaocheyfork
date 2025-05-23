@@ -16,7 +16,7 @@ module m_surface_tension
 
     use m_helper
 
-    use m_boundary_conditions
+    use m_boundary_common
 
     implicit none
 
@@ -225,9 +225,10 @@ contains
 
     end subroutine s_compute_capilary_source_flux
 
-    subroutine s_get_capilary(q_prim_vf)
+    subroutine s_get_capilary(q_prim_vf, bc_type)
 
         type(scalar_field), dimension(sys_size), intent(in) :: q_prim_vf
+        type(integer_field), dimension(1:num_dims, -1:1), intent(in) :: bc_type
 
         type(int_bounds_info) :: isx, isy, isz
 
@@ -287,7 +288,7 @@ contains
             end do
         end do
 
-        call s_populate_capillary_buffers(c_divs)
+        call s_populate_capillary_buffers(c_divs, bc_type)
 
         iv%beg = 1; iv%end = num_dims + 1
 
@@ -303,8 +304,8 @@ contains
 
         type(scalar_field), dimension(iv%beg:iv%end), intent(in) :: v_vf
 
-        real(wp), dimension(startx:, starty:, startz:, iv%beg:), intent(out) :: vL_x, vL_y, vL_z
-        real(wp), dimension(startx:, starty:, startz:, iv%beg:), intent(out) :: vR_x, vR_y, vR_z
+        real(wp), dimension(idwbuff(1)%beg:, idwbuff(2)%beg:, idwbuff(3)%beg:, iv%beg:), intent(out) :: vL_x, vL_y, vL_z
+        real(wp), dimension(idwbuff(1)%beg:, idwbuff(2)%beg:, idwbuff(3)%beg:, iv%beg:), intent(out) :: vR_x, vR_y, vR_z
         integer, intent(in) :: norm_dir
 
         integer :: recon_dir !< Coordinate direction of the WENO reconstruction
